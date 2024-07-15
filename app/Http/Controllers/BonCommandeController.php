@@ -411,7 +411,6 @@ class BonCommandeController extends Controller
     public function delete(BonCommande $boncommande)
     {
         $boncommandes = $boncommande;
-
         return view('boncommandes.delete', compact('boncommandes'));
     }
 
@@ -422,12 +421,15 @@ class BonCommandeController extends Controller
         foreach ($boncommande->recus as $recu) {
             $recu->detailrecus()->delete();
         }
+
         $boncommande->recus()->delete();
         $boncommande->detailboncommandes()->delete();
         $boncommande->delete();
+
         Session()->flash('message', 'Bon de commande supprimé avec succès!');
         return redirect()->route('boncommandes.index');
     }
+
     public function envoyerCommande(BonCommande $boncommandes){
         return view('boncommandes.envoyer',compact('boncommandes'));
     }

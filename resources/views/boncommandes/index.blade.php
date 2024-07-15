@@ -178,13 +178,18 @@
                                             <a class="btn btn-secondary btn-sm" href="{{ route('boncommandes.edit', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-circle-plus"></i></a>
                                             @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
                                             <a class="btn btn-warning btn-sm" href="{{ route('boncommandes.create', ['boncommandes'=>$boncommande->id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>
-                                            @if ($boncommande->statut = 'Valider')
-                                            <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
-                                            @endif
+
                                             @endif
                                             @elseif ($boncommande->statut == 'Valider' && count($boncommande->recus) == 0)
                                             <a class="btn btn-info btn-sm" href="{{ route('boncommandes.invalider', ['boncommande'=>$boncommande->id]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
                                             @endif
+
+                                            @if ($boncommande->statut == 'Valider')
+                                            <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
+                                            @endif
+                                            <!-- <span class="text-red"> {{$boncommande->statut}} </span> -->
+                                            <!-- <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a> -->
+
                                         </td>
                                         @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
 

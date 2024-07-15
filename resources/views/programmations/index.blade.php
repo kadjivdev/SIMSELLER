@@ -93,9 +93,11 @@
                                         @endif
                                     </tr>
                                 </thead>
+
                                 <tbody class="table-body">
                                     @if ($detailboncommandes->count() > 0)
                                     <?php $compteur = 1; ?>
+                                    
                                     @foreach($detailboncommandes as $detailboncommande)
                                     <tr>
                                         <td>{{ $compteur++ }}</td>
@@ -106,6 +108,7 @@
                                         <td class="text-right qteCommande">{{ number_format($detailboncommande->qteCommander,2,","," ") }}</td>
                                         <td class="text-right qtePro">{{ number_format(collect($detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer'])->get())->sum('qteprogrammer'),2,","," ") }}</td>
                                         <td class="text-right qteReste">{{ number_format(($detailboncommande->qteCommander - collect($detailboncommande->programmations->whereIn('statut', ['Valider', 'Livrer']))->sum('qteprogrammer')),2,","," ") }}</td>
+
                                         <td class="text-center">
                                             @if ( (collect($detailboncommande->programmations->whereIn('statut', ['Valider', 'Livrer']))->sum('qteprogrammer')) == 0)
                                             <span class="badge badge-danger">Non programmé</span>
@@ -115,9 +118,9 @@
                                             <span class="badge badge-success">Programmé</span>
                                             @else
                                             <span class="badge badge-warning">En cours</span>
-
                                             @endif
                                         </td>
+
                                         <td class="text-right text-lg"><b>{{ number_format((intval(collect($detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer'])->get())->sum('qteprogrammer'))*100)/intval($detailboncommande->qteCommander),2,',',' ') }}%</b></td>
                                         @if(!Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                                         @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
@@ -128,6 +131,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        
                                         @endif
                                         @endif
                                     </tr>

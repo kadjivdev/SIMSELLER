@@ -33,6 +33,7 @@ use App\Http\Controllers\ProgrammationController;
 use App\Http\Controllers\TypeAvaliseurController;
 use App\Http\Controllers\AccuseDocumentController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\Api\ProgrammeController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\CommercialiserController;
 use \App\Http\Controllers\TypeDetailRecuController;
@@ -302,9 +303,14 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         });
     });
 
+    Route::prefix('programmation')->group(function () {
+        Route::controller(ProgrammeController::class)->group(function (){
+            Route::post('livraison/bl/{programmation}/{user}', 'bordLivViaPost');
+        });
+    });
+
 
     // Livraison router
-
     Route::prefix('livraisons')->group(function () {
 
         Route::controller(LivraisonController::class)->group(function () {

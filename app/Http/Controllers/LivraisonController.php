@@ -266,6 +266,7 @@ class LivraisonController extends Controller
     {
         return view('livraisons.create', compact('programmation'));
     }
+
     public function cloturer(Programmation $programmation){
         try {
                 $historiques=$programmation->historiques;
@@ -482,8 +483,6 @@ class LivraisonController extends Controller
     {
         //
     }
-
-
     
     public function update(Request $request, Programmation $programmation)
     {
@@ -520,6 +519,7 @@ class LivraisonController extends Controller
     {
         //
     }
+
     public function transfertLivraison(Request $request){
         $programmation = Programmation::find($request->prog);
         $user = Auth::user();
@@ -599,6 +599,7 @@ class LivraisonController extends Controller
         $fournisseurs = Fournisseur::all();
         return view('livraisons.suivisortie', compact('fournisseurs'));
     }
+
     public function suiviSortie(Request $request){
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
@@ -610,9 +611,10 @@ class LivraisonController extends Controller
         session(['fin' => $request->fin]);
         session(['option' => $request->option ? :'Tous']);
         session(['fournisseur' => $request->fournisseur ? :'Tous']);
+
         if($request->debut && $request->fin){
-                      
             switch ($request->option){
+
                 case 'Tous':
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider','Livrer'])
@@ -643,8 +645,8 @@ class LivraisonController extends Controller
                     $messageReq = "Liste des camions non chargés de la période du ".date_format(date_create($request->debut),'d/m/y')." au ".date_format(date_create($request->fin),'d/m/Y').$fournisseur;
                     break;
             }
-
         }
+
         else{
             switch ($request->option){
                 case 'Tous':
@@ -675,13 +677,13 @@ class LivraisonController extends Controller
                     break;
             }
         }
+
         return redirect()->route('livraisons.suivicamion')->with([
             'resultat'=>$programmations,
             'request'=>$request->all(),
             'messageReq'=>$messageReq
         ])->withInput();
     }
-
     
     function suivichauffeurForm(){
         $fournisseurs = Fournisseur::all();
