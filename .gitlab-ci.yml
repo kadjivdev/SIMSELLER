@@ -1,0 +1,25 @@
+stages:
+  - deploy
+
+deploy_production:
+  stage: deploy
+
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y lftp
+
+  script:
+    # Déterminer le dossier de destination en fonction de la branche
+    - if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+          deploy_to_folder="public_html/cimseller";
+      elif [ "$CI_COMMIT_BRANCH" = "dev" ]; then
+          deploy_to_folder="public_html/ileira.com";
+      fi
+    # Copier les fichiers via SCP en évitant la vérification stricte de la clé
+    - if [ "$CI_COMMIT_BRANCH" = "main" ] || [ "$CI_COMMIT_BRANCH" = "dev" ]; then
+        lftp -e "set ssl:verify-certificate no; open -u $FTP_USER,$FTP_PASSWORD $FTP_SERVER && mirror --verbose $LFTP_MIRROR_OPTIONS -R ./ $deploy_to_folder";
+        echo "Déploiement effectué avec succès.";
+        echo "Dossier de déploiement est $deploy_to_folder";
+      else
+        echo "Pas de déploiement à faire";
+      fi
