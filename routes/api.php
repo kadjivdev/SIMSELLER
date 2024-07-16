@@ -55,7 +55,6 @@ Route::prefix('detailboncommandes')->group(function () {
 
 });
 
-
 // Bon de commande router
 
 Route::prefix('boncommandes')->group(function () {

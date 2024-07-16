@@ -170,6 +170,9 @@
 
                                         @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                                         <td class="">
+                                            <div class="text-center">
+                                                <span class="text-dark">{{$programmation->bl_gest ?  : ''}}</span>
+                                            </div>
                                             <div class="form-group" style="font-size: 14px">
                                                 <!-- <input type="text" class="form-control col-md-12" onchange="handleBordLivChange('{{ $programmation->id }}', this)" value="{{$programmation->bl_gest ?  : ''}}" @if ($programmation->bl_gest) readonly @endif >
                                                 <div class="message-container-bl d-none"></div> Conteneur pour le message -->
@@ -184,7 +187,8 @@
                                         </td>
 
                                         <td>
-                                            <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a>
+                                            <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                            <a target="_blank" href="/livraisons/livraison/{{$programmation->id}}" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
                                             <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
 
                                             <a href="{{route('programmations.create', ['detailboncommande'=>$programmation->detail_bon_commande_id]) }}" target="_blank" class="btn btn-sm btn-primary mt-1">Gérer</a>
@@ -246,7 +250,9 @@
                                         </td>
 
                                         <td>
-                                            <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a>
+                                            <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                            <a target="_blank" href="/livraisons/livraison/{{$programmation->id}}" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
+
                                             <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs" onclick="loadDetailTransfert({{$programmation->id}})"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
                                             <a href="{{route('programmations.create', ['detailboncommande'=>$programmation->detail_bon_commande_id]) }}" target="_blank" class="btn btn-sm btn-primary">Gérer</a>
                                         </td>
@@ -507,27 +513,29 @@
         $('#motif').attr('hidden', 'hidden')
 
         let optionsAsString = "<option value=''>--Sélectionnez la zone--</option>";
-        axios.get('{{env('
-            APP_BASE_URL ')}}programmation/livraison/' + id).then((response) => {
-            //console.log(response);
-            let zones = response.data.zones;
-            for (let i = 0; i < zones.length; i++) {
-                optionsAsString += "<option value='" + zones[i].id + "'>" + zones[i].libelle + "</option>";
-            }
-            $('#zone_dest').append(optionsAsString);
-            $('#id').val(response.data.programmation.zone_id)
-            $('#prog').val(response.data.programmation.id)
-            $('#zone_souce').val(response.data.zone_source)
-            $('#form_modal').removeAttr('hidden')
-            $('#warming').removeAttr('hidden')
-            $('#btn').removeAttr('hidden')
-            $('#motif').removeAttr('hidden')
-            $('#loader').attr('hidden', 'hidden')
+        axios.get("{{env('APP_BASE_URL')}}programmation/livraison/" + id)
+            .then((response) => {
+                let zones = response.data.zones;
 
-        }).catch(() => {
-            $('#loader').attr('hidden', 'hidden');
-            $('#error').removeAttr('hidden')
-        })
+                console.log(response.data);
+                // for (let i = 0; i < zones.length; i++) {
+                //     optionsAsString += "<option value='" + zones[i].id + "'>" + zones[i].libelle + "</option>";
+                // }
+
+                // $('#zone_dest').append(optionsAsString);
+                // $('#id').val(response.data.programmation.zone_id)
+                // $('#prog').val(response.data.programmation.id)
+                // $('#zone_souce').val(response.data.zone_source)
+                // $('#form_modal').removeAttr('hidden')
+                // $('#warming').removeAttr('hidden')
+                // $('#btn').removeAttr('hidden')
+                // $('#motif').removeAttr('hidden')
+                // $('#loader').attr('hidden', 'hidden')
+
+            }).catch(() => {
+                $('#loader').attr('hidden', 'hidden');
+                $('#error').removeAttr('hidden')
+            })
     }
 
     function loadDetailTransfert(id) {
@@ -590,19 +598,19 @@
                 [1, 'asc']
             ],
             "pageLength": 15,
-            // "columnDefs": [{
-            //         "targets": 2,
-            //         "orderable": false
-            //     },
-            //     {
-            //         "targets": 0,
-            //         "orderable": false
-            //     },
-            //     {
-            //         "targets": 12,
-            //         "orderable": false
-            //     }
-            // ],
+            "columnDefs": [{
+                    "targets": 2,
+                    "orderable": false
+                },
+                {
+                    "targets": 0,
+                    "orderable": false
+                },
+                {
+                    "targets": 12,
+                    "orderable": false
+                }
+            ],
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
                 "lengthMenu": "Afficher _MENU_ éléments",

@@ -477,6 +477,7 @@
                     $('#error1').removeAttr('hidden')
                 })
             }
+            
             $(function() {
                 $("#example1").DataTable({
                     "responsive": true,

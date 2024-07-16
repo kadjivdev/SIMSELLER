@@ -53,6 +53,15 @@ class ProgrammeController extends Controller
         $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
         return response(['programmation' => $programmation, 'zones' => $zones, 'zone_source' => $programmation->zone->libelle]);
     }
+
+    ####_____REDIRECTION VERS LA PAGE DE TRANSFERT
+    public function getProgrammationById_redirect(Request $request,$programmation)
+    {
+        $programmation = Programmation::find($programmation);
+        $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
+        return view("livraisons.transfertCamion", compact('programmation', 'zones'));
+    }
+
     public function getdetailTransfert($programmation)
     {
         $programmation = Programmation::find($programmation);

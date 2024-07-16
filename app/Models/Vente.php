@@ -40,8 +40,9 @@ class Vente extends Model
     }
 
     public function reglements(){
-        return $this->hasMany(Reglement::class);
+        return $this->hasMany(Reglement::class,'vente_id');
     }
+
     public function echeances(){
         return $this->hasMany(EcheanceCredit::class);
     }

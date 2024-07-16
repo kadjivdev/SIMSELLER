@@ -7,22 +7,25 @@ use App\Models\Reglement;
 use App\Models\User;
 use App\Models\Vente;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\Mail;
 
 class ControleVenteContreller extends Controller
 {
     public function index(){
         $reglements = Reglement::where('statut',2)->where('document','<>',NULL)->get();
+        // dd($reglements[0]);
         return view('ctlventes.index',compact('reglements'));
     }
 
     public function reglementSurCompte(){
+        // dd("gogo");
         $reglements = Reglement::where('type_detail_recu_id',NULL)->where('vente_id','<>',NULL)->where('document',NULL)->get();
         return view('ctlventes.reglementSurCompte',compact('reglements'));
     }
     
     public function controler(Reglement $reglement){
+        // dd($reglement);
         return view('ctlventes.create',compact('reglement'));
     }
 

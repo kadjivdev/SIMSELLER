@@ -17,10 +17,12 @@ class Client extends Model
     {
         return $this->belongsTo(TypeClient::class, 'type_client_id', 'id');
     }
+
     public function departement()
     {
         return $this->belongsTo(Departement::class, 'departement_id', 'id');
     }
+
     public function vente()
     {
         return $this->hasMany(Vente::class);
@@ -34,14 +36,17 @@ class Client extends Model
     public function compteClients(){
         return $this->hasMany(CompteClient::class,'client_id','id');
     }
+
     public function agents()
     {
         return $this->belongsTo(Agent::class, 'portefeuille');
         /* ->withPivot('datedebut','datefin','statut')
         ->withTimestamps(); */
     }
+
     public function getFilleulFiscAttribute($value)
     {
         return !is_null($value) ? json_decode($value, true) : [];
     }
+    
 }

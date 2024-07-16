@@ -132,7 +132,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     // Vente router
     Route::prefix('ventes')->group(function () {
         Route::controller(VenteController::class)->group(function () {
-            
+
             Route::get('/index', 'index')->name('ventes.index');
 
             Route::get('/indexCreate', 'indexCreate')->name('ventes.indexCreate');
@@ -303,15 +303,19 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         });
     });
 
+    // PROGRAMMATION
     Route::prefix('programmation')->group(function () {
-        Route::controller(ProgrammeController::class)->group(function (){
+        Route::controller(ProgrammeController::class)->group(function () {
             Route::post('livraison/bl/{programmation}/{user}', 'bordLivViaPost');
+            Route::get('livraison/{programation}', 'getProgrammationById_redirect');
         });
     });
 
-
     // Livraison router
     Route::prefix('livraisons')->group(function () {
+        Route::controller(ProgrammeController::class)->group(function () {
+            Route::get('livraison/{programation}', 'getProgrammationById_redirect')->name("livraisons.getTransfertProgramme");
+        });
 
         Route::controller(LivraisonController::class)->group(function () {
 
@@ -338,7 +342,10 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/edit/{programmation}', 'edit')->name('livraisons.edit');
 
             Route::post('/update/{programmation}', 'update')->name('livraisons.update');
-            Route::post('/transfert', 'transfertLivraison')->name('livraisons.transfert');
+            // Route::post('/transfert', 'transfertLivraison')->name('livraisons.transfert');
+
+            Route::post('/transfert', 'transfertLivraison_redirect')->name('livraisons.transfert');
+
 
             Route::get('/delete/{programmation}', 'delete')->name('livraisons.delete');
 
@@ -464,7 +471,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/recouvrement', 'creditARecouvrir')->name('edition.revouvrement');
 
             // GESTION DES APPROVISIONNEMENTS
-            Route::match(["GET","POST"],'/etat-compte-approvisionnement', 'CompteApprovisionnement')->name('edition.compteApprovisionnement');
+            Route::match(["GET", "POST"], '/etat-compte-approvisionnement', 'CompteApprovisionnement')->name('edition.compteApprovisionnement');
         });
     });
 

@@ -19,6 +19,7 @@ use App\Models\Vente;
 use App\Models\Reglement;
 use App\Models\Representant;
 use App\Models\Zone;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -148,7 +149,7 @@ class EditionController extends Controller
         }
     }
 
-    public function pointStockValider()
+    public function pointStockValider(Request $request)
     {
         $produits = Produit::all();
         $zones = Zone::all();
@@ -202,21 +203,39 @@ class EditionController extends Controller
 
     public function postPointSolde(Request $request)
     {
+        // dd($request->client);
         $zone = Zone::find($request->zone);
         $client = Client::find($request->client);
         $credit = 0;
         $debit = 0;
+
+        $reglement_amonts = [];
         $SommeCompte = 0;
+
+        ###___
         if ($client) {
+            foreach ($client->commandeclients as $key => $commande) {
+                $rgls = $commande->vente->reglements;
+
+                if ($rgls) {
+                    foreach ($rgls as $key => $reglement) {
+                        array_push($reglement_amonts, $reglement->montant);
+                    }
+                }
+            }
+
             $SommeCompte = (count($client->compteClients)  > 0) ? $client->compteClients[0]->solde : 0;
             $credit = $client->credit;
             $debit = $client->debit;
         }
-        $ventes = [];
-        if (!$request->zone && !$request->client) {
+        ####____
+        $reglements = array_sum($reglement_amonts);
 
-            return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
-        }
+        $ventes = [];
+        // if (!$request->zone && !$request->client) {
+
+        // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+        // }
 
         if (!$request->zone && $request->client) {
             $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
@@ -226,9 +245,8 @@ class EditionController extends Controller
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
-            return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
-
 
         if ($request->zone && $request->client) {
             $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
@@ -239,11 +257,10 @@ class EditionController extends Controller
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
-            return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
 
         if ($request->zone && !$request->client) {
-
             $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
@@ -251,10 +268,11 @@ class EditionController extends Controller
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
-            return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
-    }
 
+        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements]);
+    }
 
     public function etatCompte()
     {
@@ -265,17 +283,72 @@ class EditionController extends Controller
         $sommeVentes = Vente::all()->sum('montant');
         $credit = $clients->sum('credit');
         $debit = $clients->sum('debit');
+
         return view('editions.etatCompte', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes'));
     }
+
     public function postetatCompte(Request $request)
     {
-        if ($request->zone) {
+        ###___
+        if (!$request->zone) {
+            $clients = Client::all();
+            $zones = Zone::all();
+            $SommeCompte = CompteClient::all()->sum('solde');
+            $reglements = Reglement::all()->sum('montant');
+            $sommeVentes = Vente::all()->sum('montant');
+           
+        } else {
             $zone = Zone::find($request->zone);
             $clients = Client::where('departement_id', $zone->departement_id)->get();
-            return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'zone' => $zone]);
+           
+            $compteClients = [];
+            $reglement_amonts = [];
+            $vente_amonts = [];
+
+            foreach ($clients as $key => $client) {
+
+                ###____SOMECOMPTE
+                foreach ($client->compteClients as $key => $compteClient) {
+                    array_push($compteClients, $compteClient->solde);
+                }
+
+                ###_____VENTES
+                foreach ($client->commandeclients as $key => $commande) {
+                    $vente = $commande->vente;
+
+                    if ($vente) {
+                        array_push($vente_amonts, $vente->montant);
+                    }
+                }
+
+                ###_____REGLEMENTS
+                foreach ($client->commandeclients as $key => $commande) {
+                    $rgls = $commande->vente->reglements;
+
+                    if ($rgls) {
+                        foreach ($rgls as $key => $reglement) {
+                            array_push($reglement_amonts, $reglement->montant);
+                        }
+                    }
+                }
+            }
+
+            ###___
+            $zones = Zone::all();
+            $SommeCompte = array_sum($compteClients);
+            $reglements = array_sum($reglement_amonts);
+            $sommeVentes = array_sum($vente_amonts);
         }
-        $clients = Client::all();
-        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients]);
+
+        ###____
+        $credit = $clients->sum('credit');
+        $debit = $clients->sum('debit');
+
+        Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => Zone::all()]);
+
+        // 
+        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients,'SommeCompte'=>$SommeCompte,'credit'=>$credit,'debit'=>$debit]);
+        return view('editions.etatCompte', compact('clients', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes', 'zones'));
     }
 
     public function etatLivCde()
