@@ -61,8 +61,16 @@ class VenteController extends Controller
 
     public function indexCreate(Request $request)
     {
-        $date = date('Y-m-d');
-        $ventes = Vente::whereDate('created_at', $date)->orderBy('created_at', 'DESC')->get();
+        if ($request->method()=='GET') {
+            $date = date('Y-m-d');
+            $ventes = Vente::whereDate('created_at', $date)->orderBy('created_at', 'DESC')->get();
+        }else {
+            ##___POST METHOD
+            $debut = $request->debut;
+            $fin = $request->fin;
+            $ventes = Vente::whereBetween("created_at",[$debut,$fin])->orderBy('created_at', 'DESC')->get();
+        }
+        // 
         return view('ventes.indexCreate', compact('ventes'));
     }
 
@@ -511,6 +519,7 @@ class VenteController extends Controller
 
     public function validationVente(Vente $vente)
     {
+
         if ($vente->statut == "Vendue") {
             Session()->flash('message', 'Vous avez déjà valider cette vente n° ' . $vente->code);
             return redirect()->route('ventes.index', ['vente' => $vente->id]);

@@ -353,7 +353,7 @@
             "autoWidth": false,
             "buttons": ["excel", "pdf", "print"],
             "order": [
-                [0, 'asc']
+                [0, 'desc']
             ],
             "pageLength": 15,
             "columnDefs": [{

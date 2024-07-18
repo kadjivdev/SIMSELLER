@@ -52,7 +52,7 @@
                                         </div>
                                         <div class="col-sm-3">
                                             <div class="form-group">
-                                                <label>BL<span class="text-danger">*</span></label>
+                                                <label>BL<span class="text-danger">*</span> {{$programmation->bl_gest}} </label>
                                                 <input type="text" class="form-control form-control-sm" name="bl" style="text-transform: uppercase"  value="{{ @old('bl')?@old('bl'):$programmation->bl }}"  autocomplete="bl" autofocus>
                                                 @error('bl')
                                                     <span class="text-danger">{{ $message }}</span>
@@ -96,6 +96,7 @@
                                         </div>
                                     @endif
                                 </div>
+
                                 <div class="card-footer">
                                     <div class="row justify-content-center">
                                         <div class="col-sm-4">

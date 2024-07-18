@@ -135,7 +135,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::get('/index', 'index')->name('ventes.index');
 
-            Route::get('/indexCreate', 'indexCreate')->name('ventes.indexCreate');
+            Route::match(['GET','POST'],'/indexCreate', 'indexCreate')->name('ventes.indexCreate');
 
             Route::get('/indexControlle', 'indexControlle')->name('ventes.indexControlle');
 
@@ -170,7 +170,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     });
 
     Route::prefix('comptabilite')->group(function () {
-
         Route::controller(VenteController::class)->group(function () {
             Route::get('/vente-a-comptabilise/{vente}', 'aComptabiliser')->name('ventes.aComptabiliser');
             Route::get('/vente-a-envoyer-comptabilise', 'venteAEnvoyerComptabiliser')->name('ventes.venteAEnvoyerComptabiliser');
@@ -192,7 +191,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/listes-traitement-vente', 'postListeDesTraitementPeriode')->name('ventes.postListeDesTraitementPeriode');
         });
     });
-
     // Vendu
 
     Route::prefix('ventes')->group(function () {

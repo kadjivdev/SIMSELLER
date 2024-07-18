@@ -178,7 +178,6 @@ class clientsController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         try {
 
             $validator = Validator::make($request->all(), [

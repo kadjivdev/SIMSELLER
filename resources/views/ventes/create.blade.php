@@ -40,6 +40,7 @@
                                     </form>
                                 </div>
                             </div>
+                            
                             <form method="post" action="{{route('ventes.store')}}" id="saveVente">
                                 @csrf
                                 <div class="card-body">
@@ -309,8 +310,12 @@
             $('#typecommande option').removeAttr('selected');
             $('#typecommande').empty();
             console.log($('#commande_client_id').val())
+
             axios.get('{{env('APP_BASE_URL')}}commandeclients/typecommande/' + $('#client').val()+'/'+$('#commande_client_id').val()).then((response) => {
                 var typecommandes = response.data;
+
+                // console.log(typecommandes);
+
                 $('#typecommande').append("<option selected disabled>Choisissez le type commane</option>");
                 for (var i = 0; i < typecommandes.length; i++) {
                     var val = typecommandes[i].id;

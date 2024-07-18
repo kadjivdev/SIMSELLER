@@ -59,6 +59,7 @@ class VenduController extends Controller
             if($v->statut == 'Vendue')
                 $totalVendu +=  $v->qteTotal;
         }
+
         return view('vendus.create', compact('vente', 'vendu', 'produits','qteTotal','totalVendu'));
         
     }
@@ -190,7 +191,6 @@ class VenduController extends Controller
                             'qteTotal'=> ['required', new CheckQuanteCde($vente)],
                             'transport' => ['required']
                         ]);
-                        
                     }
                 }else{
                     $validator = Validator::make($request->all(), [
@@ -362,7 +362,7 @@ class VenduController extends Controller
             Mail::send($mail);
             return redirect()->route('ventes.index',['vente'=>$vente->id]);
         }
-        //$vente->update(['montant'=>$vente->montant-($vendu->qteVendu*$vendu->pu)]);
+        $vente->update(['montant'=>$vente->montant-($vendu->qteVendu*$vendu->pu)]);
         ControlesTools::generateLog($vendu,'vendu','Suppression ligne');
 
         $vendu->delete();

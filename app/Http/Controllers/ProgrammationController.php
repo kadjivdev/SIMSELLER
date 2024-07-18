@@ -36,14 +36,6 @@ class ProgrammationController extends Controller
 {
     public function __construct()
     {
-        /* dd(Auth::user());
-        $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
-        ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['GESTIONNAIRE', 'SUPERVISEUR','COMPTABLE'])->exists();
-    
-        if (!$possedeAuMoinsUnDroit) {
-            $this->middleware(['gest', 'superviseur','cmpt'])->except('show');
-        } */
-
         $this->middleware(['gest'])->only(['store', 'allvalidate', 'update', 'postImpression', 'confirmationImpression', 'show']);
         $this->middleware(['superviseur'])->only([]);
     }
@@ -145,6 +137,7 @@ class ProgrammationController extends Controller
                 //$programmations = $detailboncommandes->programmations()->where('statut', 'Valider')->get();
             }
         }
+
         $req = $request->statuts;
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }
@@ -238,7 +231,7 @@ class ProgrammationController extends Controller
                 $parametre = Parametre::where('id', env('PROGRAMMATION'))->first();
                 $code = $format . str_pad($parametre->valeur, 4, "0", STR_PAD_LEFT);
                 //Controle de la quantité programmer. 
-                
+
                 $SumQtiteProgDetailCmde = DB::table('programmations')
                     ->where('detail_bon_commande_id', $detailboncommande->id)
                     ->selectRaw('SUM(qteprogrammer)')
@@ -317,8 +310,6 @@ class ProgrammationController extends Controller
         }
     }
 
-
-
     public function show(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation, $total)
     {
         $programmations = $detailboncommande->programmations()->orderByDesc('id')->get();
@@ -332,14 +323,10 @@ class ProgrammationController extends Controller
         return view('programmations.valider', compact('detailboncommande', 'programmation', 'programmations'));
     }
 
-
-
     public function edit(Programmation $programmation)
     {
         //
     }
-
-
 
     public function update(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation)
     {

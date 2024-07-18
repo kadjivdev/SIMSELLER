@@ -911,6 +911,7 @@ class EditionController extends Controller
             $mvt["actor"] = $actor ? $actor->name : '---';
         }
 
+
         session()->put('result', true);
         return view('editions.approvisionnementCompte', compact('mouvements', 'startDate', 'endDate'));
     }

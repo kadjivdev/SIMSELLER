@@ -196,8 +196,8 @@
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Bordereau de reçu<span class="text-danger"></span></label>
-                                            <input type="file" name="bordereau_receit" class="form-control" id="">
+                                            <label>Bordereau de reçu <span class="text-danger">*</span></label>
+                                            <input type="file" name="bordereau_receit" class="form-control" id="" required>
                                             @error('bordereau_receit')
                                             <span class="text-danger">{{ $message }}</span>
                                             @enderror

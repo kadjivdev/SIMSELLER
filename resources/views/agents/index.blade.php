@@ -40,14 +40,12 @@
                         </div>
                         @endif
 
-                        @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                         <div class="card-header">
                             <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modal-default">
                                 <i class="fas fa-solid fa-plus"></i>
                                 Ajouter
                             </button>
                         </div>
-                        @endif
                         
                         <div class="modal fade" id="modal-default">
                             <div class="modal-dialog">

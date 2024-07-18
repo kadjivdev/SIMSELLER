@@ -370,6 +370,7 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
+
                                         <form method="POST" action="{{route('ventes.valider',['vente'=>$vente])}}" id="validation_vente">
                                             @csrf
                                             <div class="modal-body">
@@ -458,17 +459,18 @@
                 $('#loader').removeAttr('hidden')
                 $('#bl option').removeAttr('selected');
                 $('#bl').empty();
-                axios.get('{{env('APP_BASE_URL')}}programmation/produits/' + $('#produit').val() + '/'+ user).then((response) => {
+                axios.get("{{env('APP_BASE_URL')}}programmation/produits/" + $('#produit').val() + '/'+ user).then((response) => {
                     var programmation = response.data;
+
                     console.log(programmation);
-                    $('#bl').append("<option selected disabled>Choisissez un BL</option>");
+                    $('#bl').append("<option selected disabled>Choisissez un Camion</option>");
                     for (var i = 0; i < programmation.length; i++) {
                         var val = programmation[i].id;
                         var text = programmation[i].camion.immatriculationTracteur;
                         if(old == val)
                             $('#bl').append("<option selected value="+ val +">" + text + "</option>");
                         else
-                            $('#bl').append("<option value="+ val +">" + text + "</option>");
+                            $('#bl').append("<option value="+ val +">"  + text + "</option>");
                     }
                     $('.select2').select2(); 
                     $('#loader').attr('hidden', 'hidden');
