@@ -135,7 +135,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::get('/index', 'index')->name('ventes.index');
 
-            Route::match(['GET','POST'],'/indexCreate', 'indexCreate')->name('ventes.indexCreate');
+            Route::match(['GET', 'POST'], '/indexCreate', 'indexCreate')->name('ventes.indexCreate');
 
             Route::get('/indexControlle', 'indexControlle')->name('ventes.indexControlle');
 
@@ -166,6 +166,11 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/delete/{vente}', 'delete')->name('ventes.delete');
 
             Route::get('/destroy/{vente}', 'destroy')->name('ventes.destroy');
+
+            ###_____
+            Route::match(["GET", "POST"], '/askUpdateVente/{vente?}', 'askUpdateVente')->name('ventes.askUpdateVente');
+
+            Route::match(['GET', "POST"], '/ventes/validation/', 'Validation')->name('ventes.validation');
         });
     });
 
@@ -1137,7 +1142,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
 
     Route::prefix('admin')->group(function () {
-
         Route::controller(UserController::class)->group(function () {
 
             Route::get('/users/index', 'index')->name('users.index');

@@ -242,6 +242,9 @@ class EditionController extends Controller
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('clients.id', $client->id)
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -254,6 +257,10 @@ class EditionController extends Controller
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('clients.id', $client->id)
                 ->where('zones.id', $zone->id)
+
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -265,6 +272,10 @@ class EditionController extends Controller
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('zones.id', $zone->id)
+                
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+                
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -296,11 +307,10 @@ class EditionController extends Controller
             $SommeCompte = CompteClient::all()->sum('solde');
             $reglements = Reglement::all()->sum('montant');
             $sommeVentes = Vente::all()->sum('montant');
-           
         } else {
             $zone = Zone::find($request->zone);
             $clients = Client::where('departement_id', $zone->departement_id)->get();
-           
+
             $compteClients = [];
             $reglement_amonts = [];
             $vente_amonts = [];
@@ -347,7 +357,7 @@ class EditionController extends Controller
         Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => Zone::all()]);
 
         // 
-        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients,'SommeCompte'=>$SommeCompte,'credit'=>$credit,'debit'=>$debit]);
+        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'SommeCompte' => $SommeCompte, 'credit' => $credit, 'debit' => $debit]);
         return view('editions.etatCompte', compact('clients', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes', 'zones'));
     }
 

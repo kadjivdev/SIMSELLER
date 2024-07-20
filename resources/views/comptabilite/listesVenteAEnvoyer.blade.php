@@ -256,8 +256,7 @@
     $(document).ready(function() {});
 
     function charger(id) {
-        axios.get('{{env('
-            APP_BASE_URL ')}}ventes/show/' + id).then((response) => {
+        axios.get("{{env('APP_BASE_URL ')}}ventes/show/" + id).then((response) => {
             var vente = response.data
 
             $('#id').val(vente.id)
@@ -269,11 +268,9 @@
             if (!($('#PrixTransportOld').val())) {
                 $('#transport').hide();
             }
-
         }).catch(() => {
             console.error("Erreur");
         })
-
     };
 </script>
 <script>

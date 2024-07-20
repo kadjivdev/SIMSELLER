@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\MessagePasseword;
 use App\Models\Representant;
+use App\Models\UpdateVente;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;

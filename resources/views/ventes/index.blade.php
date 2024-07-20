@@ -23,6 +23,16 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
+                        <div class="row mt-2">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-8">
+                                <div class="text-center bg-dark" style="font-size: 20px;">
+                                    <marquee><b> <em> Vous avez désormais la possibilité d'effectuer une demande de modification sur une vente déjà envoyée à la comptabilité!</em> </b> </marquee>
+                                </div>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+
                         @if($message = session('message'))
                         <div class="alert alert-success alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -73,6 +83,7 @@
                                 </div>
                             </form>
                         </div>
+
                         <!-- /.card-header -->
                         <div class="card-body">
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
@@ -92,6 +103,7 @@
                                         <th>Zone</th>
                                         @endif
                                         <th>Statut</th>
+                                        <th>Comptabilité</th>
                                         <th>Utilisateur</th>
                                         <th>Actualisation</th>
                                         @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
@@ -141,6 +153,17 @@
                                         @else
                                         <td class="text-center"><span class="badge badge-info">{{ $vente->statut }}</span></td>
                                         @endif
+
+                                        <!-- COMPTABILITE -->
+                                        <td class="text-center">
+                                            @if($vente->date_envoie_commercial)
+                                            <span class="badge bg-success roundered">Envoyée</span>
+                                            @else
+                                            <span class="badge bg-dark roundered">Pas encore</span>
+                                            @endif
+                                        </td>
+                                        <!-- END COMPTABILITE -->
+
                                         <td>{{ $vente->user->name }}</td>
                                         <td class="text-center">
 
@@ -172,17 +195,28 @@
                                         @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
 
                                         <td class="text-center">
-                                            @if ($vente->date_envoie_commercial != NULL)
+                                            @if ($vente->date_envoie_commercial)
                                             <div class="dropdown">
                                                 <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown">
                                                     Actions<i class="dw dw-more"></i>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
-                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement <span class="badge badge-info">{{$vente->reglements ? count($vente->reglements):0}}</span></a>
+                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement {{$vente->id}} <span class="badge badge-info">{{$vente->reglements ? count($vente->reglements):0}}</span></a>
                                                     @if($vente->type_vente_id == 2)
                                                     <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
                                                     @endif
-                                                    <!--<a class="dropdown-item" href=""><i class="fa-solid fa-industry"></i> Chantiers</a> -->
+
+                                                    @if(!IsThisVenteUpdateDemandeOnceMade($vente))
+                                                    <a class="dropdown-item bg-primary" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Demande de modification </a>
+                                                    @else
+                                                    @if(IsThisVenteUpdateDemandeAlreadyValidated($vente))
+                                                    <a class="dropdown-item bg-warning" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Modifier maintenant</a>
+                                                    @else
+                                                    <div class="text-center">
+                                                        <span class="text-center bg-warning badge">En attente de validation</span>
+                                                    </div>
+                                                    @endif
+                                                    @endif
                                                 </div>
                                             </div>
                                             @endif
@@ -208,6 +242,7 @@
                                         <th>Zone</th>
                                         @endif
                                         <th>Statut</th>
+                                        <th>Comptabilité</th>
                                         <th>Utilisateur</th>
                                         <th>Actualisation</th>
                                         @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
@@ -240,8 +275,6 @@
                         </div>
                         @endif
                         <!-- /.card-body -->
-
-
                     </div>
                     <!-- /.card -->
                 </div>
@@ -297,27 +330,24 @@
         <!-- /.modal-content -->
     </div>
 </div>
+
 @endsection
 @section('script')
 <script>
     function charger(id) {
-        axios.get('{{env('
-            APP_BASE_URL ')}}ventes/detailVente/' + id).then((response) => {
+        axios.get("{{env('APP_BASE_URL')}}ventes/detailVente/" + id).then((response) => {
             var ventes = response.data
             $('#detailVente tbody').empty();
             $.each(ventes, function(i, data) {
                 var newRow = $('<tr><td class="text-center">' + (i + 1) + '</td><td class="text-center">' + data.codeBC + '</td><td class="text-center">' + data.code + '</td><td class="text-center">' + data.immatriculationTracteur + '</td><td class="text-center">' + data.nom + ' ' + data.prenom + ' <b>( ' + data.bl + ' )</b> ' + '</td><td class="text-center">' + data.qteVendu + '</td><td class="text-center">' + data.destination + '</td></td><td class="text-center">' + data.libelle + '</td></tr>');
                 $('#detailVente').append(newRow);
                 $('#code').text(data.vente);
-
             });
-
-
-
         }).catch(() => {
             console.error("Erreur");
         })
     };
+
     $('body').on('change', function() {
         const tableBody = document.querySelector('.table-body');
         let sumQte = 0;
@@ -343,8 +373,6 @@
         });
 
     });
-
-
 
     $(function() {
         $("#example1").DataTable({

@@ -349,9 +349,11 @@
         }
 
     }
+
     function cmdeSelected($client){
 
     }
+    
     function typeSelected(){
         if($('#typecommande').val() == 2){
             $('#echeance').removeAttr('disabled');

@@ -39,8 +39,6 @@ class VenduController extends Controller
         //
     }
 
-
-
     public function create(Vente $vente,  Vendu $vendu = NULL)
     {
         $ver = Vente::where('id', $vente->id)->first();
@@ -53,15 +51,16 @@ class VenduController extends Controller
             $detailboncommande = DetailBonCommande::whereIn('id', $progammation)->pluck('produit_id');
             $produits = Produit::whereIn('id', $detailboncommande)->get();
         }
+        
         $qteTotal = $vente->vendus()->sum('qteVendu');
         $totalVendu = 0;
+
         foreach ($commandeclient->ventes as $v){
             if($v->statut == 'Vendue')
                 $totalVendu +=  $v->qteTotal;
         }
 
         return view('vendus.create', compact('vente', 'vendu', 'produits','qteTotal','totalVendu'));
-        
     }
 
     public function store(Request $request, Vente $vente, Vendu $vendu = NULL)

@@ -20,7 +20,10 @@ use Illuminate\Http\Request;
 use App\Models\CommandeClient;
 use App\Models\filleuil;
 use App\Models\Fournisseur;
+use App\Models\Produit;
+use App\Models\UpdateVente;
 use App\tools\ControlesTools;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Mail\Transport\Transport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +48,7 @@ class VenteController extends Controller
     {
         $roles = Auth::user()->roles()->pluck('id')->toArray();
         $commandeclients = CommandeClient::whereIn('statut', ['Préparation', 'Vendue', 'Validée', 'Livraison partielle', 'Livrée']);
-        
+
         if ($request->debut && $request->fin)
             $commandeclients = $commandeclients->WhereBetween('dateBon', [$request->debut, $request->fin])->pluck('id');
         else
@@ -53,22 +56,23 @@ class VenteController extends Controller
 
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles))
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
+
+        // dd(Vente::whereNull('date_envoie_commercial')->get());
         elseif (in_array(3, $roles))
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
-
         return view('ventes.index', compact('ventes'));
     }
 
     public function indexCreate(Request $request)
     {
-        if ($request->method()=='GET') {
+        if ($request->method() == 'GET') {
             $date = date('Y-m-d');
             $ventes = Vente::whereDate('created_at', $date)->orderBy('created_at', 'DESC')->get();
-        }else {
+        } else {
             ##___POST METHOD
             $debut = $request->debut;
             $fin = $request->fin;
-            $ventes = Vente::whereBetween("created_at",[$debut,$fin])->orderBy('created_at', 'DESC')->get();
+            $ventes = Vente::whereBetween("created_at", [$debut, $fin])->orderBy('created_at', 'DESC')->get();
         }
         // 
         return view('ventes.indexCreate', compact('ventes'));
@@ -153,6 +157,7 @@ class VenteController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->client_id);
         //  try {
         $req = NULL;
         if ($request->statuts == 1) {
@@ -399,6 +404,7 @@ class VenteController extends Controller
      * @param  \App\Models\Vente  $vente
      * @return \Illuminate\Http\RedirectResponse
      */
+
     public function update(Request $request, Vente $vente)
     {
         try {
@@ -412,6 +418,7 @@ class VenteController extends Controller
                     'type_vente_id' => ['required'],
                     'transport' => ['required'],
                 ]);
+
                 $req = $vente->commandeclient->type_commande_id;
                 if ($validator->fails()) {
                     return redirect()->route('ventes.edit', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
@@ -635,15 +642,25 @@ class VenteController extends Controller
         $ventes = Vente::all();
         return view('ventes.askUpadate', compact('ventes'));
     }
+    
     public function envoieComptabilite(Request $request)
     {
+        // dd($request->ventes);
         $ventes = explode(",", $request->ventes);
+
+        // dd(!$ventes[0],count($ventes));
+        ####____
+        if (!$ventes[0]) {
+            return redirect()->back()->with("error", "Aucune vente n'a été selectionnée!");
+        }
 
         foreach ($ventes as  $vente) {
 
             $vente = Vente::find($vente);
             $vente->date_envoie_commercial = date('Y-m-d');
             $vente->user_envoie_commercial = Auth()->user()->id;
+            // ON CONFIRME QUE CETTE VENTE EST VALIDE
+            $vente->valide = true;
             $vente->update();
 
             //Mise à jour du compte Client.
@@ -657,11 +674,15 @@ class VenteController extends Controller
             $compteClient->solde = $client->credit + $client->debit;
             $compteClient->update();
         }
-        return back();
+
+        return redirect()->back()->with("message", "Envoie à la comptabilité effectuée avec succès!");
+
+        // return back();
     }
+
     public function venteAEnvoyerComptabiliser()
     {
-        $AEnvoyers = Vente::orderBy('id','desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
+        $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
@@ -995,5 +1016,114 @@ class VenteController extends Controller
         $date = date('Ymd');
 
         return Excel::download(new ComptabiliteReExport($debut, $fin, $filtre), $fileName . '_' . $date . '.xlsx');
+    }
+
+    #######__________
+    function askUpdateVente(Request $request, Vente $vente)
+    {
+        // dd($vente->produit);
+        ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
+        $isThisDemandOnceMadeByThisUser = false;
+        $isThisDemandValidatedForThisUser = false;
+        foreach ($vente->_updateDemandes as $demand) {
+            if ($demand->demandeur == auth()->user()->id) {
+                $isThisDemandOnceMadeByThisUser = true;
+
+                ###___SI LA DEMANDE EST VALIDEE
+                if ($demand->valide) {
+                    $isThisDemandValidatedForThisUser = true;
+                }
+            }
+        }
+
+        # quand la demande a déjà été faite
+        if (IsThisVenteUpdateDemandeOnceMade($vente)) {
+            $products = Produit::all();
+            $venteTypes = TypeCommande::all();
+            $clients = Client::all();
+            $zones = Zone::all();
+            $transportTYpes = TypeCommande::all();
+
+            $commandeclients = CommandeClient::where('statut', 'Validée')->orWhere('statut', 'Livraison partielle')->whereNull('byvente')->where('type_commande_id', 2)->get();
+          
+            // dd($clients[0]);
+            ####____SI LA DEMANDE A ETE VALIDEE
+            if (IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+                Session()->flash("message", "Votre demande de modification a été traitée avec succès! Passez maintenant à la modification");
+                return view("ventes.updateVente", compact("vente", "transportTYpes","commandeclients","zones","clients","products")); ##  redirect()->back()->with("error", "Vous avez déjà éffectuée cette requête! Vous ne pouvez la refaire à nouveau");
+            };
+
+            ####____QUAND LA COMMANDE N'EST VALIDEE
+            return redirect()->back()->with("error", "Désolé! Cette demande de modification a déjà été effectuée mais n'est pas encore validéé! Veuillez bien attendre sa validation");
+        }
+
+        if ($request->method() == "POST") {
+
+            // dd($isThisDemandOnceMadeByThisUser);
+            if (!$vente) {
+                return redirect()->back()->with("error", "La vente est réquise pour cette requête!");
+            }
+
+            # code...
+
+            Validator::make(
+                $request->all(),
+                [
+                    "raison" => ["required"],
+                    "prouve_file" => ["required"],
+                ],
+                [
+                    "raison.required" => "Ce champ est réquis!",
+                    "prouve_file.required" => "Ce champ est réquis!",
+                ]
+            )->validate();
+
+            ###___TRAITEMENT DE L'IMAGE
+            if ($request->hasFile("prouve_file")) {
+                # code...
+                $img = $request->file("prouve_file");
+                $img_name = $img->getClientOriginalName();
+                $img->move("files", $img_name);
+
+                $prouve_file = asset("/files/" . $img_name);
+            }
+            ###___
+
+            $data = array_merge($request->all(), [
+                "vente" => $vente->id,
+                "demandeur" => auth()->user()->id,
+                "prouve_file" => $prouve_file
+            ]);
+
+            UpdateVente::create($data);
+
+            ###___
+            return redirect('/ventes/index')->with("message", "Demande de modification de vente effectuée avec succès! Patientez en attendant que la réquête soit traitée et validée!");
+        } else {
+
+            #####________
+            return view("ventes.askUpdateVente", compact('vente'));
+        }
+    }
+
+
+
+    #####________VENTES VALIDATIONS
+    public function Validation(Request $request)
+    {
+        if ($request->method() == "POST") {
+            $demand = UpdateVente::find($request->demand);
+            if (!$demand) {
+                return redirect()->back()->with("error", "Cette demande de modification n'existe pas!");
+            }
+
+            ###___MODIFICATION
+            $demand->valide = 1;
+            $demand->save();
+        }
+
+        ####___
+        $venteUpdateDemands = UpdateVente::OrderBy("valide", "asc")->get();
+        return view("ventes.venteUpdateDemand", compact("venteUpdateDemands"));
     }
 }

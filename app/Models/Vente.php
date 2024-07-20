@@ -57,4 +57,9 @@ class Vente extends Model
         return $value ? json_decode($value,true) : [];
     } 
     */
+
+    ####___DEMANDES DE MODIFICATIONS
+    public function _updateDemandes(){
+        return $this->hasMany(UpdateVente::class,'vente');
+    }
 }
