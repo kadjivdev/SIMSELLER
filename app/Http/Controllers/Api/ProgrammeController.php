@@ -25,16 +25,30 @@ class ProgrammeController extends Controller
     }
 
     
-    public function getProgrammationByProduitId(Produit $produit, User $user)
-    {
+    // public function getProgrammationByProduitId(Produit $produit, User $user)
+    // {
+    //     $zones = $user->representant->zones->pluck('id')->toArray();
+    //     $detailboncommandes = DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
+    //     $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id', $zones)->with('camion')->get();
+    //     // $programmations = Programmation::with('camion')->get();
+    //     $newProgrammation = [];
+    //     foreach ($programmations as $programmation) {
+    //         $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
+    //         if ($qteVendu < $programmation->qtelivrer || (($programmation->qtelivrer < $programmation->qteprogrammer))) {
+    //             $newProgrammation[] = $programmation;
+    //         }
+    //     }
+    //     return response($newProgrammation);
+    // }
+
+    public function getProgrammationByProduitId(Produit $produit, User $user){
         $zones = $user->representant->zones->pluck('id')->toArray();
-        $detailboncommandes = DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
-        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id', $zones)->with('camion')->get();
-        // $programmations = Programmation::with('camion')->get();
+        $detailboncommandes =DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
+        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id',$zones)->with('camion')->get();
         $newProgrammation = [];
-        foreach ($programmations as $programmation) {
+        foreach ($programmations as $programmation){
             $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
-            if ($qteVendu < $programmation->qtelivrer || (($programmation->qtelivrer < $programmation->qteprogrammer))) {
+            if($qteVendu < $programmation->qtelivrer || (($programmation->qtelivrer < $programmation->qteprogrammer))){
                 $newProgrammation[] = $programmation;
             }
         }

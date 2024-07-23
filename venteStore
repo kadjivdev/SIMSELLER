@@ -1,89 +1,21 @@
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Mail\SuspectMail;
-use App\Rules\CheckQuanteCde;
-use App\Rules\CheckQuantite;
-use App\Rules\CheckStock;
-use App\Rules\VenduDoublonProduitStokValide;
-use App\tools\CommandeClientTools;
-use Exception;
-use App\Models\Vendu;
-use App\Models\Vente;
-use App\Models\Produit;
-use App\Models\Commander;
-use Illuminate\Http\Request;
-use App\Models\Programmation;
-use App\Models\CommandeClient;
-use App\Models\DetailBonCommande;
-use App\Models\UpdateVente;
-use App\tools\ControlesTools;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
-
-class VenduController extends Controller
-{
-    public function __construct()
+ public function store(Request $request, Vente $vente, Vendu $vendu = NULL)
     {
-        $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
-    }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    public function create(Vente $vente,  Vendu $vendu = NULL)
-    {
-        $ver = Vente::where('id', $vente->id)->first();
-        $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
-        if ($ver == NULL) {
-            $commanders = Commander::where('commande_client_id', $commandeclient->id)->pluck('produit_id');
-            $produits = Produit::whereIn('id', $commanders)->get();
-        } else {
-            $progammation = Programmation::where('statut', 'Livrer')->pluck('detail_bon_commande_id');
-            $detailboncommande = DetailBonCommande::whereIn('id', $progammation)->pluck('produit_id');
-            $produits = Produit::whereIn('id', $detailboncommande)->get();
-        }
-
-        $qteTotal = $vente->vendus()->sum('qteVendu');
-        $totalVendu = 0;
-
-        foreach ($commandeclient->ventes as $v) {
-            if ($v->statut == 'Vendue')
-                $totalVendu +=  $v->qteTotal;
-        }
-
-        ####____
-        $bl = NULL;
-
-        // dd($vente->vendus);
-        foreach ($vente->vendus as $vendu) {
-            $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
-            // dd($vendu->programmation);
-            if ($_bl) {
-                $bl = $_bl;
+        
+        ####___VENTE APRES ENVOIE A LA COMPTABILITE
+        if ($request->update_after_comptability) {
+            if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+                return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
             }
         }
-
-        // dd($bl);
-        return view('vendus.create', compact('vente', 'vendu', 'produits', 'qteTotal', 'totalVendu', "bl"));
-    }
-
-    public function store(Request $request, Vente $vente, Vendu $vendu = NULL)
-    {
+        
+        
+        #####____
         try {
-
             $ver = Vente::where('id', $vente->id)->where('code', 'LIKE', 'VD%')->first();
             if ($vendu) {
+
                 if ($request->remise == NULL) {
+
                     $validator = Validator::make($request->all(), [
                         'produit_id' => ['required'],
                         'programmation_id' => ['required'],
@@ -99,6 +31,7 @@ class VenduController extends Controller
                             'transport' => ['required'],
                         ]);
                     }
+
                 } else {
                     $validator = Validator::make($request->all(), [
                         'produit_id' => ['required'],
@@ -133,8 +66,8 @@ class VenduController extends Controller
                     'users' => Auth::user()->id,
                 ]);
 
-                if ($vendus) {
 
+                if ($vendus) {
                     $vendus = $vendu->where('vente_id', $vente->id)->get();
                     $somme = 0;
                     foreach ($vendus as $vendu) {
@@ -149,7 +82,11 @@ class VenduController extends Controller
                     if ($ventes) {
 
                         if ($ver) {
+                            // dd($vente->commande_client_id);
+                            // $commander = Commander::findOrFail($vente->commande_client_id);
                             $commander = Commander::findOrFail($vente->commande_client_id);
+                            // dd($commander);
+                            // dd($request->all());
                             $commanders = $commander->update([
                                 'commande_client_id' => $vente->commande_client_id,
                                 'produit_id' => $request->produit_id,
@@ -174,16 +111,37 @@ class VenduController extends Controller
 
                                 $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
                                 $commandeclient->montant = $somme;
-                                $commandeclients = $commandeclient->update();
+                                // $commandeclients = $commandeclient->update();
+                                $commandeclient->update();
 
-                                if ($commandeclients) {
-                                    Session()->flash('message', 'Produit vendu modifié succès!');
-                                    return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id]);
-                                }
+                                // if ($commandeclients) {
+                                //     Session()->flash('message', 'Produit vendu modifié avec succès!');
+                                // return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id]);
+                                // }
                             }
                         }
                     }
                 }
+
+                #####_____QUANT IL S'AGIT D'UNE MODIFICATION APRES ENVOIE A LA COMPTABILITE
+                if ($request->update_after_comptability) {
+                    ###___UPDATE DU BL
+                    foreach ($vente->vendus as $vendu) {
+                        $vendu->programmation->update(["bl_gest" => $request->bl]);
+                    }
+
+                    ####____ON BLOQUE A NOUVEAU L'ACCES
+                    $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "modified" => false])->first();
+                    $venteUpdateDemande->valide = false;
+                    $venteUpdateDemande->modified = true;
+                    $venteUpdateDemande->save();
+
+                    ####____SUPPRESION DE LA SESSION
+                    session()->forget("update_after_comptability");
+                }
+
+                ####_____REDIRECTION
+                return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id])->with("mesage", "'Produit vendu modifié avec succès!'");
             } else {
                 if ($request->remise == NULL) {
                     $validator = Validator::make($request->all(), [
@@ -241,6 +199,7 @@ class VenduController extends Controller
                         'destination' => $request->destination
                     ]);
                 }
+
                 $vendu = Vendu::create([
                     'vente_id' => $vente->id,
                     'programmation_id' => $request->programmation_id,
@@ -291,19 +250,42 @@ class VenduController extends Controller
 
                             $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
                             $commandeclient->montant = $somme;
-                            $commandeclients = $commandeclient->update();
+                            // $commandeclients = $commandeclient->update();
+                            $commandeclient->update();
 
-                            if ($commandeclients) {
-                                Session()->flash('message', 'Produit vendu ajouté succès!');
-                                return redirect()->route('vendus.create', ['vente' => $vente->id]);
-                            }
+                            // if ($commandeclients) {
+                            //     Session()->flash('message', 'Produit vendu ajouté succès!');
+                            //     return redirect()->route('vendus.create', ['vente' => $vente->id]);
+                            // }
                         }
                     } else {
-                        Session()->flash('message', 'Produit vendu ajouté succès!');
-                        return redirect()->route('vendus.create', ['vente' => $vente->id]);
+                        // Session()->flash('message', 'Produit vendu ajouté succès!');
+                        // return redirect()->route('vendus.create', ['vente' => $vente->id]);
                     }
                 }
                 DB::commit();
+
+
+                #####_____QUANT IL S'AGIT D'UNE MODIFICATION APRES ENVOIE A LA COMPTABILITE
+                if ($request->update_after_comptability) {
+                    ###___UPDATE DU BL
+                    foreach ($vente->vendus as $vendu) {
+                        $vendu->programmation->update(["bl_gest" => $request->bl]);
+                    }
+
+                    ####____ON BLOQUE A NOUVEAU L'ACCES
+                    $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "modified" => false])->first();
+                    $venteUpdateDemande->valide = false;
+                    $venteUpdateDemande->modified = true;
+                    $venteUpdateDemande->save();
+
+                    ####____SUPPRESION DE LA SESSION
+                    session()->forget("update_after_comptability");
+                }
+
+
+                ####_____REDIRECTION
+                return redirect()->route('vendus.create', ['vente' => $vente->id])->with("message", "Produit vendu ajouté succès!");
             }
         } catch (Exception $e) {
             if (env('APP_DEBUG') == TRUE) {
@@ -314,62 +296,3 @@ class VenduController extends Controller
             }
         }
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Vendu  $vendu
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Vendu $vendu)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Vendu  $vendu
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Vendu $vendu)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Vendu  $vendu
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Vendu $vendu)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Vendu  $vendu
-     * @return \Illuminate\Http\RedirectResponse
-     */
-
-    public function destroy(Vendu $vendu)
-    {
-        $vente = $vendu->vente;
-        if ($vente->statut == "Vendue") {
-            Session()->flash('error', 'Vous essayez de supprimer une ligne de vente n° ' . $vente->code . 'déjà valider. Ce comportement est suspect et sera notifier au administrateur');
-            $message = "Sur la vente n° " . $vente->code . ", le vendeur " . Auth::user()->name . " a esayer de supprimer un detail alors que la vente a été déjà valider";
-            $mail = new SuspectMail(['email' => env('ADMIN_SUSPECT')], 'Action suspecte', $message);
-            Mail::send($mail);
-            return redirect()->route('ventes.index', ['vente' => $vente->id]);
-        }
-        $vente->update(['montant' => $vente->montant - ($vendu->qteVendu * $vendu->pu)]);
-        ControlesTools::generateLog($vendu, 'vendu', 'Suppression ligne');
-
-        $vendu->delete();
-        return redirect()->route('vendus.create', ['vente' => $vente->id])->with('msgSuppression', 'Element supprimé avec succès');
-    }
-}

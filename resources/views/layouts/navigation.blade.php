@@ -126,16 +126,25 @@
             </a>
         </li>
         <li class="nav-item dropdown">
-                <a class="nav-link" href="{{ route('logout') }}"
-                   onclick="event.preventDefault();
+            <a class="nav-link" href="{{ route('logout') }}" onclick="event.preventDefault();
                                 document.getElementById('logout-form').submit();">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    {{ __('Deconnexion') }}
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
+                <i class="fa-solid fa-right-from-bracket"></i>
+                {{ __('Deconnexion') }}
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
         </li>
     </ul>
+
 </nav>
+
+<!-- <br><br><br>
+<div class="row">
+    <div class="col-md-12">
+        <div class="text-center bg-light" style="font-size: 15px;">
+            <marquee><b> <em> Vous avez désormais la possibilité d'effectuer une demande de modification sur une vente déjà envoyée à la comptabilité!</em> </b> </marquee>
+        </div>
+    </div>
+</div> -->
 <!-- /.navbar -->

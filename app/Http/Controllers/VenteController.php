@@ -107,11 +107,13 @@ class VenteController extends Controller
             ->join('vendus', 'vendus.vente_id', '=', 'ventes.id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
-            ->join('produits', 'produits.id', '=', 'detail_bon_commandes.produit_id')
+            // ->join('produits', 'produits.id', '=', 'detail_bon_commandes.produit_id')
+            ->join('produits', 'produits.id', '=', 'ventes.produit_id')
             ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
             ->join('camions', 'camions.id', '=', 'programmations.camion_id')
             ->join('chauffeurs', 'chauffeurs.id', '=', 'programmations.chauffeur_id')
             ->select('ventes.code as vente', 'programmations.code', 'bon_commandes.code as codeBC', 'programmations.bl', 'camions.immatriculationTracteur', 'chauffeurs.nom', 'chauffeurs.prenom', 'vendus.qteVendu', 'ventes.destination', 'produits.libelle',)
+            // ->with("produit")
             ->orderByDesc('date')->get();
         return response()->json($ventes);
     }
@@ -590,6 +592,7 @@ class VenteController extends Controller
     {
         return response()->json($vente);
     }
+
     public function demandeVente(Request $request)
     {
         try {
@@ -637,12 +640,11 @@ class VenteController extends Controller
     }
     public function askUpdate()
     {
+        // $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
-
-        $ventes = Vente::all();
         return view('ventes.askUpadate', compact('ventes'));
     }
-    
+
     public function envoieComptabilite(Request $request)
     {
         // dd($request->ventes);
@@ -1021,50 +1023,59 @@ class VenteController extends Controller
     #######__________
     function askUpdateVente(Request $request, Vente $vente)
     {
-        // dd($vente->produit);
-        ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
-        $isThisDemandOnceMadeByThisUser = false;
-        $isThisDemandValidatedForThisUser = false;
-        foreach ($vente->_updateDemandes as $demand) {
-            if ($demand->demandeur == auth()->user()->id) {
-                $isThisDemandOnceMadeByThisUser = true;
 
-                ###___SI LA DEMANDE EST VALIDEE
-                if ($demand->valide) {
-                    $isThisDemandValidatedForThisUser = true;
+        if ($request->method() == "GET") {
+            ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
+            $isThisDemandOnceMadeByThisUser = false;
+            $isThisDemandValidatedForThisUser = false;
+            foreach ($vente->_updateDemandes as $demand) {
+                if ($demand->demandeur == auth()->user()->id) {
+                    $isThisDemandOnceMadeByThisUser = true;
+
+                    ###___SI LA DEMANDE EST VALIDEE
+                    if ($demand->valide) {
+                        $isThisDemandValidatedForThisUser = true;
+                    }
                 }
             }
-        }
 
-        # quand la demande a déjà été faite
-        if (IsThisVenteUpdateDemandeOnceMade($vente)) {
-            $products = Produit::all();
-            $venteTypes = TypeCommande::all();
-            $clients = Client::all();
-            $zones = Zone::all();
-            $transportTYpes = TypeCommande::all();
+            # quand la demande a déjà été faite
+            if (IsThisVenteUpdateDemandeOnceMade($vente)) {
+                $products = Produit::all();
+                $clients = Client::all();
+                // $commendeClients = CommandeClient::all();
 
-            $commandeclients = CommandeClient::where('statut', 'Validée')->orWhere('statut', 'Livraison partielle')->whereNull('byvente')->where('type_commande_id', 2)->get();
-          
-            // dd($clients[0]);
-            ####____SI LA DEMANDE A ETE VALIDEE
-            if (IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
-                Session()->flash("message", "Votre demande de modification a été traitée avec succès! Passez maintenant à la modification");
-                return view("ventes.updateVente", compact("vente", "transportTYpes","commandeclients","zones","clients","products")); ##  redirect()->back()->with("error", "Vous avez déjà éffectuée cette requête! Vous ne pouvez la refaire à nouveau");
-            };
+                ####____SI LA DEMANDE A ETE VALIDEE
+                if (IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+                    ###__une redirection vers l'ancienne method en attendant
 
-            ####____QUAND LA COMMANDE N'EST VALIDEE
-            return redirect()->back()->with("error", "Désolé! Cette demande de modification a déjà été effectuée mais n'est pas encore validéé! Veuillez bien attendre sa validation");
+                    // session(['update_after_comptability' => true]);
+
+                    // dd(session("update_after_comptability"));
+                    // return redirect(route("vendus.create", $vente->id));
+                    return view("ventes.updateVente", compact("vente", "clients", "products")); ##  redirect()->back()->with("error", "Vous avez déjà éffectuée cette requête! Vous ne pouvez la refaire à nouveau");
+                };
+
+                ####____QUAND LA COMMANDE N'EST VALIDEE
+                return redirect()->back()->with("error", "Désolé! Cette demande de modification a déjà été effectuée mais n'est pas encore validéé! Veuillez bien attendre sa validation");
+            } else {
+
+                #####________Faire une demande
+                return view("ventes.askUpdateVente", compact('vente'));
+            }
         }
 
         if ($request->method() == "POST") {
 
-            // dd($isThisDemandOnceMadeByThisUser);
             if (!$vente) {
                 return redirect()->back()->with("error", "La vente est réquise pour cette requête!");
             }
 
-            # code...
+            ####____REFORMATTAGE DES DATAS
+            $pu = $vente->pu;
+            $qteTotal = $request->qteTotal;
+            $montant = $pu * $qteTotal;
+            $produit_id = $request->produit;
 
             Validator::make(
                 $request->all(),
@@ -1092,21 +1103,65 @@ class VenteController extends Controller
             $data = array_merge($request->all(), [
                 "vente" => $vente->id,
                 "demandeur" => auth()->user()->id,
-                "prouve_file" => $prouve_file
+                "prouve_file" => $prouve_file,
             ]);
 
             UpdateVente::create($data);
 
             ###___
             return redirect('/ventes/index')->with("message", "Demande de modification de vente effectuée avec succès! Patientez en attendant que la réquête soit traitée et validée!");
-        } else {
-
-            #####________
-            return view("ventes.askUpdateVente", compact('vente'));
         }
     }
 
 
+    ####____UPDATE VENTE TRULLY
+    function _updateVente(Request $request)
+    {
+        $vente = Vente::findOrFail($request->vente);
+
+        ####____
+        if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+            return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
+        }
+
+        ####____REFORMATTAGE DES DATAS
+        $pu = (int)$request->pu; ## $vente->pu;
+        $qteTotal = $request->qteTotal;
+        $montant = $pu * $qteTotal;
+        $produit_id = $request->produit;
+        $bl = $request->bl;
+        $client = $request->client_id;
+
+        // dd($client);
+
+        foreach ($vente->vendus as $vendu) {
+            $vendu->programmation->update(["bl_gest" => $bl]);
+        }
+
+        $vente->commandeclient->update(["client_id" => $client]);
+
+        ###_____
+        $vente->update([
+            "qteTotal" => $qteTotal,
+            "montant" => $montant,
+            "produit_id" => $produit_id,
+            "pu" => $pu,
+            // "ctl_payeur"=>$client,
+        ]);
+
+        ####____ON BLOQUE A NOUVEAU L'ACCES
+        // dd($vente->_updateDemandes);
+        $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "modified" => false])->first();
+        $venteUpdateDemande->valide = false;
+        $venteUpdateDemande->modified = true;
+        $venteUpdateDemande->save();
+
+        ###___
+        return redirect("/ventes/index")->with("message", "Vente modifiée avec succès!");
+
+        // return redirect()->back()->with("message", "Vente modifiée avec succès!");
+        // return redirect('/ventes/index')->with("message", "Demande de modification de vente effectuée avec succès! Patientez en attendant que la réquête soit traitée et validée!");
+    }
 
     #####________VENTES VALIDATIONS
     public function Validation(Request $request)
@@ -1120,10 +1175,12 @@ class VenteController extends Controller
             ###___MODIFICATION
             $demand->valide = 1;
             $demand->save();
+
+            return redirect()->back()->with("message", "Demande validée avec succès!");
         }
 
         ####___
-        $venteUpdateDemands = UpdateVente::OrderBy("valide", "asc")->get();
+        $venteUpdateDemands = UpdateVente::where("modified", false)->OrderBy("valide", "asc")->get();
         return view("ventes.venteUpdateDemand", compact("venteUpdateDemands"));
     }
 }

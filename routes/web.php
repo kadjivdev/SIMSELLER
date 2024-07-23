@@ -169,6 +169,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             ###_____
             Route::match(["GET", "POST"], '/askUpdateVente/{vente?}', 'askUpdateVente')->name('ventes.askUpdateVente');
+            Route::post('/updateVente/{vente?}', '_updateVente')->name('ventes.updateVente');
 
             Route::match(['GET', "POST"], '/ventes/validation/', 'Validation')->name('ventes.validation');
         });

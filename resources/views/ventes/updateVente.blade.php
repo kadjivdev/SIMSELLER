@@ -25,13 +25,14 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        @if($message = session('message'))
+                        @if(session()->has("message"))
                         <div class="alert alert-success alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                             <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{ $message }}
+                            {{session()->get("message") }}
                         </div>
                         @endif
+
                         @if($message = session('error'))
                         <div class="alert alert-danger alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -54,31 +55,69 @@
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="">
-                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->payeur->nom}} {{$vente->payeur->prenom}} {{$vente->payeur->sigle}} </li>
+                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}} </li>
                                         <li class="nav-item"> <b> <var>Reponsable de la vente: </var></b> {{$vente->user->name}} </li>
-                                        <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit->libelle}} </li>
+                                        <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit?$vente->produit->libelle:""}} </li>
                                         <li class="nav-item"> <b> <var>Vente Type: </var></b> {{$vente->typeVente->libelle}} </li>
                                     </ul>
                                 </div>
                             </div>
                             <br>
-                            <form action="{{route('ventes.askUpdateVente',$vente)}}" method="POST" enctype="multipart/form-data">
+                            <form action="{{route('ventes.updateVente',$vente)}}" method="POST" enctype="multipart/form-data">
                                 @csrf
-
+                                <input type="hidden" name="vente" value="{{$vente->id}}">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
+                                            <label for="">Bordereau de Livraison</label>
+
+                                            <?php
+                                            $bl = NULL;
+
+                                            foreach ($vente->vendus as $vendu) {
+
+                                                $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
+
+                                                if ($_bl) {
+                                                    $bl = $_bl;
+                                                }
+                                            }
+                                            ?>
+
+                                            <!--  -->
+                                            <input type="text" value="{{$bl}}" name="bl" class="form-control">
+                                            @error('bl')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group mb-3">
                                             <label for="">Qte totale </label>
-                                            <input type="text" value="{{$vente->qteTotal}}" class="form-control">
+                                            <input type="text" value="{{$vente->qteTotal}}" disabled name="qteTotal" class="form-control">
                                             @error('raison')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <div class="form-group mb-3">
+                                            <label for="">Produit </label>
+                                            <select class="form-control form-control-sm select2" id="" name="produit">
+                                                <option class="text-center" value="{{$vente->produit?$vente->produit->id:''}}" selected>{{$vente->produit?$vente->produit->libelle:""}}</option>
+                                                @foreach($products as $product)
+                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('produit')
                                             <span class="text-danger">{{$message}} </span>
                                             @enderror
                                         </div>
 
                                         <div class="form-group mb-3">
                                             <label for="">Clients</label>
-                                            <select id="client" class="form-control form-control-sm select2" id="client_id" name="client_id">
-                                                <option class="text-center" selected disabled>{{ $vente->payeur->raisonSociale }}</option>
+                                            <select id="client" class="form-control form-control-sm select2" name="client_id">
+                                                <option value="{{$vente->payeur->id}}" class="text-center" selected>{{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}}</option>
                                                 @foreach($clients as $client)
                                                 <option value="{{$client->id}}">
                                                     {{ $client->raisonSociale }}
@@ -90,63 +129,24 @@
                                             @enderror
                                         </div>
 
-                                        <div class="form-group mb-3">
-                                            <label for="">Type commande</label>
-                                            <select class="form-control form-control-sm select2" name="type_vente_id" id="typecommande">
-                                                <option class="text-center" selected id="type_commande_0">{{$vente->typeVente->libelle}}</option>
-                                                @foreach($transportTYpes as $type)
-                                                <option class="text-center" id="type_commande_0">{{$type->libelle}}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('type_vente_id')
-                                            <span class="text-danger">{{$message}}</span>
-                                            @enderror
-                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
                                         <div class="form-group mb-3">
-                                            <label>Commande client</label>
-                                            <select class="form-control form-control-sm select2" id="commande_client_id" name="commande_client_id">
-                                                <option class="text-center" value="" selected disabled>{{ $vente->commandeclient->code }} {{ $vente->commandeclient->client->sigle?$vente->commandeclient->client->sigle:$vente->commandeclient->client->nom.' '.$vente->commandeclient->client->prenom }}</option>
-                                                @foreach($commandeclients as $commandeclient)
-                                                <option value="{{$commandeclient->id}}">{{ $commandeclient->code }} {{ $commandeclient->client->sigle?$commandeclient->client->sigle:$commandeclient->client->nom.' '.$commandeclient->client->prenom }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('commande_client_id')
-                                            <span class="text-danger">{{$message}}</span>
-                                            @enderror
-                                        </div>
+                                            <p class="text-center">
+                                                <label for="">P.U</label>
+                                            </p>
+                                            <input type="text" class="form-control" disabled value="{{$vente->pu}}" name="pu">
 
-                                        <div class="form-group mb-3">
-                                            <label for="">Zone </label>
-                                            <select class="form-control form-control-sm select2" id="commande_client_id" name="commande_client_id">
-                                                <option class="text-center" value="{{$vente->commandeclient->zone->id}}" selected>{{$vente->commandeclient->zone->libelle}}</option>
-                                                @foreach($zones as $zone)
-                                                <option value="{{$zone->id}}">{{ $zone->libelle }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('raison')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
-
-                                        <div class="form-group mb-3">
-                                            <label for="">Produit </label>
-                                            <select class="form-control form-control-sm select2" id="commande_client_id" name="commande_client_id">
-                                                <option class="text-center" value="{{$vente->produit->id}}" selected>{{$vente->produit->libelle}}</option>
-                                                @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('raison')
+                                            @error('pu')
                                             <span class="text-danger">{{$message}} </span>
                                             @enderror
                                         </div>
                                     </div>
                                 </div>
+                                <button type="submit" class="btn btn-sm btn-success w-100 text-uppercase">Modifier</button>
                                 <br>
-                                <!-- <button type="submit" class="btn btn-sm btn-primary w-100 text-uppercase">Modifier</button> -->
                             </form>
                         </div>
                         <!-- /.card-body -->

@@ -185,7 +185,17 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Bordereau de livraison<span class="text-danger"></span></label>
+                                                <input type="hidden" name="update_after_comptability" value="{{session('update_after_comptability')}}" >
+                                                <input type="text" name="bl" class="form-control" value="{{$bl}}" id="">
+                                            </div>
+                                        </div>
+                                    </div>
                                     <hr style="margin-top: -0.2em; border-color: black;" class="my-sm-1">
+                                    <!-- <h1> {{$vente->qteTotal}} {{$qteTotal}}</h1> -->
                                     @if($vente->qteTotal && $vente->qteTotal == $qteTotal)
                                         <div class="row align-content-center">
                                             <div class="col-12 text-center text-info my-1 border border-info">
@@ -370,6 +380,7 @@
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
+
                                         <form method="POST" action="{{route('ventes.valider',['vente'=>$vente])}}" id="validation_vente">
                                             @csrf
                                             <div class="modal-body">
@@ -458,17 +469,18 @@
                 $('#loader').removeAttr('hidden')
                 $('#bl option').removeAttr('selected');
                 $('#bl').empty();
-                axios.get('{{env('APP_BASE_URL')}}programmation/produits/' + $('#produit').val() + '/'+ user).then((response) => {
+                axios.get("{{env('APP_BASE_URL')}}programmation/produits/" + $('#produit').val() + '/'+ user).then((response) => {
                     var programmation = response.data;
-                    console.log(programmation);
-                    $('#bl').append("<option selected disabled>Choisissez un BL</option>");
+
+                    // console.log(programmation);
+                    $('#bl').append("<option selected disabled>Choisissez un Camion</option>");
                     for (var i = 0; i < programmation.length; i++) {
                         var val = programmation[i].id;
                         var text = programmation[i].camion.immatriculationTracteur;
                         if(old == val)
                             $('#bl').append("<option selected value="+ val +">" + text + "</option>");
                         else
-                            $('#bl').append("<option value="+ val +">" + text + "</option>");
+                            $('#bl').append("<option value="+ val +">"  + text + "</option>");
                     }
                     $('.select2').select2(); 
                     $('#loader').attr('hidden', 'hidden');

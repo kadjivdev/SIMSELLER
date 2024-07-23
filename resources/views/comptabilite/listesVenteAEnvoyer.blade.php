@@ -256,9 +256,9 @@
     $(document).ready(function() {});
 
     function charger(id) {
-        axios.get("{{env('APP_BASE_URL ')}}ventes/show/" + id).then((response) => {
+        axios.get("{{env('APP_BASE_URL')}}ventes/show/" + id).then((response) => {
             var vente = response.data
-
+            // console.log(vente);
             $('#id').val(vente.id)
             $('#PrixUnitaireOld').val(vente.pu);
             $('#PrixTransportOld').val(vente.transport);

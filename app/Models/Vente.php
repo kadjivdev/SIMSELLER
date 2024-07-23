@@ -62,4 +62,8 @@ class Vente extends Model
     public function _updateDemandes(){
         return $this->hasMany(UpdateVente::class,'vente');
     }
+
+    // function _detailBonDeCommande() : Returntype {
+        
+    // }
 }

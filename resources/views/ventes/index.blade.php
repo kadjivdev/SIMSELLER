@@ -23,15 +23,6 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="row mt-2">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <div class="text-center bg-dark" style="font-size: 20px;">
-                                    <marquee><b> <em> Vous avez désormais la possibilité d'effectuer une demande de modification sur une vente déjà envoyée à la comptabilité!</em> </b> </marquee>
-                                </div>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
 
                         @if($message = session('message'))
                         <div class="alert alert-success alert-dismissible">
@@ -206,16 +197,16 @@
                                                     <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
                                                     @endif
 
-                                                    @if(!IsThisVenteUpdateDemandeOnceMade($vente))
+                                                    @if(!IsThisVenteUpdateDemandeOnceMade($vente) || IsThisVenteUpdateDemandeAlreadyModified($vente))
                                                     <a class="dropdown-item bg-primary" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Demande de modification </a>
                                                     @else
-                                                    @if(IsThisVenteUpdateDemandeAlreadyValidated($vente))
-                                                    <a class="dropdown-item bg-warning" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Modifier maintenant</a>
-                                                    @else
-                                                    <div class="text-center">
-                                                        <span class="text-center bg-warning badge">En attente de validation</span>
-                                                    </div>
-                                                    @endif
+                                                        @if(IsThisVenteUpdateDemandeAlreadyValidated($vente))
+                                                        <a class="dropdown-item bg-warning" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Modifier maintenant</a>
+                                                        @else
+                                                        <div class="text-center">
+                                                            <span class="text-center bg-warning badge">En attente de validation</span>
+                                                        </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </div>
@@ -337,6 +328,9 @@
     function charger(id) {
         axios.get("{{env('APP_BASE_URL')}}ventes/detailVente/" + id).then((response) => {
             var ventes = response.data
+
+            console.log(ventes);
+
             $('#detailVente tbody').empty();
             $.each(ventes, function(i, data) {
                 var newRow = $('<tr><td class="text-center">' + (i + 1) + '</td><td class="text-center">' + data.codeBC + '</td><td class="text-center">' + data.code + '</td><td class="text-center">' + data.immatriculationTracteur + '</td><td class="text-center">' + data.nom + ' ' + data.prenom + ' <b>( ' + data.bl + ' )</b> ' + '</td><td class="text-center">' + data.qteVendu + '</td><td class="text-center">' + data.destination + '</td></td><td class="text-center">' + data.libelle + '</td></tr>');
