@@ -486,10 +486,11 @@ class VenteController extends Controller
 
     public function delete(Vente $vente)
     {
+        // dd($vente->user->id,Auth::user()->id);
         if (Auth::user()->id == $vente->user->id) {
             return view('ventes.delete', compact('vente'));
         } else {
-            Session()->flash('error', 'Vos n\'êtes eligible à une suppression.');
+            Session()->flash('error', 'Vos n\'êtes eligible à une suppression. Cette vente n evous appartient pas!');
             return redirect()->route('ventes.index');
         }
     }
@@ -1059,11 +1060,6 @@ class VenteController extends Controller
             if (IsThisVenteUpdateDemandeOnceMade($vente)) {
                 $products = Produit::all();
                 $clients = Client::all();
-                // $commendeClients = CommandeClient::all();
-
-                ####____SI LA DEMANDE A ETE MODIFIEE UNE FOIS
-                // dd(IsThisVenteUpdateDemandeAlreadyModified($vente));
-                // if (IsThisVenteUpdateDemandeAlreadyModified($vente)) {
 
                 ####____SI LA DEMANDE MODIFIEE N'EST PAS ACTUELLEMENT VALIDEE
                 if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
@@ -1073,10 +1069,7 @@ class VenteController extends Controller
 
                 #####____SI C'ETS VALIDEE ON PASSE A LA MODIFICATION VRAIE
                 return view("ventes.updateVente", compact("vente", "clients", "products")); ##  redirect()->back()->with("error", "Vous avez déjà éffectuée cette requête! Vous ne pouvez la refaire à nouveau");
-                // };
 
-                ####____QUAND LA COMMANDE N'EST PAS VALIDEE
-                return redirect()->back()->with("error", "Désolé! Cette demande de modification a déjà été effectuée mais n'est pas encore validéé! Veuillez bien attendre sa validation");
             } else {
 
                 #####________Faire une demande
@@ -1137,7 +1130,6 @@ class VenteController extends Controller
             return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
         }
 
-        // dd($request->bl);
         ####___faire une validation ici avant de continuer
 
         ####____REFORMATTAGE DES DATAS
@@ -1164,7 +1156,6 @@ class VenteController extends Controller
         ]);
 
         ####____ON BLOQUE A NOUVEAU L'ACCES
-        // dd($vente->_updateDemandes);
         $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id])->get()->last();
         $venteUpdateDemande->valide = false;
         $venteUpdateDemande->modified = true;
@@ -1172,9 +1163,6 @@ class VenteController extends Controller
 
         ###___
         return redirect("/ventes/index")->with("message", "Vente modifiée avec succès!");
-
-        // return redirect()->back()->with("message", "Vente modifiée avec succès!");
-        // return redirect('/ventes/index')->with("message", "Demande de modification de vente effectuée avec succès! Patientez en attendant que la réquête soit traitée et validée!");
     }
 
     #####________VENTES VALIDATIONS
@@ -1223,15 +1211,14 @@ class VenteController extends Controller
             # quand la demande a déjà été faite
             if (IsThisVenteDeleteDemandeOnceMade($vente)) {
 
-                ####____SI LA DEMANDE A ETE VALIDEE
-                if (IsThisVenteDeleteDemandeAlreadyValidated($vente)) {
-                    ###__une redirection vers la page de suppression de la vente
+                ####____SI LA DEMANDE SUPPRIMEE N'EST PAS ACTUELLEMENT VALIDEE
+                if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+                    #####________ECRIRE A NOUVEAU UNE DEMANDE DE SUPPRESSION
+                    return view("ventes.askDeleteVente", compact('vente'));
+                }
 
-                    return view('ventes.delete', compact('vente'));
-                };
-
-                ####____QUAND LA COMMANDE N'EST PAS VALIDEE
-                return redirect()->back()->with("error", "Désolé! Cette demande de modification a déjà été effectuée mais n'est pas encore validéé! Veuillez bien attendre sa validation");
+                #####____SI C'ETS VALIDEE ON PASSE A LA SUPPRESSION VRAIE
+                return view('ventes.delete', compact('vente'));
             } else {
 
                 #####________Faire une demande
@@ -1299,6 +1286,7 @@ class VenteController extends Controller
     public function venteDeleteValidation(Request $request)
     {
         if ($request->method() == "POST") {
+            // dd($request->demand);
             $demand = VenteDeleteDemand::find($request->demand);
             if (!$demand) {
                 return redirect()->back()->with("error", "Cette demande de modification n'existe pas!");
@@ -1312,15 +1300,7 @@ class VenteController extends Controller
         }
 
         ####___
-        // $venteDeleteDemands  = [];
-        $venteDeleteDemands = VenteDeleteDemand::where("deleted", false)->OrderBy("valide", "asc")->get();
-
-        // RECUPERONS UNIQUEMENT LES DEMANDE DONT LA VENTE EXISTE ENCORE DANS LA DB
-        // foreach ($demands as $key => $demand) {
-        //     if ($demand->_Vente) {
-        //         $venteDeleteDemands[] = $demand;
-        //     }
-        // }
+        $venteDeleteDemands = VenteDeleteDemand::OrderBy("valide", "asc")->get();
 
         return view("ventes.venteDeleteDemand", compact("venteDeleteDemands"));
     }

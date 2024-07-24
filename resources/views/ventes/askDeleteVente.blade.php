@@ -67,7 +67,7 @@
 
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <label for="">Raison de cette modification <span class="text-danger">*</span> </label>
+                                        <label for="">Raison de cette suppression <span class="text-danger">*</span> </label>
                                         <textarea name="raison" rows="1" id="" class="form-control @error('error') is-valid @enderror" value="{{old('raison')}}"></textarea>
 
                                         @error('raison')

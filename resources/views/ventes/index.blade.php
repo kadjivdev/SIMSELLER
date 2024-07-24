@@ -112,6 +112,7 @@
                                     <?php $TotalMontant = $TotalMontant + $vente->montant; ?>
 
                                     <tr>
+
                                         <td>{{ $vente->code }}</td>
                                         @if(Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true)
                                         <td>{{!$vente->commandeclient->byvente ?  $vente->commandeclient->code : '' }}</td>
@@ -211,16 +212,14 @@
 
                                                     <small class="d-block"> <b>SUPPRESSION</b> </small>
                                                     <!-- SUPPRESSION -->
-                                                    @if(!IsThisVenteDeleteDemandeOnceMade($vente) || IsThisVenteDeleteDemandeAlreadyModified($vente))
+                                                    @if(!IsThisVenteDeleteDemandeOnceMade($vente) || (!IsThisVenteDeleteDemandeAlreadyValidated($vente) && IsThisVenteDeleteDemandeAlreadyModified($vente)))
                                                     <a class="dropdown-item bg-warning btn btn-sm" target="_blank" href="{{route('ventes.askDeleteVente',$vente->id)}}"><i class="fa-solid fa-trash-can"></i>Demande de suppression </a>
-                                                    @else
-                                                    @if(IsThisVenteDeleteDemandeAlreadyValidated($vente))
+                                                    @elseif(IsThisVenteDeleteDemandeAlreadyValidated($vente))
                                                     <a class="dropdown-item bg-danger btn btn-sm" target="_blank" href="{{route('ventes.delete',$vente->id)}}"><i class="fa-solid fa-trash-can"></i>Supprimer maintenant</a>
                                                     @else
                                                     <div class="text-center">
                                                         <span class="text-center bg-warning badge">En attente de validation</span>
                                                     </div>
-                                                    @endif
                                                     @endif
                                                 </div>
                                             </div>

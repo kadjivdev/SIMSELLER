@@ -599,6 +599,8 @@ class EditionController extends Controller
     }
     public function postEtatReglementPeriode(Request $request)
     {
+        // dd("gogo");
+
         //Prévoir le validator
         $banque = Banque::find($request->banque);
         $zone = Zone::find($request->zone);
@@ -624,6 +626,7 @@ class EditionController extends Controller
                     'ventes.code as code_vente',
                     'ventes.montant as montant_vente',
                     'reglements.date',
+                    'reglements.reference as reference',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
                     'reglements.montant as montant_reglement',
@@ -636,6 +639,8 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.id')
                 ->get();
             $nbre = count($reglements);
+
+            // dd($reglements);
             return redirect()->route('edition.etatReglementperiode')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'zone' => $zone, 'banque' => $banque, 'debut' => $request->debut, 'fin' => $request->fin]);
         }
 
@@ -658,6 +663,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
@@ -690,6 +696,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
@@ -723,6 +730,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
