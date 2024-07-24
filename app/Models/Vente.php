@@ -63,7 +63,8 @@ class Vente extends Model
         return $this->hasMany(UpdateVente::class,'vente');
     }
 
-    // function _detailBonDeCommande() : Returntype {
-        
-    // }
+    ####___DEMANDES DE SUPPRESSION
+    public function _deleteDemandes(){
+        return $this->hasMany(VenteDeleteDemand::class,'vente');
+    }
 }

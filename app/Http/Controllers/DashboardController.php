@@ -14,6 +14,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        ###___VALIDER TOUTES LES VENTES
+        // foreach (Vente::all() as $vente) {
+        //     $vente->valide=true;
+        //     $vente->save();
+        // }
         // QUAND C'EST NI UN ADMINISTRATEUR, NI UN CONTROLEUR ,NI UN VALIDATEUR,NI UN SUPERVISEUR
         if (!Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) {
             // QUAND C'EST UN GESTIONNAIRE, COMPTABLE ,VALIDATEUR

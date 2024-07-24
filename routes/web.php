@@ -167,11 +167,15 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::get('/destroy/{vente}', 'destroy')->name('ventes.destroy');
 
-            ###_____
+            ###_____UPDATE DE VENTE
             Route::match(["GET", "POST"], '/askUpdateVente/{vente?}', 'askUpdateVente')->name('ventes.askUpdateVente');
             Route::post('/updateVente/{vente?}', '_updateVente')->name('ventes.updateVente');
-
             Route::match(['GET', "POST"], '/ventes/validation/', 'Validation')->name('ventes.validation');
+
+            ###_____DELETE DE VENTE
+            Route::match(["GET", "POST"], '/askDeleteVente/{vente?}', 'askDeleteVente')->name('ventes.askDeleteVente');
+            Route::post('/deleteVente/{vente?}', '_deleteVente')->name('ventes.deleteVente');
+            Route::match(['GET', "POST"], '/ventes/deleteValidation/', 'venteDeleteValidation')->name('ventes.deleteValidation');
         });
     });
 

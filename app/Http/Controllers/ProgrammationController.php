@@ -146,6 +146,7 @@ class ProgrammationController extends Controller
 
     public function create(DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
+        // dd("goog");
         $boncommandes = BonCommande::orderByDesc('code')->get();
         $zones = Zone::all();
         $camions = Camion::all();

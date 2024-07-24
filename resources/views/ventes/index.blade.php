@@ -197,16 +197,30 @@
                                                     <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
                                                     @endif
 
-                                                    @if(!IsThisVenteUpdateDemandeOnceMade($vente) || IsThisVenteUpdateDemandeAlreadyModified($vente))
-                                                    <a class="dropdown-item bg-primary" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Demande de modification </a>
+                                                    <small class="d-block"> <b>MODIFICATION</b> </small>
+                                                    <!-- MODIFICATION -->
+                                                    @if(!IsThisVenteUpdateDemandeOnceMade($vente) ||(!IsThisVenteUpdateDemandeAlreadyValidated($vente) && IsThisVenteUpdateDemandeAlreadyModified($vente)) )
+                                                    <a class="dropdown-item bg-primary btn btn-sm" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Demande de modification </a>
+                                                    @elseif(IsThisVenteUpdateDemandeAlreadyValidated($vente))
+                                                    <a class="dropdown-item bg-warning btn btn-sm" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Modifier maintenant</a>
                                                     @else
-                                                        @if(IsThisVenteUpdateDemandeAlreadyValidated($vente))
-                                                        <a class="dropdown-item bg-warning" target="_blank" href="{{route('ventes.askUpdateVente',$vente->id)}}"><i class="bi bi-pencil-fill"></i>Modifier maintenant</a>
-                                                        @else
-                                                        <div class="text-center">
-                                                            <span class="text-center bg-warning badge">En attente de validation</span>
-                                                        </div>
-                                                        @endif
+                                                    <div class="text-center">
+                                                        <span class="text-center bg-warning badge">En attente de validation</span>
+                                                    </div>
+                                                    @endif
+
+                                                    <small class="d-block"> <b>SUPPRESSION</b> </small>
+                                                    <!-- SUPPRESSION -->
+                                                    @if(!IsThisVenteDeleteDemandeOnceMade($vente) || IsThisVenteDeleteDemandeAlreadyModified($vente))
+                                                    <a class="dropdown-item bg-warning btn btn-sm" target="_blank" href="{{route('ventes.askDeleteVente',$vente->id)}}"><i class="fa-solid fa-trash-can"></i>Demande de suppression </a>
+                                                    @else
+                                                    @if(IsThisVenteDeleteDemandeAlreadyValidated($vente))
+                                                    <a class="dropdown-item bg-danger btn btn-sm" target="_blank" href="{{route('ventes.delete',$vente->id)}}"><i class="fa-solid fa-trash-can"></i>Supprimer maintenant</a>
+                                                    @else
+                                                    <div class="text-center">
+                                                        <span class="text-center bg-warning badge">En attente de validation</span>
+                                                    </div>
+                                                    @endif
                                                     @endif
                                                 </div>
                                             </div>

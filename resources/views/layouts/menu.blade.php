@@ -181,6 +181,45 @@
                         @endif
                     </ul>
                 </li>
+
+                <!--  -->
+                @if(Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                <li class="nav-item {{request()->route()->getPrefix() == '/ventes' ? 'menu-open':''}}">
+                    <a href="#" class="nav-link {{request()->route()->getPrefix() == '/ventes/*' ? 'active':''}}">
+                        <i class="nav-icon fas fa-solid fa-hand-holding-dollar"></i>
+                        <p>
+                            Modification & Suppression
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{route('ventes.validation')}}" class="nav-link">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-dollar text-cyan"></i>
+                                <p>
+                                    Modification en attente
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{route('ventes.deleteValidation')}}" class="nav-link">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-dollar text-cyan"></i>
+                                <p>
+                                    Suppression en attente
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                @endif
+
+
+
                 @endif
 
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
@@ -572,16 +611,6 @@
                 </li>
                 @endif
 
-                @if(Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
-                <li class="nav-header">Demande de modification</li>
-                <a href="{{route('ventes.validation')}}" class="nav-link">
-                    <i class="nav-icon fas fa-solid fa-users-gear"></i>
-                    <p>
-                        Demande en attente
-                        <i class="right fas fa-angle-left"></i>
-                    </p>
-                </a>
-                @endif
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>MODIFICATION D'UNE VENTE</h1>
+                    <h1>DEMANDE DE SUPPRESION D'UNE VENTE</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -25,14 +25,13 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        @if(session()->has("message"))
+                        @if($message = session('message'))
                         <div class="alert alert-success alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                             <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{session()->get("message") }}
+                            {{ $message }}
                         </div>
                         @endif
-
                         @if($message = session('error'))
                         <div class="alert alert-danger alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -55,98 +54,37 @@
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="">
-                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}} </li>
+                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->payeur->nom}} {{$vente->payeur->prenom}} {{$vente->payeur->sigle}} </li>
                                         <li class="nav-item"> <b> <var>Reponsable de la vente: </var></b> {{$vente->user->name}} </li>
-                                        <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit?$vente->produit->libelle:""}} </li>
+                                        <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit->libelle}} </li>
                                         <li class="nav-item"> <b> <var>Vente Type: </var></b> {{$vente->typeVente->libelle}} </li>
                                     </ul>
                                 </div>
                             </div>
                             <br>
-                            <form action="{{route('ventes.updateVente',$vente)}}" method="POST" enctype="multipart/form-data">
+                            <form action="{{route('ventes.askDeleteVente',$vente)}}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" name="vente" value="{{$vente->id}}">
+
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="">Bordereau de Livraison</label>
+                                        <label for="">Raison de cette modification <span class="text-danger">*</span> </label>
+                                        <textarea name="raison" rows="1" id="" class="form-control @error('error') is-valid @enderror" value="{{old('raison')}}"></textarea>
 
-                                            <?php
-                                            $bl = NULL;
-
-                                            foreach ($vente->vendus as $vendu) {
-
-                                                $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
-
-                                                if ($_bl) {
-                                                    $bl = $_bl;
-                                                }
-                                            }
-                                            ?>
-
-                                            <!--  -->
-                                            <input type="text" value="{{$bl}}" name="bl" class="form-control">
-                                            @error('bl')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
-
-                                        <div class="form-group mb-3">
-                                            <label for="">Qte totale </label>
-                                            <input type="text" value="{{$vente->qteTotal}}" name="qteTotal" class="form-control">
-                                            @error('raison')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
+                                        @error('raison')
+                                        <span class="text-danger">{{$message}} </span>
+                                        @enderror
                                     </div>
                                     <div class="col-md-6">
+                                        <label for="">Fiche d'autorisation validée par madame <span class="text-danger">*</span> </label>
+                                        <input type="file" value="{{old('prouve_file')}}" name="prouve_file" class="form-control @error('error') is-valid @enderror" id="">
 
-                                        <div class="form-group mb-3">
-                                            <label for="">Produit </label>
-                                            <select class="form-control form-control-sm select2" id="" name="produit">
-                                                <option class="text-center" value="{{$vente->produit?$vente->produit->id:''}}" selected>{{$vente->produit?$vente->produit->libelle:""}}</option>
-                                                @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('produit')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
-
-                                        <div class="form-group mb-3">
-                                            <label for="">Clients</label>
-                                            <select id="client" class="form-control form-control-sm select2" name="client_id">
-                                                <option value="{{$vente->payeur->id}}" class="text-center" selected>{{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}}</option>
-                                                @foreach($clients as $client)
-                                                <option value="{{$client->id}}">
-                                                    {{ $client->raisonSociale }}
-                                                </option>
-                                                @endforeach
-                                            </select>
-                                            @error('client_id')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
-
+                                        @error('prouve_file')
+                                        <span class="text-danger">{{$message}} </span>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-group mb-3">
-                                            <p class="text-center">
-                                                <label for="">P.U</label>
-                                            </p>
-                                            <input type="text" class="form-control" value="{{$vente->pu}}" name="pu">
-
-                                            @error('pu')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-sm btn-success w-100 text-uppercase">Modifier</button>
                                 <br>
+                                <button type="submit" class="btn btn-sm btn-primary w-100 text-uppercase">Soumettez</button>
                             </form>
                         </div>
                         <!-- /.card-body -->
@@ -387,6 +325,15 @@
                 }
             },
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        $('#example2').DataTable({
+            "paging": true,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+        });
     });
 </script>
 @endsection
