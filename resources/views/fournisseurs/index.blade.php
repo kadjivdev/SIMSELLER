@@ -61,9 +61,9 @@
                                             <th>Catégorie</th>
                                             <th>Adresse</th>
                                             
-                                            @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                                            <!-- if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())) -->
                                             <th>Actualisation</th>
-                                            @endif
+                                            <!-- endif -->
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -85,15 +85,15 @@
                                                     <td>{{ $fournisseur->email }}</td>
                                                     <td>{{ $fournisseur->categoriefournisseur->libelle }}</td>
                                                     <td>{{ $fournisseur->adresse }}</td>
-                                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                                                     <td class="text-center" width="130">
                                                         <a class="btn btn-success btn-sm" href="{{ route('fournisseurs.show', ['id'=>$fournisseur->id]) }}"><i class="fa-regular fa-eye"></i></a>
+                                                        @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                                                         <a class="btn btn-warning btn-sm" href="{{ route('fournisseurs.edit', ['id'=>$fournisseur->id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>
                                                         <a class="btn btn-danger btn-sm" href="{{ route('fournisseurs.delete', ['id'=>$fournisseur->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
+                                                        @endif
                                                         <!--<a class="btn btn-secondary btn-sm" href=""><i class="fa-solid fa-bed"></i></a>
                                                         <a class="btn btn-primary btn-sm" href=""><i class="fas fa-running"></i></a>-->
                                                     </td>
-                                                    @endif
                                                 </tr>
                                             @endforeach
                                         @endif
@@ -108,9 +108,9 @@
                                             <th>E-mail</th>
                                             <th>Catégorie</th>
                                             <th>Adresse</th>
-                                            @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                                            <!-- if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())) -->
                                             <th>Actualisation</th>
-                                            @endif
+                                            <!-- endif -->
                                         </tr>
                                         </tfoot>
                                     </table>

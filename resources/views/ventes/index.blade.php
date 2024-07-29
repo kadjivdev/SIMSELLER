@@ -114,7 +114,7 @@
                                     <tr>
                                         <td>{{ $vente->code }}</td>
                                         @if(Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true)
-                                        <td>{{!$vente->commandeclient->byvente ?  $vente->commandeclient->code : '' }}</td>
+                                        <td>{{!$vente->commandeclient->byvente ?  $vente->commandeclient->code : '---' }}</td>
                                         @endif
                                         <td class="text-center">
                                             @foreach ( $vente->vendus as $vendu )

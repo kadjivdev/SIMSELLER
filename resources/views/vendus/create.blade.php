@@ -458,6 +458,7 @@
                 $('#loader').removeAttr('hidden')
                 $('#bl option').removeAttr('selected');
                 $('#bl').empty();
+                
                 axios.get('{{env('APP_BASE_URL')}}programmation/produits/' + $('#produit').val() + '/'+ user).then((response) => {
                     var programmation = response.data;
                     console.log(programmation);

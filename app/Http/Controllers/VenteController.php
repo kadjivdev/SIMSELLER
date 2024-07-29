@@ -18,10 +18,13 @@ use App\Models\Parametre;
 use App\Models\TypeCommande;
 use Illuminate\Http\Request;
 use App\Models\CommandeClient;
+use App\Models\DetailBonCommande;
 use App\Models\filleuil;
 use App\Models\Fournisseur;
 use App\Models\Produit;
+use App\Models\Programmation;
 use App\Models\UpdateVente;
+use App\Models\Vendu;
 use App\Models\VenteDeleteDemand;
 use App\tools\ControlesTools;
 use Illuminate\Contracts\Session\Session;
@@ -485,7 +488,6 @@ class VenteController extends Controller
 
     public function delete(Vente $vente)
     {
-        // dd($vente->user->id,Auth::user()->id);
         if (Auth::user()->id == $vente->user->id) {
             return view('ventes.delete', compact('vente'));
         } else {
@@ -523,7 +525,6 @@ class VenteController extends Controller
             $venteDeleteDemande->deleted = true;
             $venteDeleteDemande->save();
         }
-
 
         #####___
         Session()->flash('message', 'Vente supprimée avec succès.');
@@ -1130,6 +1131,8 @@ class VenteController extends Controller
     }
 
     ####____UPDATE VENTE TRULLY
+    ####____ ON MODIFIE LA VENTE SEULEMENT POUR UNE PROGRAMMATION DONNEE
+    ####_____(il faut donc preciser la programmation concernée)
     function _updateVente(Request $request)
     {
         $vente = Vente::findOrFail($request->vente);
@@ -1146,28 +1149,44 @@ class VenteController extends Controller
 
         ####___faire une validation ici avant de continuer
 
+        $request->validate([
+            "pu"=>["numeric"],
+            "qteTotal"=>["numeric"],
+            "produit"=>["numeric"],
+        ]);
+
         ####____REFORMATTAGE DES DATAS
         $pu = $request->pu ? $request->pu : $vente->pu; ## $vente->pu;
         $qteTotal = $request->qteTotal ? $request->qteTotal : $vente->qteTotal;
         $montant = $pu * $qteTotal;
         $produit_id = $request->produit ? $request->produit : $request->produit_id;
-        $bl = $request->bl;
         $client = $request->client_id ? $request->client_id : $vente->client_id;
+        $programmation_id = $request->programmation_id;
 
-        ###___ON VA PLUS MODIFIER LES BL AU COUR D'UNE MODIFICATION DE VENTE(ça se fera plutot dans la gestion des programmations)
-        foreach ($vente->vendus as $vendu) {
-            // $vendu->programmation->update(["bl_gest" => $bl]);
+        // dd($programmation_id);
+
+        ###___MODIFICATION DU VENDU
+        $vendu = Vendu::where(["vente_id" => $vente->id, "programmation_id" => $programmation_id])->first();
+
+        // dd($vendu);
+        if ($vendu) {
+            $vendu->update([
+                "qteTotal" => $qteTotal,
+                "pu" => $pu
+            ]);
         }
 
-        $vente->commandeclient->update(["client_id" => $client]);
+        ###___MODIFICATION DE LA COMMANDE CLIENT (si la modification touche le client)
+        if ($request->client_id) {
+            $vente->commandeclient->update(["client_id" => $client]);
+        }
 
-        ###_____
+        ###_____MODIFICATION DE LA VENTE EN REEL
         $vente->update([
             "qteTotal" => $qteTotal,
             "montant" => $montant,
             "produit_id" => $produit_id,
             "pu" => $pu,
-            // "ctl_payeur"=>$client,
         ]);
 
         ####____ON BLOQUE A NOUVEAU L'ACCES
