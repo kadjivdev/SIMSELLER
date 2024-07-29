@@ -63,12 +63,91 @@
                                 </div>
                             </div>
                             <br>
+                            <form action="{{route('ventes.updateVente',$vente)}}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <input type="hidden" name="vente" value="{{$vente->id}}">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="">Bordereau de Livraison</label>
 
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <h4 class="text-center">Disponible bientôt!</h4>
+                                            <?php
+                                            $bl = NULL;
+
+                                            foreach ($vente->vendus as $vendu) {
+
+                                                $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
+
+                                                if ($_bl) {
+                                                    $bl = $_bl;
+                                                }
+                                            }
+                                            ?>
+
+                                            <!--  -->
+                                            <input type="text" value="{{$bl}}" name="bl" class="form-control">
+                                            @error('bl')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label for="">Qte totale </label>
+                                            <input type="text" value="{{$vente->qteTotal}}" disabled name="qteTotal" class="form-control">
+                                            @error('raison')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <div class="form-group mb-3">
+                                            <label for="">Produit </label>
+                                            <select class="form-control form-control-sm select2" disabled id="" name="produit">
+                                                <option class="text-center" value="{{$vente->produit?$vente->produit->id:''}}" selected>{{$vente->produit?$vente->produit->libelle:""}}</option>
+                                                @foreach($products as $product)
+                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('produit')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="form-group mb-3">
+                                            <label for="">Clients</label>
+                                            <select id="client" class="form-control form-control-sm select2" name="client_id">
+                                                <option value="{{$vente->payeur->id}}" class="text-center" selected>{{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}}</option>
+                                                @foreach($clients as $client)
+                                                <option value="{{$client->id}}">
+                                                    {{ $client->raisonSociale }}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                            @error('client_id')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+
+                                    </div>
                                 </div>
-                            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-group mb-3">
+                                            <p class="text-center">
+                                                <label for="">P.U</label>
+                                            </p>
+                                            <input type="text" class="form-control" value="{{$vente->pu}}" name="pu">
+
+                                            @error('pu')
+                                            <span class="text-danger">{{$message}} </span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-success w-100 text-uppercase">Modifier</button>
+                                <br>
+                            </form>
                         </div>
                         <!-- /.card-body -->
                     </div>

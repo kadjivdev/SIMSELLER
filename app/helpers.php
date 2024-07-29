@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Vente;
+
 function IsThisVenteUpdateDemandeOnceMade($vente)
 {
     $demand = $vente->_updateDemandes->last();
@@ -98,4 +100,15 @@ function IsThisVenteDeleteDemandeAlreadyModified($vente)
     }
     ####__else
     return false;
+}
+
+function GetVenteTraitedDateViaCode($venteCode)
+{
+    $vente = Vente::where("code", $venteCode)->first();
+
+    if (!$vente->traited_date) {
+        return null;
+    }
+    $date = $vente->traited_date ? date("d/m/Y H:m:s", strtotime($vente->traited_date)) : null;
+    return $date;
 }

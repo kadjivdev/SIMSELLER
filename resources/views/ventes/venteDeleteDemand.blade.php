@@ -55,7 +55,7 @@
                                 <tbody class="table-body">
                                     @if (count($venteDeleteDemands) > 0)
                                     @foreach($venteDeleteDemands as $demand)
-                                    @if(!$demand->modified)
+                                    @if(!$demand->deleted)
                                     <tr style="align-items: center;">
                                         <td>{{ $loop->index +1 }}</td>
                                         <td>
@@ -68,13 +68,12 @@
                                         <td>{{$demand->_Demandeur->name}}</td>
                                         <td>
                                             @if($demand->valide)
-                                            <span class="bg-success text-white p-1">Validé</span>
-                                            @else
-                                            @if($demand->modified)
-                                            <span class="bg-success text-white p-1">Déjà modifiée</span>
+                                            <span class="bg-success text-white p-1">Validé</span> &nbsp;
+                                            @if($demand->deleted)
+                                            <span class="bg-success text-white p-1">Déjà Supprimée</span>
+                                            @endif
                                             @else
                                             <span class="bg-warning text-white p-1">En attente</span>
-                                            @endif
                                             @endif
                                         </td>
                                         <td class="text-center">
@@ -90,7 +89,7 @@
                                             <form id="update_form" action="{{route('ventes.deleteValidation')}}" method="post">
                                                 @csrf
                                                 <input type="text" name="demand" value="{{$demand->id}}" hidden>
-                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->modified) disabled @endif >Valider</button>
+                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->deleted) disabled @endif >Valider</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -98,8 +97,8 @@
                                     @endforeach
 
                                     @foreach($venteDeleteDemands as $demand)
-                                    @if($demand->modified)
-                                    <tr class="bg-dark" style="align-items: center;" >
+                                    @if($demand->deleted)
+                                    <tr class="bg-dark" style="align-items: center;">
                                         <td>{{ $loop->index +1 }}</td>
                                         <td>
                                             @if($demand->_Vente)
@@ -110,18 +109,10 @@
                                         </td>
                                         <td>{{$demand->_Demandeur->name}}</td>
                                         <td>
-                                            @if($demand->valide)
-                                            <span class="bg-success text-white p-1">Validé</span>
-                                            @else
-                                            @if($demand->modified)
-                                            <span class="bg-success text-white p-1">Déjà modifiée</span>
-                                            @else
-                                            <span class="bg-warning text-white p-1">En attente</span>
-                                            @endif
-                                            @endif
+                                            <span class="bg-success text-white p-1">Déjà Supprimée</span>
                                         </td>
                                         <td class="text-center">
-                                            <textarea name="" class="form-control" rows="1" id="">{{$demand->raison}}
+                                            <textarea name="" class="form-control" rows="2" id="">{{$demand->raison}}
                                             </textarea>
                                         </td>
                                         <td class="text-center">
@@ -133,7 +124,8 @@
                                             <form id="update_form" action="{{route('ventes.deleteValidation')}}" method="post">
                                                 @csrf
                                                 <input type="text" name="demand" value="{{$demand->id}}" hidden>
-                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->modified) disabled @endif >Valider</button>
+                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->deleted) disabled @endif >Valider</button>
+
                                             </form>
                                         </td>
                                     </tr>
@@ -187,7 +179,9 @@
             "autoWidth": false,
             "buttons": ["excel", "pdf", "print"],
             "pageLength": 15,
-            "order": [[6, 'desc']],
+            "order": [
+                [6, 'desc']
+            ],
             "columnDefs": [{
                     "targets": 5,
                     "orderable": false

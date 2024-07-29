@@ -46,6 +46,7 @@ class CompteClientController extends Controller
         $typedetailrecus = TypeDetailRecu::all();
         return view('compteClients.appro', compact('client', 'comptes', 'typedetailrecus'));
     }
+    
     public function postAppro(Request $request, Client $client)
     {
         try {

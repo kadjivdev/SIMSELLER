@@ -32,6 +32,7 @@ class VenduDoublonProduitStokValide implements Rule
     {
         $vendu = Vendu::where('programmation_id',$this->programmation_id)->where('vente_id',$this->vente_id)->first();
         //Contrôle de doublon
+
         if($vendu){
             $this->messageText = 'Doublon! Ce produit est déjà dans la liste vente en cours';
             return false;

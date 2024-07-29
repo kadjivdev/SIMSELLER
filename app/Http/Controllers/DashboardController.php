@@ -19,9 +19,16 @@ class DashboardController extends Controller
         //     $vente->valide=true;
         //     $vente->save();
         // }
+        
         // QUAND C'EST NI UN ADMINISTRATEUR, NI UN CONTROLEUR ,NI UN VALIDATEUR,NI UN SUPERVISEUR
-        if (!Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) {
-            // QUAND C'EST UN GESTIONNAIRE, COMPTABLE ,VALIDATEUR
+        if (!Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() &&  !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()  && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) {
+            
+            ###___CONTROLLEUR DE VENTE
+            if (Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists()) {
+                return redirect()->route('ventes.venteAEnvoyerComptabiliser');
+            }
+            
+            // QUAND C'EST UN GESTIONNAIRE, COMPTABLE ,VALIDATEUR OU CONTROLLEUR DE VENTE
             if (Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists()) {
                 return redirect()->route("boncommandes.index");
             };

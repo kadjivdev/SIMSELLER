@@ -142,11 +142,8 @@ class ProgrammationController extends Controller
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }
 
-
-
     public function create(DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
-        // dd("goog");
         $boncommandes = BonCommande::orderByDesc('code')->get();
         $zones = Zone::all();
         $camions = Camion::all();
@@ -157,8 +154,6 @@ class ProgrammationController extends Controller
         $total = number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
         return view('programmations.create', compact('detailboncommande', 'boncommandes', 'zones', 'avaliseurs', 'camions', 'chauffeurs', 'programmations', 'programmation', 'total'));
     }
-
-
 
     public function store(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
@@ -357,7 +352,9 @@ class ProgrammationController extends Controller
                     INNER JOIN avaliseurs ON programmations.avaliseur_id = avaliseurs.id
                     INNER JOIN zones ON programmations.zone_id = zones.id
                     WHERE programmations.id = ?
-                    ", [$programmation->id,]);
+                    ", [$programmation->id,]
+                );
+
                 $destinataire = [
                     'nom' => $zone->representant->nom . ' ' . $zone->representant->prenom,
                     'email' => $zone->representant->email

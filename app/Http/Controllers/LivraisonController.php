@@ -583,12 +583,19 @@ class LivraisonController extends Controller
         ]);
     }
 
+    public function getTransfertPage(Request $request, Programmation $programmation)
+    {
+        $zone = Zone::find($programmation->zone_id);
+        $zones = Zone::all();
+        return view("livraisons.transfertCamion", compact("programmation", "zones", "zone"));
+    }
+
     public function transfertLivraison_redirect(Request $request)
     {
-        // dd($request->get("programmation"));
-        // dd($request->all());
-        $programmation = Programmation::find($request->get("programmation"));
-        // dd($programmation);
+        ###____
+        $prog_id = $request->get("prog") ? $request->get("prog") : $request->get("programmation");
+
+        $programmation = Programmation::find($prog_id);
 
         $user = Auth::user();
         $gestionnaire = Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists();
@@ -601,7 +608,7 @@ class LivraisonController extends Controller
         }
 
         if (($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == false) || ($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == null)) {
-            session()->flash("message", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est en déjà en cours de vente.");
+            session()->flash("message", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est déjà en cours de vente.");
             return back()/* redirect()->route("livraisons.index") */;
         }
 
@@ -659,7 +666,9 @@ class LivraisonController extends Controller
         $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programme->avaliseur->email ? [$programme->avaliseur->email] : [], $programme, $lienAction);
         Mail::send($mail);
 
-        return redirect()->back()->with('message', 'Programme transferé avec succès!');
+        // return redirect()->back()->with('message', 'Programme transferé avec succès!');
+
+        return redirect()->back()->with("message", 'Programme transferé avec succès!');
     }
 
     public function livraisonPeriode(Request $request)

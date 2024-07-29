@@ -24,15 +24,31 @@ class ProgrammeController extends Controller
         return response($camion->chauffeur()->first());
     }
 
-    public function getProgrammationByProduitId(Produit $produit, User $user)
-    {
+    
+    // public function getProgrammationByProduitId(Produit $produit, User $user)
+    // {
+    //     $zones = $user->representant->zones->pluck('id')->toArray();
+    //     $detailboncommandes = DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
+    //     $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id', $zones)->with('camion')->get();
+    //     // $programmations = Programmation::with('camion')->get();
+    //     $newProgrammation = [];
+    //     foreach ($programmations as $programmation) {
+    //         $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
+    //         if ($qteVendu < $programmation->qtelivrer || (($programmation->qtelivrer < $programmation->qteprogrammer))) {
+    //             $newProgrammation[] = $programmation;
+    //         }
+    //     }
+    //     return response($newProgrammation);
+    // }
+
+    public function getProgrammationByProduitId(Produit $produit, User $user){
         $zones = $user->representant->zones->pluck('id')->toArray();
-        $detailboncommandes = DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
-        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id', $zones)->with('camion')->get();
+        $detailboncommandes =DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
+        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id',$zones)->with('camion')->get();
         $newProgrammation = [];
-        foreach ($programmations as $programmation) {
+        foreach ($programmations as $programmation){
             $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
-            if ($qteVendu < $programmation->qtelivrer) {
+            if($qteVendu < $programmation->qtelivrer || ($programmation->qtelivrer < $programmation->qteprogrammer)){
                 $newProgrammation[] = $programmation;
             }
         }
@@ -52,6 +68,15 @@ class ProgrammeController extends Controller
         $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
         return response(['programmation' => $programmation, 'zones' => $zones, 'zone_source' => $programmation->zone->libelle]);
     }
+
+    ####_____REDIRECTION VERS LA PAGE DE TRANSFERT
+    public function getProgrammationById_redirect(Request $request,$programmation)
+    {
+        $programmation = Programmation::find($programmation);
+        $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
+        return view("livraisons.transfertCamion", compact('programmation', 'zones'));
+    }
+
     public function getdetailTransfert($programmation)
     {
         $programmation = Programmation::find($programmation);
@@ -115,25 +140,11 @@ class ProgrammeController extends Controller
     public function bordLiv(Programmation $programmation, $bl, $user)
     {
         try {
-            // $rules = ['bl' => ['required', 'string', 'unique:programmations,bl_gest']];
-            $rules = ['bl' => ['required']];
+            $rules = ['bl' => ['required', 'string', 'unique:programmations,bl_gest']];
             $data = ['bl' => $bl];
             $validator = Validator::make($data, $rules);
             if ($validator->fails()) {
-                // return response('Le format du Bordereau de Livraison est invalide', 401);
-                return response('Le format du Bordereau de Livraison est invalide', 200);
-            }
-
-            $bl = $bl == "_@_" ? null : $bl;
-
-            // return response("Le bl est :$bl",200);
-
-            ###____VERIFIONS SI CE BL EXISTAIT DEJA DANS LA DB A L'EXCEPTION DES ANNULES
-            $programmation_bl_gest = Programmation::where("statut", "!=", 'Annuler')->where("bl_gest", $bl)->where("bl_gest","!=",null)->first();
-
-            if ($programmation_bl_gest) {
-                // return response('Le Bordereau de Livraison existe déjà', 401);
-                return response('Le Bordereau de Livraison existe déjà', 200);
+                return response('Le Bordereau de Livraison existe déjà', 401);
             }
 
             $historiques = $programmation->historiques;
@@ -155,8 +166,43 @@ class ProgrammeController extends Controller
             if ($update) {
                 return response('Bordereau de Livraison mise à jour', 200);
             } else {
-                // return response("La mise à jour à echouée. Merci de reprendre ou contacter l'admin", 401);
-                return response("La mise à jour à echouée. Merci de reprendre ou contacter l'admin", 200);
+                return response("La mise à jour à echouée. Merci de reprendre ou contacter l'admin", 401);
+            }
+        } catch (\Throwable $e) {
+
+            if (env('APP_DEBUG') == TRUE) {
+                return $e;
+            } else {
+                Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
+                return  response()->json('Error');;
+            }
+        }
+    }
+
+    public function bordLivBlNull(Programmation $programmation, $user)
+    {
+        try {
+            $bl = null;
+            $historiques = $programmation->historiques;
+            if (count($historiques) > 0) {
+                if (array_key_exists('BL_GEST', $historiques)) {
+                    $sortie = $historiques['BL_GEST'];
+                }
+            }
+            $itemesortie['user'] = $user;
+            $itemesortie['date'] = $programmation->dateSortie;
+            $itemesortie['update_at'] = date('d/m/y H:i');
+            $sortie[] = $itemesortie;
+            $historiques['dateSortie'] = $sortie;
+
+            $update = $programmation->update([
+                'bl_gest' => $bl,
+                'historiques' => json_encode($historiques)
+            ]);
+            if ($update) {
+                return response('Bordereau de Livraison mise à jour', 200);
+            } else {
+                return response("La mise à jour à echouée. Merci de reprendre ou contacter l'admin", 401);
             }
         } catch (\Throwable $e) {
 
@@ -180,5 +226,56 @@ class ProgrammeController extends Controller
             'comptabiliser' => 1
         ]);
         return response("Vente comptabilisé");
+    }
+
+    public function bordLivViaPost(Request $request, Programmation $programmation, $user)
+    {
+
+        ###___BON DE COMMANDE ASSOCIE
+        // dd($programmation->detailboncommande->boncommande);
+        // $bon_de_commande = $programmation->detailboncommande->boncommande;
+        // return $bon_de_commande->statut=="Valider";
+
+
+        $bl = $request->get('bl');
+        $rules = ['bl' => ['required', 'string', 'unique:programmations,bl_gest']];
+        $data = ['bl' => $bl];
+
+        ##___VALIDATION
+        Validator::make(
+            $data,
+            $rules,
+            [
+                'bl.required' => 'Le Bl est requis',
+                'bl.string' => 'Le Bl doit être un string',
+                'bl.unique' => 'Ce Bl existe déjà',
+            ]
+        )->validate();
+
+
+        $historiques = $programmation->historiques;
+        if (count($historiques) > 0) {
+            if (array_key_exists('BL_GEST', $historiques)) {
+                $sortie = $historiques['BL_GEST'];
+            }
+        }
+        $itemesortie['user'] = $user;
+        $itemesortie['date'] = $programmation->dateSortie;
+        $itemesortie['update_at'] = date('d/m/y H:i');
+        $sortie[] = $itemesortie;
+        $historiques['dateSortie'] = $sortie;
+
+        $update = $programmation->update([
+            'bl_gest' => $bl,
+            'historiques' => json_encode($historiques)
+        ]);
+
+        ###___
+        // Session()->flash('message', 'Bordereau de Livraison mise à jour');
+
+        if ($update) {
+            return redirect('/livraisons/suivi-camion')->with('message', 'Bordereau de Livraison mise à jour');
+        }
+        return redirect('/livraisons/suivi-camion')->with('error', 'Oooops! Mise à jour échouée!');
     }
 }

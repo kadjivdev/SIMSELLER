@@ -164,7 +164,8 @@
 
                                                         <td >
                                                             
-                                                            <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a>
+                                                            <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                                            <a target="_blank" href="{{route('livraisons.getTransfert',$programmation->id)}} "title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
                                                             <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
 
                                                             <a href="{{route('programmations.create', ['detailboncommande'=>$programmation->detail_bon_commande_id]) }}" target="_blank" class="btn btn-sm btn-primary mt-1">Gérer</a>
@@ -210,7 +211,8 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a>
+                                                                <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                                                <a target="_blank" href="{{route('livraisons.getTransfert',$programmation->id)}} "title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
                                                                 <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs" onclick="loadDetailTransfert({{$programmation->id}})"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
                                                                 <a href="{{route('programmations.create', ['detailboncommande'=>$programmation->detail_bon_commande_id]) }}" target="_blank" class="btn btn-sm btn-primary">Gérer</a>
                                                             
@@ -399,13 +401,15 @@
         }
 
         function handleBordLivChange(id, inputElement) {
-            const BLValue = inputElement.value;
+            const _BLValue = inputElement.value;
+
+            const BLValue = _BLValue?_BLValue:"_@_";
 
             // Récupérer le conteneur du message
             const messageContainer = inputElement.parentNode.querySelector('.message-container-bl');
 
             // Vérifier si la date est renseignée
-            if (BLValue) {
+            // if (BLValue) {
                 showLoader(messageContainer);
                 // Appeler l'API via Axios
                 axios.get(`{{env('APP_BASE_URL')}}programmation/livraison/bl/${id}/${BLValue}/`+"{{Auth::user()->name }}" )
@@ -413,19 +417,33 @@
                         // Afficher un message de succès
                         const successMessage = response.data
                       
+                        if(successMessage == 'Bordereau de Livraison mise à jour'){
                             showMessage(messageContainer, '<i class="fas fa-check-circle"></i>', successMessage, 'text-success');     
+                        }
+                        
+                        if(successMessage == "Le Bordereau de Livraison existe déjà"){
+                            showMessage(messageContainer, '<i class="fas fa-times-circle"></i>', successMessage, 'text-danger',false);
+                        }
+
+                        if(successMessage == "La mise à jour à echouée. Merci de reprendre ou contacter l'admin"){
+                            showMessage(messageContainer, '<i class="fas fa-times-circle"></i>', successMessage, 'text-danger',false);
+                        }
+
+                        if(successMessage == "Le format du Bordereau de Livraison est invalide"){
+                            showMessage(messageContainer, '<i class="fas fa-times-circle"></i>', successMessage, 'text-danger',false);
+                        }
                      
                     })
                     .catch(function (error) {
                         // Afficher un message d'erreur
-                        console.log( error.response.data);
-                        const errorMessage = error.response.data;
+                        console.log( error);
+                        const errorMessage = error.data;
                         showMessage(messageContainer, '<i class="fas fa-times-circle"></i>', errorMessage, 'text-danger',false);
                     });
-            } else {
-                // Si la date n'est pas renseignée, effacer le message
-                messageContainer.innerHTML = '';
-            }
+            // } else {
+            //     // Si la date n'est pas renseignée, effacer le message
+            //     messageContainer.innerHTML = '';
+            // }
         }
 
         function showLoader(container) {

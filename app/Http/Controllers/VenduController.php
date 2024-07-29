@@ -42,6 +42,7 @@ class VenduController extends Controller
 
     public function create(Vente $vente,  Vendu $vendu = NULL)
     {
+        // dd("gogo");
         $ver = Vente::where('id', $vente->id)->first();
         $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
         if ($ver == NULL) {
@@ -64,7 +65,6 @@ class VenduController extends Controller
         ####____
         $bl = NULL;
 
-        // dd($vente->vendus);
         foreach ($vente->vendus as $vendu) {
             $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
             // dd($vendu->programmation);
@@ -73,14 +73,12 @@ class VenduController extends Controller
             }
         }
 
-        // dd($bl);
         return view('vendus.create', compact('vente', 'vendu', 'produits', 'qteTotal', 'totalVendu', "bl"));
     }
 
     public function store(Request $request, Vente $vente, Vendu $vendu = NULL)
     {
         try {
-
             $ver = Vente::where('id', $vente->id)->where('code', 'LIKE', 'VD%')->first();
             if ($vendu) {
                 if ($request->remise == NULL) {
@@ -90,6 +88,7 @@ class VenduController extends Controller
                         'qteVendu' => ['required'],
                         'pu' => ['required'],
                     ]);
+
                     if ($vente->transport) {
                         $validator = Validator::make($request->all(), [
                             'produit_id' => ['required'],
@@ -185,6 +184,7 @@ class VenduController extends Controller
                     }
                 }
             } else {
+                // dd("gogo");
                 if ($request->remise == NULL) {
                     $validator = Validator::make($request->all(), [
                         'produit_id' => ['required'],

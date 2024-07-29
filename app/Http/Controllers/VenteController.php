@@ -59,7 +59,6 @@ class VenteController extends Controller
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles))
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
 
-        // dd(Vente::whereNull('date_envoie_commercial')->get());
         elseif (in_array(3, $roles))
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         return view('ventes.index', compact('ventes'));
@@ -123,6 +122,7 @@ class VenteController extends Controller
 
     public function create(Request $request)
     {
+        // dd("gogo");
         $typeVente = [];
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
@@ -161,7 +161,6 @@ class VenteController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->client_id);
         //  try {
         $req = NULL;
         if ($request->statuts == 1) {
@@ -551,7 +550,10 @@ class VenteController extends Controller
             return redirect()->route('ventes.index', ['vente' => $vente->id]);
         }
         if ($vente->vendus()->sum('qteVendu') && $vente->vendus()->sum('qteVendu') == $vente->qteTotal) {
-            $vente->update(['statut' => 'Vendue']);
+            // $vente->update(['statut' => 'Vendue']);
+
+            $vente->update(['statut' => 'Vendue', "validated_date" => now()]);
+
             CommandeClientTools::changeStatutCommande($vente->commandeclient);
             $venteAttentes = DB::select("
                 SELECT date,COUNT(*) AS nombre
@@ -655,6 +657,7 @@ class VenteController extends Controller
             //throw $th;
         }
     }
+
     public function askUpdate()
     {
         // $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
@@ -667,7 +670,6 @@ class VenteController extends Controller
         // dd($request->ventes);
         $ventes = explode(",", $request->ventes);
 
-        // dd(!$ventes[0],count($ventes));
         ####____
         if (!$ventes[0]) {
             return redirect()->back()->with("error", "Aucune vente n'a été selectionnée!");
@@ -687,11 +689,14 @@ class VenteController extends Controller
             $client->debit = $client->debit - $vente->montant;
             $client->update();
 
+            // dd($client->compteClients->first());
             // Mise à jour du Solde du client 
             $client = $vente->commandeclient->client;
-            $compteClient = $client->compteClients[0];
-            $compteClient->solde = $client->credit + $client->debit;
-            $compteClient->update();
+            $compteClient = $client->compteClients->first();
+            if ($compteClient) {
+                $compteClient->solde = $client->credit + $client->debit;
+                $compteClient->update();
+            }
         }
 
         return redirect()->back()->with("message", "Envoie à la comptabilité effectuée avec succès!");
@@ -707,7 +712,6 @@ class VenteController extends Controller
 
     public function getVenteAComptabiliser()
     {
-
         return view('comptabilite.listesVente');
     }
 
@@ -755,7 +759,6 @@ class VenteController extends Controller
     public function traiterVente(Request $request, Vente $vente)
     {
         try {
-
             $vente->taux_aib = $request->taux_aib;
             $vente->taux_tva = $request->taux_tva;
             $vente->prix_Usine = $request->prix_Usine;
@@ -763,6 +766,7 @@ class VenteController extends Controller
             $vente->marge = $request->marge;
             $vente->date_traitement = date('Y-m-d');
             $vente->user_traitement = Auth()->user()->id;
+            $vente->traited_date = now();
             $vente->update();
 
             return redirect()->route('ventes.getPostVenteAComptabiliser', [
@@ -825,6 +829,7 @@ class VenteController extends Controller
         $mail = new NotificateurProgrammationMail('test', ['email' => 'to@exemple.com', 'nom' => 'KANHONOU Arnauld'], 'Nouvelle commande', 'Bonjour');
         Mail::send($mail);
     }
+
     public function viewVenteTraiter()
     {
         $fournisseurs = Fournisseur::all();
@@ -1040,6 +1045,10 @@ class VenteController extends Controller
     #######__________UPDATE VENTE ________#################
     function askUpdateVente(Request $request, Vente $vente)
     {
+        ###___ON NE PEUT QUE MODIFIER LA VENTE QU'ON A PASSEE
+        if (Auth::user()->id != $vente->user->id) {
+            return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
+        };
 
         if ($request->method() == "GET") {
             ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
@@ -1125,6 +1134,11 @@ class VenteController extends Controller
     {
         $vente = Vente::findOrFail($request->vente);
 
+        ###___ON NE PEUT QUE MODIFIER LA VENTE QU'ON A PASSEE
+        if (Auth::user()->id != $vente->user->id) {
+            return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
+        };
+
         ####____QUAND C'EST NI MODIFIE NI VALIDEE
         if (!IsThisVenteUpdateDemandeAlreadyValidated($vente) && !IsThisVenteUpdateDemandeAlreadyModified($vente)) {
             return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
@@ -1140,8 +1154,9 @@ class VenteController extends Controller
         $bl = $request->bl;
         $client = $request->client_id ? $request->client_id : $vente->client_id;
 
+        ###___ON VA PLUS MODIFIER LES BL AU COUR D'UNE MODIFICATION DE VENTE(ça se fera plutot dans la gestion des programmations)
         foreach ($vente->vendus as $vendu) {
-            $vendu->programmation->update(["bl_gest" => $bl]);
+            // $vendu->programmation->update(["bl_gest" => $bl]);
         }
 
         $vente->commandeclient->update(["client_id" => $client]);
@@ -1193,6 +1208,11 @@ class VenteController extends Controller
     #######__________UPDATE VENTE ________#################
     function askDeleteVente(Request $request, Vente $vente)
     {
+        ###___ON NE PEUT QUE MODIFIER LA VENTE QU'ON A PASSEE
+        if (Auth::user()->id != $vente->user->id) {
+            return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
+        };
+
         if ($request->method() == "GET") {
             ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
             $isThisDemandOnceMadeByThisUser = false;
@@ -1269,18 +1289,18 @@ class VenteController extends Controller
     }
 
     ####____DELETE VENTE TRULLY
-    function _deleteVente(Request $request)
-    {
-        $vente = Vente::findOrFail($request->vente);
+    // function _deleteVente(Request $request)
+    // {
+    //     $vente = Vente::findOrFail($request->vente);
 
-        ####____
-        if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
-            return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
-        }
+    //     ####____
+    //     if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+    //         return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
+    //     }
 
-        ###___
-        return redirect("/ventes/index")->with("message", "Vente modifiée avec succès!");
-    }
+    //     ###___
+    //     return redirect("/ventes/index")->with("message", "Vente modifiée avec succès!");
+    // }
 
     #####________DELETE VENTES VALIDATIONS
     public function venteDeleteValidation(Request $request)

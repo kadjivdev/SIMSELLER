@@ -119,7 +119,8 @@
 
                                             @foreach(session('resultat')['comptabilisers'] as $key=>$item)
                                             <tr>
-                                                <td>{{date_format(date_create($item->dateSysteme),'d/m/Y')}} {{$item->heureSysteme}}</td>
+                                                <td class="text-center text-danger">{{GetVenteTraitedDateViaCode($item->code)?GetVenteTraitedDateViaCode($item->code):"---"}}</td>
+                                                <!-- <td>{{date_format(date_create($item->dateSysteme),'d/m/Y')}} {{$item->heureSysteme}}</td> -->
                                                 <td>{{date_format(date_create($item->date_traitement),'d/m/Y')}}</td>
                                                 <td>{{$item->code}}</td>
                                                 <td>{{date_format(date_create($item->dateVente),'d/m/Y')}}</td>
@@ -181,7 +182,7 @@
             "autoWidth": false,
             "buttons": ["pdf", "print"],
             "order": [
-                [0, 'asc']
+                [0, 'desc']
             ],
             "pageLength": 15,
             "columnDefs": [{

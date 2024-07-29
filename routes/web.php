@@ -352,6 +352,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/update/{programmation}', 'update')->name('livraisons.update');
             // Route::post('/transfert', 'transfertLivraison')->name('livraisons.transfert');
 
+            Route::get('/transfert/{programmation}', 'getTransfertPage')->name('livraisons.getTransfert');
             Route::post('/transfert', 'transfertLivraison_redirect')->name('livraisons.transfert');
 
 

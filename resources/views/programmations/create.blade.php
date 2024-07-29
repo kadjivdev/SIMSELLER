@@ -347,8 +347,9 @@
 
     function saveBl() {
         var bl_gest = $('#bl_gest').val();
-        axios.get('{{env('
-            APP_BASE_URL ')}}programmation/livraison/bl/' + id_prog + '/' + bl_gest + '/{{ Auth::user()->name }}').then((response) => {
+        // axios.get('{{env('APP_BASE_URL')}}programmation/livraison/bl/' + id_prog + '/' + bl_gest + '/{{ Auth::user()->name }}')
+            axios.get(`{{env('APP_BASE_URL')}}programmation/livraison/bl/${id_prog}/${bl_gest}/`+"{{Auth::user()->name }}" ).then((response) => {
+
             console.log(response.data);
 
             if (response.data == 'success') {

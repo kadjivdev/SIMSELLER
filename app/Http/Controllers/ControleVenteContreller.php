@@ -14,7 +14,7 @@ class ControleVenteContreller extends Controller
 {
     public function index(){
         $reglements = Reglement::where('statut',2)->where('document','<>',NULL)->get();
-        // dd($reglements[0]);
+        // dd($reglements[0]->vente->commandeclient->client);
         return view('ctlventes.index',compact('reglements'));
     }
 

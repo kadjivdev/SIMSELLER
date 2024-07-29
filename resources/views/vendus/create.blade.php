@@ -200,7 +200,7 @@
                                                         <i class="fa fa-spin fa-spinner"></i> Recherche Type ...
                                                     </div>
                                                     <div id="champ">
-                                                        <label>Camion<span class="text-danger">*</span></label>
+                                                        <label>Camion <span class="text-danger">*</span></label>
                                                         <select required class="form-control form-control-sm select2  @error('programmation_id') is-invalid @enderror" name="programmation_id" id="bl"  onchange="getStockDisponible()"  style="width: 100%;">
                                                             @if ($vendu)
                                                                 <option value="{{ $vendu->programmation->id }}" selected>{{ $vendu->programmation->bl }}</option>
