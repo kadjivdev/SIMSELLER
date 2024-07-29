@@ -71,6 +71,7 @@
                                                     <th>#</th>
                                                     <th>Code</th>
                                                     <th>Date Vente</th>
+                                                    <th>Date Validation</th>
                                                     <th>Type de Vente</th>
                                                     <th>Payeur</th>
                                                     <th>Qté</th>
@@ -90,6 +91,7 @@
                                                     <td>{{ ++$key }}</td>
                                                     <td class="text-center">{{ $AComptabiliser->code }}</td>
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
+                                                    <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
                                                     <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
                                                     <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
                                                     <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
@@ -109,6 +111,7 @@
                                                     <th>#</th>
                                                     <th>Code</th>
                                                     <th>Date Vente</th>
+                                                    <th>Date Validation</th>
                                                     <th>Type de Vente</th>
                                                     <th>Payeur</th>
                                                     <th>Qté</th>
@@ -154,6 +157,7 @@
                                                 <th>#</th>
                                                 <th>Code</th>
                                                 <th>Date Vente</th>
+                                                <th>Date Validation</th>
                                                 <th>Type de Vente</th>
                                                 <th>Payeur</th>
                                                 <th>Qté</th>
@@ -171,6 +175,7 @@
                                                 <td>{{ ++$key }}</td>
                                                 <td class="text-center">{{ $AComptabiliser->code }}</td>
                                                 <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
+                                                <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
                                                 <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
                                                 <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
                                                 <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
@@ -188,6 +193,7 @@
                                                 <th>#</th>
                                                 <th>Code</th>
                                                 <th>Date Vente</th>
+                                                <th>Date Validation</th>
                                                 <th>Type de Vente</th>
                                                 <th>Payeur</th>
                                                 <th>Qté</th>
@@ -247,7 +253,7 @@
             "autoWidth": false,
             "buttons": ["pdf", "print"],
             "order": [
-                [3, 'asc']
+                [3, 'desc']
             ],
             "pageLength": 15,
             "columnDefs": [{

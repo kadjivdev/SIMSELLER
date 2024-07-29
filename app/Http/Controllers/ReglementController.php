@@ -49,8 +49,10 @@ class ReglementController extends Controller
 
     public function store(Request $request, Vente $vente)
     {
+        // dd($request->all());
         try {
             $reglmt = $vente->reglements()->pluck('id');
+
             count($reglmt) == 0 ? $reglmt = NULL: $reglmt = Reglement::find($reglmt[0]);
             if($request->compte_id == NULL){
                 if ($vente->commandeclient->client->compteClients->toArray() == null) {
@@ -59,7 +61,6 @@ class ReglementController extends Controller
                 }
                 
                 if ($request->document == NULL){
-
                     $validator = Validator::make($request->all(), [
                         'date' => ['required','before_or_equal:now'],
                      //   'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],

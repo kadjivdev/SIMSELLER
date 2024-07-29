@@ -8,44 +8,49 @@ use Illuminate\Support\Facades\DB;
 
 class CommandeClientTools
 {
-    public static function viderProduitCommander(CommandeClient $commandeclient){
+    public static function viderProduitCommander(CommandeClient $commandeclient)
+    {
         DB::delete('delete commanders where commanders.commande_client_id = ?', [$commandeclient->id]);
     }
 
 
-    
-    public static function calculerTotalCommande(CommandeClient $commandeclient){
+
+    public static function calculerTotalCommande(CommandeClient $commandeclient)
+    {
         $commandeclient->montant = 0;
         $commandeclient->update();
     }
 
 
-    public static function statutUpdate(CommandeClient $commandeclient, $statut){
+    public static function statutUpdate(CommandeClient $commandeclient, $statut)
+    {
         $commandeclient->statut = $statut;
         $commandeclient->update();
     }
 
-    public static function getSuiviStock(CommandeClient $client){
+    public static function getSuiviStock(CommandeClient $client)
+    {
         $suivisStocks = [];
         $detailCmdes = $client->commanders;
-        foreach ($detailCmdes as $cmde){
+        foreach ($detailCmdes as $cmde) {
             $suivisStocks[$cmde->produit_id] = [
-                'id'=>$cmde->produit_id,
-                'qtecde'=>$cmde->qteCommander,
-                'qteLiv'=>0,
-                'resteLiv'=>0
+                'id' => $cmde->produit_id,
+                'qtecde' => $cmde->qteCommander,
+                'qteLiv' => 0,
+                'resteLiv' => 0
             ];
         }
-        foreach($client->ventes as $vente){
-            foreach ($suivisStocks as $key=> $suivisStock){
-                $suivisStocks[$key]['qteLiv'] += self::calculeStockLivre($vente->id,$key);
-                $suivisStocks[$key]['resteLiv'] = $suivisStocks[$key]['qtecde']-$suivisStocks[$key]['qteLiv'];
+        foreach ($client->ventes as $vente) {
+            foreach ($suivisStocks as $key => $suivisStock) {
+                $suivisStocks[$key]['qteLiv'] += self::calculeStockLivre($vente->id, $key);
+                $suivisStocks[$key]['resteLiv'] = $suivisStocks[$key]['qtecde'] - $suivisStocks[$key]['qteLiv'];
             }
         }
         return $suivisStocks;
     }
 
-    public static function calculeStockLivre($vente_id,$produit_id){
+    public static function calculeStockLivre($vente_id, $produit_id)
+    {
         $stockVente = DB::select("
             SELECT SUM(vendus.qteVendu) AS totalVente
             FROM vendus
@@ -56,24 +61,26 @@ class CommandeClientTools
             WHERE vendus.vente_id = ?
             AND produits.id = ?
             AND ventes.statut = 'Vendue'
-        ",[$vente_id,$produit_id]);
+        ", [$vente_id, $produit_id]);
 
         return $stockVente[0]->totalVente;
     }
-    public static function changeStatutCommande(CommandeClient $client){
+    public static function changeStatutCommande(CommandeClient $client)
+    {
         $suivis = self::getSuiviStock($client);
-        foreach ($suivis as $suivi){
-            if($suivi['resteLiv'] == 0){
+        foreach ($suivis as $suivi) {
+            if ($suivi['resteLiv'] == 0) {
                 $statut = 'Livrée';
-            }
-            elseif($suivi['qteLiv'] > 0){
+            } elseif ($suivi['qteLiv'] > 0) {
                 $statut = 'Livraison partielle';
                 break;
-            }
-            else {
+            } else {
                 $statut = 'Validée';
             }
-        }		 if(count($suivis) == 0)            abort(412);
-        $client->update(['statut'=>$statut]);
+        }
+        if (count($suivis) == 0)
+            abort(412);
+        
+        $client->update(['statut' => $statut]);
     }
 }

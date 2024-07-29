@@ -19,7 +19,7 @@ class clientsController extends Controller
     /**
      * 
      */
-    
+
     public function index(Request $request)
     {
         if ($request->search) {
@@ -29,7 +29,6 @@ class clientsController extends Controller
             // $clients = Client::orderBy('id','desc')->paginate(1000);          
             $clients = Client::orderBy('id', 'desc')->get();
         }
-
         return view('client.index', compact('clients'));
         // <!-- {{ $clients->links('pagination') }}  à ajouter à la fin du tableau pour affichage de la pagination laravel -->
 
@@ -45,7 +44,7 @@ class clientsController extends Controller
         $typeclients = TypeClient::all();
         $departements = Departement::all();
         $agents = Agent::all();
-        $filleulFisc = Client::orderBy("id","desc")->whereNotNull('ifu')->get();
+        $filleulFisc = Client::orderBy("id", "desc")->whereNotNull('ifu')->get();
         return view('client.create', compact('typeclients', 'departements', 'agents', 'filleulFisc'));
     }
 
@@ -178,7 +177,6 @@ class clientsController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         try {
 
             $validator = Validator::make($request->all(), [
@@ -228,7 +226,7 @@ class clientsController extends Controller
                 $rc->move("files", $rc_name);
 
                 ##___Formation du lien du fichier à entregistrer
-                $bordereau_receit = asset("/files/".$rc_name);
+                $bordereau_receit = asset("/files/" . $rc_name);
             }
 
             $data = [

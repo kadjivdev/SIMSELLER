@@ -135,7 +135,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::get('/index', 'index')->name('ventes.index');
 
-            Route::get('/indexCreate', 'indexCreate')->name('ventes.indexCreate');
+            Route::match(['GET', 'POST'], '/indexCreate', 'indexCreate')->name('ventes.indexCreate');
 
             Route::get('/indexControlle', 'indexControlle')->name('ventes.indexControlle');
 
@@ -166,11 +166,20 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/delete/{vente}', 'delete')->name('ventes.delete');
 
             Route::get('/destroy/{vente}', 'destroy')->name('ventes.destroy');
+
+            ###_____UPDATE DE VENTE
+            Route::match(["GET", "POST"], '/askUpdateVente/{vente?}', 'askUpdateVente')->name('ventes.askUpdateVente');
+            Route::post('/updateVente/{vente?}', '_updateVente')->name('ventes.updateVente');
+            Route::match(['GET', "POST"], '/ventes/validation/', 'Validation')->name('ventes.validation');
+
+            ###_____DELETE DE VENTE
+            Route::match(["GET", "POST"], '/askDeleteVente/{vente?}', 'askDeleteVente')->name('ventes.askDeleteVente');
+            Route::post('/deleteVente/{vente?}', '_deleteVente')->name('ventes.deleteVente');
+            Route::match(['GET', "POST"], '/ventes/deleteValidation/', 'venteDeleteValidation')->name('ventes.deleteValidation');
         });
     });
 
     Route::prefix('comptabilite')->group(function () {
-
         Route::controller(VenteController::class)->group(function () {
             Route::get('/vente-a-comptabilise/{vente}', 'aComptabiliser')->name('ventes.aComptabiliser');
             Route::get('/vente-a-envoyer-comptabilise', 'venteAEnvoyerComptabiliser')->name('ventes.venteAEnvoyerComptabiliser');
@@ -192,7 +201,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/listes-traitement-vente', 'postListeDesTraitementPeriode')->name('ventes.postListeDesTraitementPeriode');
         });
     });
-
     // Vendu
 
     Route::prefix('ventes')->group(function () {
@@ -344,6 +352,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/update/{programmation}', 'update')->name('livraisons.update');
             // Route::post('/transfert', 'transfertLivraison')->name('livraisons.transfert');
 
+            Route::get('/transfert/{programmation}', 'getTransfertPage')->name('livraisons.getTransfert');
             Route::post('/transfert', 'transfertLivraison_redirect')->name('livraisons.transfert');
 
 
@@ -1139,7 +1148,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
 
     Route::prefix('admin')->group(function () {
-
         Route::controller(UserController::class)->group(function () {
 
             Route::get('/users/index', 'index')->name('users.index');

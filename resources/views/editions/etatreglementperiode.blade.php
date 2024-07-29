@@ -103,12 +103,14 @@
                                                 <th>Montant Vente</th>
                                                 <th class="text-center">Banque</th>
                                                 <th>Code Règlement</th>
+                                                <th>Ref Règlement</th>
                                                 <th>Montant Règlement</th>
                                                 <th>Reste</th>
                                                 <th>Constat</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                           
                                             @php($montant = 0)
                                             @php($montantTotal = 0)
                                             @php($cpte = 0)
@@ -133,6 +135,7 @@
                                                 <td class="text-right">{{ $item->montant_vente}}</td>
                                                 <td class="text-center">{{ $item->banque}} <br>({{ $item->numero}})</td>
                                                 <td>{{ $item->code_reglement}}</td>
+                                                <td>{{ $item->reference}}</td>
                                                 <td class="text-right">{{ $item->montant_reglement}}</td>
                                                 <td></td>
                                                 <td></td>
@@ -152,9 +155,12 @@
                                                 <td colspan="5" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold"></td>
+                                                <td></td>
                                                 <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
+                                                <!-- <td></td> -->
                                                 <td class="text-right @if (number_format(($montant - $regle),0,',',' ')>0) text-danger @else @endif font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"></td>
+                                                <!-- <td class="text-right font-weight-bold"></td> -->
+                                                <!-- <td></td> -->
                                             </tr>
                                             <tr>
                                                 <td>{{++$key}}</td>
@@ -165,9 +171,11 @@
                                                 <td class="text-right">{{ $item->montant_vente}}</td>
                                                 <td class="text-center">{{ $item->banque}} ({{ $item->numero}})</td>
                                                 <td>{{ $item->code_reglement}}</td>
+                                                <td>{{ $item->reference}}</td>
                                                 <td class="text-right">{{ $item->montant_reglement}}</td>
                                                 <td></td>
                                                 <td>{{ $item->recouvreur}}</td>
+                                                <td></td>
                                             </tr>
                                             @php($venteId = $item->id_vente)
                                             @php($montant = $item->montant_vente)
@@ -181,6 +189,7 @@
                                                 <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold"></td>
+                                                <td></td>
                                             </tr>
                                             @endif
 
@@ -194,6 +203,7 @@
                                                 <td colspan="2" class="text-right font-weight-bold text-success">{{number_format($regleTotal,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold text-success">{{number_format(($montantTotal - $regleTotal),0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold text-success"></td>
+                                                <td></td>
                                             </tr>
                                         </tbody>
                                     </table>

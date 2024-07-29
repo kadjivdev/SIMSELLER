@@ -127,7 +127,7 @@
                                         <td class="text-center">
                                             <div class="row">
                                                 <div class="col-sm-12 ">
-                                                    <a class="btn btn-success btn-sm" href="{{ route('programmations.create', ['detailboncommande'=>$detailboncommande->id]) }}" @if (($detailboncommande->boncommande->statut == 'Programmer') && (floatval($detailboncommande->qteCommander) == floatval((collect($detailboncommande->programmations->where('statut', 'Livrer'))->sum('qteprogrammer')))))disabled="disabled" @endif id="programmer"><i class="fa-solid fa-p"></i> Programmer</a>
+                                                    <a target="_blank" class="btn btn-success btn-sm" href="{{ route('programmations.create', ['detailboncommande'=>$detailboncommande->id]) }}" @if (($detailboncommande->boncommande->statut == 'Programmer') && (floatval($detailboncommande->qteCommander) == floatval((collect($detailboncommande->programmations->where('statut', 'Livrer'))->sum('qteprogrammer')))))disabled="disabled" @endif id="programmer"><i class="fa-solid fa-p"></i> Programmer</a>
                                                 </div>
                                             </div>
                                         </td>

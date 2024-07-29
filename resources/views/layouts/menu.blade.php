@@ -141,7 +141,7 @@
                                 <p>Liste des ventes</p>
                             </a>
                         </li>
-                        
+
                         @if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('ventes.indexCreate') }}" class="nav-link {{ (request()->is('ventes/indexCreate')) ? 'active' : '' }}">
@@ -160,6 +160,7 @@
                         @endif
                         @endif
                         @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+
                         @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('ventes.askUpdate') }}" class="nav-link {{ (request()->is('ventes/askUpdate')) ? 'active' : '' }}">
@@ -168,6 +169,7 @@
                             </a>
                         </li>
                         @endif
+
                         <li class="nav-item">
                             <a href="{{ route('edition.solde') }}" class="nav-link {{ (route('edition.solde') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -179,6 +181,45 @@
                         @endif
                     </ul>
                 </li>
+
+                <!--  -->
+                @if(Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                <li class="nav-item {{request()->route()->getPrefix() == '/ventes' ? 'menu-open':''}}">
+                    <a href="#" class="nav-link {{request()->route()->getPrefix() == '/ventes/*' ? 'active':''}}">
+                        <i class="nav-icon fas fa-solid fa-hand-holding-dollar"></i>
+                        <p>
+                            Modification & Suppression
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{route('ventes.validation')}}" class="nav-link">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-dollar text-cyan"></i>
+                                <p>
+                                    Modification en attente
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{route('ventes.deleteValidation')}}" class="nav-link">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-dollar text-cyan"></i>
+                                <p>
+                                    Suppression en attente
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                @endif
+
+
+
                 @endif
 
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
@@ -318,7 +359,7 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        
+
                         @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()|| Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('edition.stock') }}" class="nav-link {{ (route('edition.stock') == url()->current()) ? 'active' : '' }}">
@@ -383,7 +424,7 @@
                             <a href="{{ route('edition.etatCaProgPeriode') }}" class="nav-link {{ (route('edition.etatCaProgPeriode') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
                                 <p>
-                                    Etat des Camions 
+                                    Etat des Camions
                                 </p>
                             </a>
                         </li>
@@ -399,7 +440,7 @@
                             <a href="{{ route('edition.etatventeperiode') }}" class="nav-link {{ (route('edition.etatventeperiode') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
                                 <p>
-                                    Etat des ventes 
+                                    Etat des ventes
                                 </p>
                             </a>
                         </li>
@@ -569,6 +610,7 @@
                     </ul>
                 </li>
                 @endif
+
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

@@ -69,6 +69,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Client</th>
+                                                    <th>Département</th>
                                                     <th>Date</th>
                                                     <th>Libelle</th>
                                                     <th>Crédit</th>
@@ -81,6 +82,7 @@
                                                 <tr>
                                                     <td class="text-center">MVT-{{str_pad($key+1,6,'0',STR_PAD_LEFT)}}</td>
                                                     <td class="text-center">{{$mouvement->compteClient->client->nom}} {{$mouvement->compteClient->client->prenom}}</td>
+                                                    <td class="text-center"> <b> {{$mouvement->compteClient->client->departement?$mouvement->compteClient->client->departement->libelle:'---'}}</b> </td>
                                                     <td class="text-center">{{date_format(date_create($mouvement['dateMvt']),'d/m/Y H:i')}}</td>
                                                     <td>{{$mouvement['libelleMvt']}}</td>
                                                     <td class="text-right">{{$mouvement['sens'] == 0 ? number_format($mouvement['montantMvt'],0,',',' '):''}}</td>
@@ -93,6 +95,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Client</th>
+                                                    <th>Département</th>
                                                     <th>Date</th>
                                                     <th>Libelle</th>
                                                     <th>Crédit</th>

@@ -242,6 +242,9 @@ class EditionController extends Controller
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('clients.id', $client->id)
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -254,6 +257,10 @@ class EditionController extends Controller
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('clients.id', $client->id)
                 ->where('zones.id', $zone->id)
+
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -265,6 +272,10 @@ class EditionController extends Controller
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('zones.id', $zone->id)
+                
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+                
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
@@ -296,11 +307,10 @@ class EditionController extends Controller
             $SommeCompte = CompteClient::all()->sum('solde');
             $reglements = Reglement::all()->sum('montant');
             $sommeVentes = Vente::all()->sum('montant');
-           
         } else {
             $zone = Zone::find($request->zone);
             $clients = Client::where('departement_id', $zone->departement_id)->get();
-           
+
             $compteClients = [];
             $reglement_amonts = [];
             $vente_amonts = [];
@@ -347,7 +357,7 @@ class EditionController extends Controller
         Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => Zone::all()]);
 
         // 
-        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients,'SommeCompte'=>$SommeCompte,'credit'=>$credit,'debit'=>$debit]);
+        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'SommeCompte' => $SommeCompte, 'credit' => $credit, 'debit' => $debit]);
         return view('editions.etatCompte', compact('clients', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes', 'zones'));
     }
 
@@ -589,6 +599,8 @@ class EditionController extends Controller
     }
     public function postEtatReglementPeriode(Request $request)
     {
+        // dd("gogo");
+
         //Prévoir le validator
         $banque = Banque::find($request->banque);
         $zone = Zone::find($request->zone);
@@ -614,6 +626,7 @@ class EditionController extends Controller
                     'ventes.code as code_vente',
                     'ventes.montant as montant_vente',
                     'reglements.date',
+                    'reglements.reference as reference',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
                     'reglements.montant as montant_reglement',
@@ -626,6 +639,8 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.id')
                 ->get();
             $nbre = count($reglements);
+
+            // dd($reglements);
             return redirect()->route('edition.etatReglementperiode')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'zone' => $zone, 'banque' => $banque, 'debut' => $request->debut, 'fin' => $request->fin]);
         }
 
@@ -648,6 +663,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
@@ -680,6 +696,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
@@ -713,6 +730,7 @@ class EditionController extends Controller
                     'reglements.date',
                     'reglements.id as id_règlement',
                     'reglements.code as code_reglement',
+                    'reglements.reference as reference',
                     'reglements.montant as montant_reglement',
                     'comptes.numero',
                     'banques.sigle as banque',
@@ -910,6 +928,7 @@ class EditionController extends Controller
             $actor = User::find($mvt->user_id);
             $mvt["actor"] = $actor ? $actor->name : '---';
         }
+
 
         session()->put('result', true);
         return view('editions.approvisionnementCompte', compact('mouvements', 'startDate', 'endDate'));

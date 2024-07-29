@@ -1,0 +1,298 @@
+ public function store(Request $request, Vente $vente, Vendu $vendu = NULL)
+    {
+        
+        ####___VENTE APRES ENVOIE A LA COMPTABILITE
+        if ($request->update_after_comptability) {
+            if (!IsThisVenteUpdateDemandeAlreadyValidated($vente)) {
+                return redirect("/ventes/index")->with("error", "Désolé! Vous n'avez plus accès à cette modification! Veillez écrire à nouveau une demande de modification");
+            }
+        }
+        
+        
+        #####____
+        try {
+            $ver = Vente::where('id', $vente->id)->where('code', 'LIKE', 'VD%')->first();
+            if ($vendu) {
+
+                if ($request->remise == NULL) {
+
+                    $validator = Validator::make($request->all(), [
+                        'produit_id' => ['required'],
+                        'programmation_id' => ['required'],
+                        'qteVendu' => ['required'],
+                        'pu' => ['required'],
+                    ]);
+                    if ($vente->transport) {
+                        $validator = Validator::make($request->all(), [
+                            'produit_id' => ['required'],
+                            'programmation_id' => ['required'],
+                            'qteVendu' => ['required'],
+                            'pu' => ['required'],
+                            'transport' => ['required'],
+                        ]);
+                    }
+
+                } else {
+                    $validator = Validator::make($request->all(), [
+                        'produit_id' => ['required'],
+                        'programmation_id' => ['required'],
+                        'qteVendu' => ['required'],
+                        'pu' => ['required'],
+                        'remise' => ['required'],
+                    ]);
+
+                    if ($vente->transport) {
+                        $validator = Validator::make($request->all(), [
+                            'produit_id' => ['required'],
+                            'programmation_id' => ['required'],
+                            'qteVendu' => ['required'],
+                            'pu' => ['required'],
+                            'transport' => ['required'],
+                        ]);
+                    }
+                }
+
+                if ($validator->fails()) {
+                    return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id])->withErrors($validator->errors())->withInput();
+                }
+
+
+                $vendus = $vendu->update([
+                    'vente_id' => $vente->id,
+                    'programmation_id' => $request->programmation_id,
+                    'qteVendu' => $request->qteVendu,
+                    'pu' => $request->pu,
+                    'remise' => $request->remise,
+                    'users' => Auth::user()->id,
+                ]);
+
+
+                if ($vendus) {
+                    $vendus = $vendu->where('vente_id', $vente->id)->get();
+                    $somme = 0;
+                    foreach ($vendus as $vendu) {
+                        $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
+                        $somme += $montants;
+                    }
+                    $vente->montant = $somme + ($request->qteVendu * $request->transport);
+                    $ventes = $vente->update();
+
+
+
+                    if ($ventes) {
+
+                        if ($ver) {
+                            // dd($vente->commande_client_id);
+                            // $commander = Commander::findOrFail($vente->commande_client_id);
+                            $commander = Commander::findOrFail($vente->commande_client_id);
+                            // dd($commander);
+                            // dd($request->all());
+                            $commanders = $commander->update([
+                                'commande_client_id' => $vente->commande_client_id,
+                                'produit_id' => $request->produit_id,
+                                'qteCommander' => $request->qteVendu,
+                                'pu' => $request->pu,
+                                'remise' => $request->remise,
+                                'users' => Auth::user()->id,
+                            ]);
+
+
+                            if ($commanders) {
+
+                                $commanders = $commander->where('commande_client_id', $vente->commande_client_id)->get();
+                                $montants = null;
+                                $somme = 0;
+                                foreach ($vendus as $vendu) {
+                                    $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
+                                    $somme += $montants;
+                                }
+                                $vente->montant = $somme + ($request->qteVendu * $request->transport);
+                                $vente->update();
+
+                                $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
+                                $commandeclient->montant = $somme;
+                                // $commandeclients = $commandeclient->update();
+                                $commandeclient->update();
+
+                                // if ($commandeclients) {
+                                //     Session()->flash('message', 'Produit vendu modifié avec succès!');
+                                // return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id]);
+                                // }
+                            }
+                        }
+                    }
+                }
+
+                #####_____QUANT IL S'AGIT D'UNE MODIFICATION APRES ENVOIE A LA COMPTABILITE
+                if ($request->update_after_comptability) {
+                    ###___UPDATE DU BL
+                    foreach ($vente->vendus as $vendu) {
+                        $vendu->programmation->update(["bl_gest" => $request->bl]);
+                    }
+
+                    ####____ON BLOQUE A NOUVEAU L'ACCES
+                    $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "modified" => false])->first();
+                    $venteUpdateDemande->valide = false;
+                    $venteUpdateDemande->modified = true;
+                    $venteUpdateDemande->save();
+
+                    ####____SUPPRESION DE LA SESSION
+                    session()->forget("update_after_comptability");
+                }
+
+                ####_____REDIRECTION
+                return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id])->with("mesage", "'Produit vendu modifié avec succès!'");
+            } else {
+                if ($request->remise == NULL) {
+                    $validator = Validator::make($request->all(), [
+                        'produit_id' => ['required'],
+                        'programmation_id' => ['required', new VenduDoublonProduitStokValide($request->programmation_id, $vente->id)],
+                        'qteVendu' => ['required', new CheckStock($request->programmation_id), new CheckQuantite($vente)],
+                        'pu' => ['required'],
+                        'qteTotal' => ['required', new CheckQuanteCde($vente)]
+                    ]);
+
+                    if ($vente->transport) {
+                        $validator = Validator::make($request->all(), [
+                            'produit_id' => ['required'],
+                            'programmation_id' => ['required', new VenduDoublonProduitStokValide($request->programmation_id, $vente->id)],
+                            'qteVendu' => ['required', new CheckStock($request->programmation_id), new CheckQuantite($vente)],
+                            'pu' => ['required'],
+                            'qteTotal' => ['required', new CheckQuanteCde($vente)],
+                            'transport' => ['required']
+                        ]);
+                    }
+                } else {
+                    $validator = Validator::make($request->all(), [
+                        'produit_id' => ['required'],
+                        'programmation_id' => ['required', new VenduDoublonProduitStokValide($request->programmation_id, $vente->id)],
+                        'qteVendu' => ['required', new CheckStock($request->programmation_id), new CheckQuantite($vente)],
+                        'pu' => ['required'],
+                        'remise' => ['required'],
+                        'qteTotal' => ['required', new CheckQuanteCde($vente)],
+                    ]);
+                    if ($vente->transport) {
+                        $validator = Validator::make($request->all(), [
+                            'produit_id' => ['required'],
+                            'programmation_id' => ['required', new VenduDoublonProduitStokValide($request->programmation_id, $vente->id)],
+                            'qteVendu' => ['required', new CheckStock($request->programmation_id), new CheckQuantite($vente)],
+                            'pu' => ['required'],
+                            'qteTotal' => ['required', new CheckQuanteCde($vente)],
+                            'transport' => ['required']
+                        ]);
+                    }
+                }
+
+                if ($validator->fails()) {
+                    return redirect()->route('vendus.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
+                }
+
+                DB::beginTransaction();
+                if (!$vente->montant) {
+                    $vente->update([
+                        'remise' => $request->remise,
+                        'pu' => $request->pu,
+                        'qteTotal' => $request->qteTotal,
+                        'montant' => $request->montant,
+                        'produit_id' => $request->produit_id,
+                        'transport' => $request->transport,
+                        'destination' => $request->destination
+                    ]);
+                }
+
+                $vendu = Vendu::create([
+                    'vente_id' => $vente->id,
+                    'programmation_id' => $request->programmation_id,
+                    'qteVendu' => $request->qteVendu,
+                    'pu' => $request->pu,
+                    'remise' => $request->remise,
+                    'users' => Auth::user()->id,
+                ]);
+
+                if ($vendu) {
+
+                    $vendus = $vendu->where('vente_id', $vente->id)->get();
+                    $montants = null;
+                    $somme = 0;
+                    foreach ($vendus as $vendu) {
+                        $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
+                        $somme += $montants;
+                    }
+
+
+                    $programmation = Programmation::find($request->programmation_id);
+                    $vente->prix_Usine = $programmation->detailboncommande->pu;
+                    $vente->montant = $somme + ($request->qteVendu * $request->transport);
+                    $vente->update();
+                    //Les programmation Conserner par une Ventes 
+                    foreach ($vendus as $key => $vendu) {
+                        $programmation = Programmation::find($vendu->programmation_id);
+                    }
+                    if ($ver) {
+                        $commander = Commander::create([
+                            'commande_client_id' => $vente->commande_client_id,
+                            'produit_id' => $request->produit_id,
+                            'qteCommander' => $request->qteVendu,
+                            'pu' => $request->pu,
+                            'remise' => $request->remise,
+                            'users' => Auth::user()->id,
+                        ]);
+
+                        if ($commander) {
+
+                            $commanders = $commander->where('commande_client_id', $vente->commande_client_id)->get();
+                            $montants = null;
+                            $somme = 0;
+                            foreach ($commanders as $commander) {
+                                $montants = ($commander->qteCommander * $commander->pu) - $commander->remise;
+                                $somme += $montants;
+                            }
+
+                            $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
+                            $commandeclient->montant = $somme;
+                            // $commandeclients = $commandeclient->update();
+                            $commandeclient->update();
+
+                            // if ($commandeclients) {
+                            //     Session()->flash('message', 'Produit vendu ajouté succès!');
+                            //     return redirect()->route('vendus.create', ['vente' => $vente->id]);
+                            // }
+                        }
+                    } else {
+                        // Session()->flash('message', 'Produit vendu ajouté succès!');
+                        // return redirect()->route('vendus.create', ['vente' => $vente->id]);
+                    }
+                }
+                DB::commit();
+
+
+                #####_____QUANT IL S'AGIT D'UNE MODIFICATION APRES ENVOIE A LA COMPTABILITE
+                if ($request->update_after_comptability) {
+                    ###___UPDATE DU BL
+                    foreach ($vente->vendus as $vendu) {
+                        $vendu->programmation->update(["bl_gest" => $request->bl]);
+                    }
+
+                    ####____ON BLOQUE A NOUVEAU L'ACCES
+                    $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "modified" => false])->first();
+                    $venteUpdateDemande->valide = false;
+                    $venteUpdateDemande->modified = true;
+                    $venteUpdateDemande->save();
+
+                    ####____SUPPRESION DE LA SESSION
+                    session()->forget("update_after_comptability");
+                }
+
+
+                ####_____REDIRECTION
+                return redirect()->route('vendus.create', ['vente' => $vente->id])->with("message", "Produit vendu ajouté succès!");
+            }
+        } catch (Exception $e) {
+            if (env('APP_DEBUG') == TRUE) {
+                return $e;
+            } else {
+                Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
+                return redirect()->route('vendus.index');
+            }
+        }
+    }

@@ -13,14 +13,14 @@ class Vente extends Model
         'code', 'date', 'montant', 'statut', 'commande_client_id', 'users','pu','qteTotal','remise',
         'produit_id','type_vente_id','vente_validation','historiques','transport','destination','ask_history',
         'ctl_payeur','date_comptabilisation','taux_aib','taux_tva','prix_impot','prix_achat','marge',
-        'date_traitement','user_traitement','date_envoie_commercial','user_envoie_commercial','filleuls','statut_reglement'
+        'date_traitement','user_traitement','date_envoie_commercial','user_envoie_commercial','filleuls','statut_reglement',
+        "validated_date","traited_date"
     ];
 
     public function vendus()
     {
         return $this->hasMany(Vendu::class, 'vente_id', 'id');
     }
-
 
     public function commandeclient()
     {
@@ -57,4 +57,14 @@ class Vente extends Model
         return $value ? json_decode($value,true) : [];
     } 
     */
+
+    ####___DEMANDES DE MODIFICATIONS
+    public function _updateDemandes(){
+        return $this->hasMany(UpdateVente::class,'vente');
+    }
+
+    ####___DEMANDES DE SUPPRESSION
+    public function _deleteDemandes(){
+        return $this->hasMany(VenteDeleteDemand::class,'vente');
+    }
 }

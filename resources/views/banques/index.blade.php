@@ -40,7 +40,6 @@
                                     </div>
                                 @endif
 
-                                @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                                 <div class="card-header">
                                     <h3 class="card-title"></h3>
                                     <a class="btn btn-success btn-sm" href="{{route('banques.create')}}">
@@ -48,7 +47,6 @@
                                         Ajouter
                                     </a>
                                 </div>
-                                @endif
 
                                 <!-- /.card-header -->
                                 <div class="card-body">
