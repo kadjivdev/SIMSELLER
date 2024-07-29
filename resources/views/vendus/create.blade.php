@@ -447,11 +447,12 @@
 
 @section('script')
     <script>
+        
         let user = {{auth()->user()->id}};
         $(document).ready(function (){
-            //transport('{{old('$vente->transport')}}')
             selectDefaultDriver('{{old('programmation_id')}}');
         })
+
         function selectDefaultDriver(old){
             if($('#produit').val()) {
                 $('#champ').attr('hidden','hidden');
