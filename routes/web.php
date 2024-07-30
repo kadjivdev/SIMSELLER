@@ -1295,6 +1295,10 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     //});
     Route::controller(clientsController::class)->group(function () {
         Route::get('newclient/index/', 'index')->name('newclient.index');
+
+        ####___REGLEMENT DES DETTES ANCIENNES
+        Route::match(["GET","POST"],'newclient/reglement/{client?}', 'reglement')->name('newclient.reglement');
+
         Route::get('newclient/data', 'data')->name('newclient.data');
         Route::get('newclient/create', 'create')->name('newclient.create');
         Route::get('newclient/show/{client}', 'show')->name('newclient.show');

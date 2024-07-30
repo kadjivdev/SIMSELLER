@@ -72,7 +72,6 @@
                                     <div class="col-2">
                                         <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
                                     </div>
-
                                 </div>
                             </form>
 
@@ -115,7 +114,7 @@
                                             @foreach(session('resultat')['comptabilisers'] as $key=>$item)
                                             <tr>
                                                 <!-- <td>{{$item->heureSysteme}}</td> -->
-                                                <td class="text-center text-danger">{{GetVenteTraitedDateViaCode($item->code)?GetVenteTraitedDateViaCode($item->code):"---"}}</td>
+                                                    <td class="text-center text-danger">{{GetVenteTraitedDateViaCode($item->code)?GetVenteTraitedDateViaCode($item->code):"---"}}</td>
                                                 <td>{{$item->code}}</td>
                                                 <td>{{date_format(date_create($item->dateVente),'d/m/Y')}}</td>
                                                 <td>{{$item->clients}}</td>

@@ -718,10 +718,16 @@ class VenteController extends Controller
 
     public function postVenteAComptabiliser(Request $request)
     {
+        
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            ->whereDate('ventes.created_at', '>=', $request->debut)
-            ->whereDate('ventes.created_at', '<=', $request->fin)
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
             ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
@@ -733,8 +739,13 @@ class VenteController extends Controller
 
         $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            ->whereDate('ventes.created_at', '>=', $request->debut)
-            ->whereDate('ventes.created_at', '<=', $request->fin)
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
             ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
@@ -791,6 +802,7 @@ class VenteController extends Controller
             'debut' => ['required'],
             'fin' => ['required']
         ]);
+
         $ventes = Vente::where('ventes.statut', 'Contrôller')
             ->whereBetween('date_traitement', [$request->debut, $request->fin])->orderByDesc('ventes.code')
             ->join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
@@ -803,7 +815,6 @@ class VenteController extends Controller
             ->select('ventes.*', 'clients.*', 'bon_commandes.code as codeBon', 'bon_commandes.dateBon', 'fournisseurs.sigle as fournisseur')
             ->with('produit', 'payeur')
             ->get();
-
 
         //  $ventes = Vente::where('statut', 'Contrôller')->whereBetween('date_traitement',[$request->debut, $request->fin])->orderByDesc('code')->get();
         return redirect()->route('ventes.listeDesTraitementPeriode')->withInput()->with('resultat', ['ventes' => $ventes, 'debut' => $request->debut, 'fin' => $request->fin]);
@@ -841,6 +852,7 @@ class VenteController extends Controller
         $fournisseurs = Fournisseur::all();
         return view('comptabilite.etatDejacomptabilite', compact('fournisseurs'));
     }
+
     public function postexport(Request $request)
     {
         $comptabiliser = [];
@@ -916,7 +928,6 @@ class VenteController extends Controller
 
     public function postDejaExport(Request $request)
     {
-
         $comptabiliser = [];
         if ($request->filtre == 'traitement') {
             session(['filtre' => $request->filtre]);

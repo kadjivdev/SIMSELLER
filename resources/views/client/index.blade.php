@@ -173,6 +173,13 @@
                                                                     href="{{ route('compteClient.show', ['client' => $client->id]) }}"><i
                                                                         class="nav-icon fa-solid fa-money-check-dollar"></i>
                                                                     Compte</a>
+
+                                                                   @if(!Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                                                                    <a class="dropdown-item" target="_blank"
+                                                                    href="{{ route('newclient.reglement', ['client' => $client->id]) }}"><i
+                                                                        class="nav-icon fa-solid fa-money-check-dollar"></i>
+                                                                    Règler dette</a>
+                                                                    @endif
                                                             </div>
                                                         </div>
                                                     </td>

@@ -10,7 +10,7 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code', 'civilite', 'nom', 'prenom', 'photo', 'sigle', 'raisonSociale', 'logo', 'telephone','parent', 'numerocompte', 'email', 'adresse', 'domaine', 'statutCredit', 'sommeil', 'type_client_id','agent_id','credit','filleulFisc','departement_id','bordereau_receit'
+        'code', 'civilite', 'nom', 'prenom', 'photo', 'sigle', 'raisonSociale', 'logo', 'telephone', 'parent', 'numerocompte', 'email', 'adresse', 'domaine', 'statutCredit', 'sommeil', 'type_client_id', 'agent_id', 'credit', 'filleulFisc', 'departement_id', 'bordereau_receit'
     ];
 
     public function typeclient()
@@ -33,8 +33,9 @@ class Client extends Model
         return $this->hasMany(CommandeClient::class, 'client_id', 'id');
     }
 
-    public function compteClients(){
-        return $this->hasMany(CompteClient::class,'client_id','id');
+    public function compteClients()
+    {
+        return $this->hasMany(CompteClient::class, 'client_id', 'id');
     }
 
     public function agents()
@@ -48,5 +49,9 @@ class Client extends Model
     {
         return !is_null($value) ? json_decode($value, true) : [];
     }
-    
+
+    public function _detteReglements()
+    {
+        return $this->hasMany(DetteReglement::class, 'client', 'id');
+    }
 }

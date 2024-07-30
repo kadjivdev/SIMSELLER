@@ -71,9 +71,7 @@
                                             <span class="info-box-text">AVOIR EN COMPTE</span>
                                             <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['SommeCompte'], '0', '', ' '): number_format($SommeCompte, '0', '', ' ')  }}</span>
                                         </div>
-
                                     </div>
-
                                 </div>
 
                                 <div class="col-md-3 col-sm-6 col-12">

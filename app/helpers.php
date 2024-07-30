@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Client;
 use App\Models\Vente;
 
 function IsThisVenteUpdateDemandeOnceMade($vente)
@@ -106,9 +107,25 @@ function GetVenteTraitedDateViaCode($venteCode)
 {
     $vente = Vente::where("code", $venteCode)->first();
 
-    if (!$vente->traited_date) {
-        return null;
+    if ($vente) {
+        if (!$vente->traited_date) {
+            return null;
+        }
+        $date = $vente->traited_date ? date("d/m/Y H:m:s", strtotime($vente->traited_date)) : null;
+        return $date;
     }
-    $date = $vente->traited_date ? date("d/m/Y H:m:s", strtotime($vente->traited_date)) : null;
-    return $date;
+
+    return null;
+}
+
+
+###___Verifions si le client a une dette à regler
+function IsClientHasADebt($clientId)
+{
+    $client = Client::find($clientId);
+    if (!$client->debit || $client->debit == 0) {
+        return false;
+    }
+
+    return true;
 }

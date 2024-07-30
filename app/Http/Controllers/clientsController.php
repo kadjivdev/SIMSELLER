@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Agent;
 use App\Models\Client;
+use App\Models\Compte;
 use App\Models\Departement;
+use App\Models\DetteReglement;
 use App\Models\Porteuille;
 use App\Models\TypeClient;
+use App\Models\TypeDetailRecu;
 use App\Models\Vente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +36,65 @@ class clientsController extends Controller
         // <!-- {{ $clients->links('pagination') }}  à ajouter à la fin du tableau pour affichage de la pagination laravel -->
 
     }
+
+    ####___REGLEMENT DES DETTES ANCIENNES
+    function reglement(Request $request, Client $client)
+    {
+        if ($request->method() == "GET") {
+
+            $comptes = Compte::all();
+            $typedetailrecus = TypeDetailRecu::all();
+            ###___
+            return view("client.reglements.create", compact(["client", "comptes", "typedetailrecus"]));
+        }
+
+        ####___POST
+
+        ###___Verifions si le client a une dette à regler
+        if (!IsClientHasADebt($client->id)) {
+            return redirect()->route()->with("error", "Ce client n'a plus de dette à solder!");
+        }
+
+        // VALIDATION
+        $request->validate([
+            "reference" => ["required", "unique:dette_reglements,reference"],
+            "date" => ["required"],
+            "montant" => ["required", "numeric"],
+            "document" => ["required"],
+            // "client" => ["required", "integer"],
+            "type_detail_recu" => ["required", "integer"],
+            "compte" => ["required", "integer"],
+        ]);
+
+        ###__VERIFICATION DU MONTANT
+        if ($request->get("montant") > - ($client->debit)) {
+            return redirect()->back()->withInput()->with("error", "Le montant saisi depasse le montant à rembourser!");
+        }
+
+        // TRAITEMENT DU DOCUMENT
+        $doc = $request->file("document");
+        $doc_name = $doc->getClientOriginalName();
+        $doc->move("files/", $doc_name);
+
+        $document = asset("files/" . $doc_name);
+
+        $data = array_merge($request->all(), ["operator" => request()->user()->id, "document" => $document, "client" => $client->id]);
+
+        $dette_reglement = DetteReglement::create($data);
+
+        // dd($client->debit + $dette_reglement->montant);
+        ###___ACTUALISATION DU DEBIT DU CLIENT
+        $client->debit = $client->debit + $dette_reglement->montant;
+        $client->save();
+
+
+        if ($dette_reglement) {
+            return redirect()->back()->with("message", "Règlement de dette éffectué avec succès!");
+        } else {
+            return redirect()->back()->with("error", "Ooops!! Une erreure est survenue!");
+        }
+    }
+
     public function data()
     {
         $clients = Client::orderBy('raisonsociale')->get();

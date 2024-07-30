@@ -212,6 +212,7 @@ class EditionController extends Controller
         $reglement_amonts = [];
         $SommeCompte = 0;
 
+        // dd($client);
         ###___
         if ($client) {
             foreach ($client->commandeclients as $key => $commande) {
@@ -282,6 +283,7 @@ class EditionController extends Controller
             // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
 
+        // dd($debit);
         return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements]);
     }
 

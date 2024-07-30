@@ -20,8 +20,8 @@ class ComptabiliteReExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-           'Heure système',
-           'Date système',
+           'Heure & Date système',
+        //    'Date système',
            'Date vente',
            'Client',
            'IFU',
@@ -58,12 +58,26 @@ class ComptabiliteReExport implements FromCollection, WithHeadings
         if($this->filtre == 'on'){
             $comptabiliser =  DB::select(
                 "SELECT  
-                                            
-                    export_comptabilite.`heureSysteme`, export_comptabilite.`dateSysteme`,export_comptabilite.`code`,export_comptabilite.`id`, export_comptabilite.`dateVente`, 
-                    export_comptabilite.`clients`, export_comptabilite.`ifu`, export_comptabilite.dateAchat,  export_comptabilite.produit,
-                    export_comptabilite.qte,  export_comptabilite.pvr,export_comptabilite.prixTTC, 
-                    export_comptabilite.PrixHT,export_comptabilite.`filleuls`,export_comptabilite.PrixBruite,export_comptabilite.NetHT,
-                    export_comptabilite.TVA, export_comptabilite.AIB, export_comptabilite.TTC, export_comptabilite.FRS
+                    -- export_comptabilite.`heureSysteme`,
+                    -- export_comptabilite.`dateSysteme`,
+                    export_comptabilite.`code`,
+                    export_comptabilite.`id`, 
+                    export_comptabilite.`dateVente`, 
+                    export_comptabilite.`clients`, 
+                    export_comptabilite.`ifu`, 
+                    export_comptabilite.dateAchat,  
+                    export_comptabilite.produit,
+                    export_comptabilite.qte,  
+                    export_comptabilite.pvr,
+                    export_comptabilite.prixTTC, 
+                    export_comptabilite.PrixHT,
+                    export_comptabilite.`filleuls`,
+                    export_comptabilite.PrixBruite,
+                    export_comptabilite.NetHT,
+                    export_comptabilite.TVA, 
+                    export_comptabilite.AIB, 
+                    export_comptabilite.TTC, 
+                    export_comptabilite.FRS
                 
                     FROM `export_comptabilite`  
                         WHERE  `export_comptabilite`.`date_comptabilisation` BETWEEN ? AND ?
@@ -74,12 +88,26 @@ class ComptabiliteReExport implements FromCollection, WithHeadings
             
             $comptabiliser =  DB::select(
                 "SELECT  
-                                
-                    export_comptabilite.`heureSysteme`, export_comptabilite.`dateSysteme`,export_comptabilite.`code`,export_comptabilite.`id`, export_comptabilite.`dateVente`, 
-                    export_comptabilite.`clients`, export_comptabilite.`ifu`, export_comptabilite.dateAchat,  export_comptabilite.produit,
-                    export_comptabilite.qte,  export_comptabilite.pvr,export_comptabilite.prixTTC, 
-                    export_comptabilite.PrixHT,export_comptabilite.`filleuls`,export_comptabilite.PrixBruite,export_comptabilite.NetHT,
-                    export_comptabilite.TVA, export_comptabilite.AIB, export_comptabilite.TTC, export_comptabilite.FRS
+                    -- export_comptabilite.`heureSysteme`, 
+                    -- export_comptabilite.`dateSysteme`,
+                    export_comptabilite.`code`,
+                    export_comptabilite.`id`, 
+                    export_comptabilite.`dateVente`, 
+                    export_comptabilite.`clients`, 
+                    export_comptabilite.`ifu`, 
+                    export_comptabilite.dateAchat,  
+                    export_comptabilite.produit,
+                    export_comptabilite.qte,  
+                    export_comptabilite.pvr,
+                    export_comptabilite.prixTTC, 
+                    export_comptabilite.PrixHT,
+                    export_comptabilite.`filleuls`,
+                    export_comptabilite.PrixBruite,
+                    export_comptabilite.NetHT,
+                    export_comptabilite.TVA, 
+                    export_comptabilite.AIB, 
+                    export_comptabilite.TTC, 
+                    export_comptabilite.FRS
                 
                     FROM `export_comptabilite`  
                         WHERE  `export_comptabilite`.`dateCreate` BETWEEN ? AND ?
@@ -107,8 +135,9 @@ class ComptabiliteReExport implements FromCollection, WithHeadings
             if ($comptabilise->filleuls!== null) {
                 $compta = json_decode($comptabilise->filleuls);
                 $Export = new ExcelReturn();
-                $Export->heureSysteme = $comptabilise->heureSysteme;
-                $Export->dateSysteme = date_format(date_create($comptabilise->dateSysteme),'d/m/Y');
+                $Export->heureSysteme = GetVenteTraitedDateViaCode(venteCode: $comptabilise->code) ? GetVenteTraitedDateViaCode(venteCode: $comptabilise->code) : "---";
+                // $Export->heureSysteme = $comptabilise->heureSysteme;
+                // $Export->dateSysteme = date_format(date_create($comptabilise->dateSysteme),'d/m/Y');
                 $Export->dateVente = $comptabilise->dateVente;
                 $Export->clients = $comptabilise->clients;
                 $Export->ifu = $comptabilise->ifu;
@@ -145,8 +174,10 @@ class ComptabiliteReExport implements FromCollection, WithHeadings
             }else{
 
                 $Export = new ExcelReturn();
-                $Export->heureSysteme = $comptabilise->heureSysteme;
-                $Export->dateSysteme = $comptabilise->dateSysteme;
+                $Export->heureSysteme = GetVenteTraitedDateViaCode(venteCode: $comptabilise->code) ? GetVenteTraitedDateViaCode(venteCode: $comptabilise->code) : "---";
+
+                // $Export->heureSysteme = $comptabilise->heureSysteme;
+                // $Export->dateSysteme = $comptabilise->dateSysteme;
                 $Export->dateVente = $comptabilise->dateVente;
                 $Export->clients = $comptabilise->clients;
                 $Export->ifu = $comptabilise->ifu;
