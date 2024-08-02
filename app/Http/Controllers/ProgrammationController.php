@@ -40,7 +40,6 @@ class ProgrammationController extends Controller
         $this->middleware(['superviseur'])->only([]);
     }
 
-
     public function index(Request $request)
     {
         if ($request->statuts) {
@@ -158,7 +157,6 @@ class ProgrammationController extends Controller
     public function store(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
         try {
-
             if ($programmation) {
                 $validator = Validator::make($request->all(), [
                     'code' => ['required', 'string', 'max:255', Rule::unique('programmations')->ignore($programmation->id)],
