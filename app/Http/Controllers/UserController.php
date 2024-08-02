@@ -56,6 +56,8 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+
         #3. Envoi du mail
         Mail::to($user)->queue(new MessagePasseword($request->password));
 

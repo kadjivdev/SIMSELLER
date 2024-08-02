@@ -122,10 +122,8 @@ class VenteController extends Controller
         return response()->json($ventes);
     }
 
-
     public function create(Request $request)
     {
-        // dd("gogo");
         $typeVente = [];
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
@@ -224,7 +222,6 @@ class VenteController extends Controller
                 $parametre = $parametres->update([
                     'valeur' => $valeur,
                 ]);
-
 
                 if ($parametre) {
                     $format = env('FORMAT_VENTE_D');
