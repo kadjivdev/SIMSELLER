@@ -2,6 +2,7 @@
 
 use App\Models\Client;
 use App\Models\Vente;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Number;
 
 function IsThisVenteUpdateDemandeOnceMade($vente)
 {
@@ -123,9 +124,40 @@ function GetVenteTraitedDateViaCode($venteCode)
 function IsClientHasADebt($clientId)
 {
     $client = Client::find($clientId);
-    if (!$client->debit || $client->debit == 0) {
+    // dd($client);
+    if (!$client->debit_old || $client->debit_old == 0) {
         return false;
     }
 
     return true;
+}
+
+###___RECUPERATION DU RESTE A SOLDER D'UN CLIENT DE L'ANCIEN SYSTEME
+function ClientDebtReste($clientOld)
+{
+    $client = Client::where(["raisonSociale" => $clientOld->nomUP])->first();
+
+    if (!$client) {
+        return 0;
+    }
+
+    return $client->debit_old ? $client->debit_old : 0;
+}
+
+###___RECUPERATION DU RESTE A SOLDER D'UN CLIENT DU NOUVEAU SYSTEME
+function _ClientDebtReste($client)
+{
+    if (!$client) {
+        return 0;
+    }
+
+    return $client->debit_old ? $client->debit_old : 0;
+}
+
+
+###___SOMME DE DEUX NOMBRE
+function Somm($a, $b)
+{
+    // dd($a,$b);
+    return number_format($a + $b,'0', '', ' ');
 }

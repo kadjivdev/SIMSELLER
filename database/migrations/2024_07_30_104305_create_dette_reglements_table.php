@@ -11,6 +11,7 @@ class CreateDetteReglementsTable extends Migration
      *
      * @return void
      */
+    
     public function up()
     {
         Schema::create('dette_reglements', function (Blueprint $table) {

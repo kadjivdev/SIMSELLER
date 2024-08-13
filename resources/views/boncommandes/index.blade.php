@@ -126,7 +126,6 @@
                                         <th>Actualisation</th>
                                         @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <th>Action</th>
-
                                         @endif
                                     </tr>
                                 </thead>
@@ -191,6 +190,7 @@
                                             <!-- <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a> -->
 
                                         </td>
+                                        
                                         @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
 
                                         <td class="text-center">

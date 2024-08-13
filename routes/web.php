@@ -49,6 +49,7 @@ use App\Http\Controllers\CommandeClientController;
 use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
+use App\Models\User;
 use Database\Factories\AgentFactory;
 
 /*
@@ -321,9 +322,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
     // Livraison router
     Route::prefix('livraisons')->group(function () {
-        Route::controller(ProgrammeController::class)->group(function () {
-            Route::get('livraison/{programation}', 'getProgrammationById_redirect')->name("livraisons.getTransfertProgramme");
-        });
+        // Route::controller(ProgrammeController::class)->group(function () {
+        //     Route::get('livraison/{programation}', 'getProgrammationById_redirect')->name("livraisons.getTransfertProgramme");
+        // });
 
         Route::controller(LivraisonController::class)->group(function () {
 
@@ -394,11 +395,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     //Detail bon de commande
     Route::prefix('boncommandes')->group(function () {
         Route::controller(DetailBonCommandeController::class)->group(function () {
-
             //Route::get('/index', 'index')->name('boncommandes.index');
 
             Route::post('/detailboncommandes/store/{boncommande}/{detailboncommandes?}', 'store')->where(['boncommande' => '[0-9]+'])->name('detailboncommandes.store');
-
 
             Route::get('/detailboncommandes/show/{id}', 'show')->name('detailboncommandes.show');
 
@@ -1291,13 +1290,16 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         Route::get('/agent/destroy/{agent}', 'destroy')->name('agent.destroy');
         Route::get('/agent/client_Affecter/{agent}', 'client_Affecter')->name('agent.affecter');
     });
-
+    
     //});
     Route::controller(clientsController::class)->group(function () {
         Route::get('newclient/index/', 'index')->name('newclient.index');
+        Route::get('newclient/indexOld/', 'oldClients')->name('newclient.oldClients');
+        Route::get('newclient/indexOldNotExistInTheNewSystem/', 'oldClientsNotInTheNewSystem')->name('newclient.oldClientsNotInTheNewSystem');
 
         ####___REGLEMENT DES DETTES ANCIENNES
         Route::match(["GET","POST"],'newclient/reglement/{client?}', 'reglement')->name('newclient.reglement');
+        Route::get('newclient/reglement/{client}/detail', 'reglementDetail')->name('newclient.reglementDetail');
 
         Route::get('newclient/data', 'data')->name('newclient.data');
         Route::get('newclient/create', 'create')->name('newclient.create');

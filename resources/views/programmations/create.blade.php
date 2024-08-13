@@ -188,7 +188,8 @@
                                                     <th>Avaliseur</th>
                                                     <th>Quantité</th>
                                                     <th>Zone</th>
-                                                    <th>Date Sortie</th>
+                                                    <!-- <th>Date Sortie</th> -->
+                                                    <th>BL</th>
                                                     <th>Statut</th>
                                                     <th>Action</th>
                                                 </tr>
@@ -221,7 +222,8 @@
                                                     </td>
                                                     <td>{{ $programmation->zone->libelle }}
                                                         ({{ $programmation->zone->departement->libelle }})</td>
-                                                    <td>{{ $programmation->dateSortie ? date_format(date_create($programmation->dateSortie),'d/m/Y'):'' }}</td>
+                                                    <!-- <td>{{ $programmation->dateSortie ? date_format(date_create($programmation->dateSortie),'d/m/Y'):'' }}</td> -->
+                                                    <td>{{ $programmation->bl_gest ? $programmation->bl_gest:$programmation->bl}}</td>
 
                                                     <td class="text-center">
                                                         @if ($programmation->statut == 'Annuler')

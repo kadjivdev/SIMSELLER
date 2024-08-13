@@ -28,10 +28,14 @@
                                 <div class="card-header">
                                     <h3 class="card-title"></h3>
                                         @if (($vente->montant-$vente->remise) > collect($vente->reglements)->sum('montant'))
-                                            <a class="btn btn-success btn-sm" href="{{route('reglements.create', ['vente'=>$vente->id])}}">
-                                                <i class="fas fa-solid fa-plus"></i>
-                                                Ajouter
-                                            </a>
+                                            @if(!IsClientHasADebt($vente->commandeclient->client->id))
+                                                <a class="btn btn-success btn-sm" href="{{route('reglements.create', ['vente'=>$vente->id])}}">
+                                                    <i class="fas fa-solid fa-plus"></i>
+                                                    Ajouter
+                                                </a>
+                                            @else
+                                            <p class="text-center text-danger">Ooops!! Désolé, ce client doit une dette antérieure. Veuillez bien la regler d'abord avant tout nouveau règlement</p>
+                                            @endif
                                         @endif
                                         @if(($vente->montant-$vente->remise) > collect($vente->reglements)->sum('montant') && count($vente->echeances) > 0 && $vente->type_vente_id == 2)
                                             <button type="button" class="btn btn-primary btn-sm float-md-right" data-toggle="modal" data-target="#modal-default">

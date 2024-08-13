@@ -34,6 +34,7 @@ class LivraisonController extends Controller
         $repre = $user->representant;
         $zones = $repre->zones;
 
+        // dd($request->statuts);
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -120,7 +121,7 @@ class LivraisonController extends Controller
         }
         $req = $request->all();
 
-        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()) {
+        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()) {
             if ($request->debut && $request->fin)
                 $programmations = $programmations->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
             else
@@ -142,6 +143,7 @@ class LivraisonController extends Controller
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
         $zones = $repre->zones;
+        
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -375,7 +377,6 @@ class LivraisonController extends Controller
                     'public'
                 );
 
-
                 $programmations = $programmation->update([
                     'bl' => $request->bl,
                     'datelivrer' => $request->datelivrer,
@@ -386,7 +387,6 @@ class LivraisonController extends Controller
                     'dateSortie' => $programmation->dateSortie ?: date('Y-m-d'),
                     'historiques' => $programmation->dateSortie ? $programmation->historiques : json_encode($historiques)
                 ]);
-
 
                 if ($programmations) {
                     $detailboncommande = DetailBonCommande::findOrFail($programmation->detailboncommande->id);
@@ -608,7 +608,7 @@ class LivraisonController extends Controller
         }
 
         if (($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == false) || ($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == null)) {
-            session()->flash("message", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est déjà en cours de vente.");
+            session()->flash("error", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est déjà en cours de vente.");
             return back()/* redirect()->route("livraisons.index") */;
         }
 

@@ -51,19 +51,26 @@ class VenteController extends Controller
 
     public function index(Request $request)
     {
+        // dd(Auth::user()->roles);
         $roles = Auth::user()->roles()->pluck('id')->toArray();
         $commandeclients = CommandeClient::whereIn('statut', ['Préparation', 'Vendue', 'Validée', 'Livraison partielle', 'Livrée']);
 
-        if ($request->debut && $request->fin)
+        if ($request->debut && $request->fin){
             $commandeclients = $commandeclients->WhereBetween('dateBon', [$request->debut, $request->fin])->pluck('id');
-        else
+        }else{
             $commandeclients = $commandeclients->pluck('id');
+        }
 
-        if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles))
-            $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
-
-        elseif (in_array(3, $roles))
+        if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)){
+            $user = Auth::user();
+            if ($user->id==11) {
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users",$user->id)->orderByDesc('code')->get();
+            }else {
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
+            }
+        }elseif (in_array(3, $roles)){
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
+        }
         return view('ventes.index', compact('ventes'));
     }
 
@@ -715,7 +722,7 @@ class VenteController extends Controller
 
     public function postVenteAComptabiliser(Request $request)
     {
-        
+
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
             // ->whereDate('ventes.created_at', '>=', $request->debut)
@@ -1158,9 +1165,9 @@ class VenteController extends Controller
         ####___faire une validation ici avant de continuer
 
         $request->validate([
-            "pu"=>["numeric"],
-            "qteTotal"=>["numeric"],
-            "produit"=>["numeric"],
+            "pu" => ["numeric"],
+            "qteTotal" => ["numeric"],
+            "produit" => ["numeric"],
         ]);
 
         ####____REFORMATTAGE DES DATAS

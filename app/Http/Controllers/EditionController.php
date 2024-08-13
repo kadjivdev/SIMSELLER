@@ -198,12 +198,13 @@ class EditionController extends Controller
         $sommeVentes = Vente::all()->sum('montant');
         $credit = $clients->sum('credit');
         $debit = $clients->sum('debit');
+
+        // dd($sommeVentes-$reglements);
         return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes'));
     }
 
     public function postPointSolde(Request $request)
     {
-        // dd($request->client);
         $zone = Zone::find($request->zone);
         $client = Client::find($request->client);
         $credit = 0;
@@ -273,18 +274,32 @@ class EditionController extends Controller
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('zones.id', $zone->id)
-                
+
                 // SEULE LES VENTES VALIDE SONT RECUPERES
                 ->where('valide', true)
-                
+
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
             // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
 
-        // dd($debit);
-        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements]);
+        $_sommeVentes = $ventes->sum('montant');
+        $_reglements = $reglements;
+        $_client = $client;
+        $montant = 0;
+        $regle = 0;
+
+        $_montant = 0;
+        $_regle = 0;
+
+        foreach ($ventes as $item) {
+            $_montant = $montant + $item->montant;
+            $_regle = $regle + $item->reglements()->sum('montant');
+        }
+
+        #####____
+        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_reglements" => $_reglements,"_montant"=>$_montant,"_regle"=>$_regle]);
     }
 
     public function etatCompte()
@@ -601,7 +616,6 @@ class EditionController extends Controller
     }
     public function postEtatReglementPeriode(Request $request)
     {
-        // dd("gogo");
 
         //Prévoir le validator
         $banque = Banque::find($request->banque);
@@ -903,7 +917,6 @@ class EditionController extends Controller
     // GESTION DE LA LISTE DES APPROVISIONNEMENTS
     function CompteApprovisionnement(Request $request)
     {
-
         ## QUAND C'EST UNE REQUETE GET
         if ($request->method() == "GET") {
             $mouvements = Mouvement::orderBy('id', 'desc')->get(); # where('compteClient_id', $compteClient->id)->paginate()->toArray();

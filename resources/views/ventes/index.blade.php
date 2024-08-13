@@ -108,6 +108,7 @@
                                     <?php $TotalMontant = 0; ?>
                                     <?php $TotalQuantite = 0; ?>
                                     @foreach($ventes as $vente)
+                                    
                                     <?php $TotalQuantite = $TotalQuantite + $vente->qteTotal; ?>
                                     <?php $TotalMontant = $TotalMontant + $vente->montant; ?>
 
@@ -157,7 +158,6 @@
 
                                         <td>{{ $vente->user->name }}</td>
                                         <td class="text-center">
-
                                             @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() == true)
                                             @if( $vente->statut == 'Vendue')
                                             <a class="btn btn-danger btn-sm" href="{{ route('ventes.destroy', ['vente'=>$vente->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
@@ -181,7 +181,6 @@
                                             @endif
                                             @endif
                                             <a class="btn btn-dark btn-sm" href="#" onclick="charger({{ $vente->id }} )" data-toggle="modal" data-target="#modal-lg"><i class="fa-solid fa-list"></i></a>
-
                                         </td>
                                         @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
 

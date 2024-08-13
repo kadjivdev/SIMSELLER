@@ -296,13 +296,36 @@
                         @endif
                         @if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
                         <li class="nav-item">
-                            <a href="{{ route('newclient.index') }}" class="nav-link {{ (request()->is('newclient/*')) ? 'active' : '' }}">
+                            <a href="{{ route('newclient.index') }}" class="nav-link {{ (request()->is('newclient/index')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
                                 <p>
                                     Client
                                 </p>
                             </a>
                         </li>
+
+                        @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists())
+                        <li class="nav-item">
+                            <a href="{{ route('newclient.oldClients') }}" class="nav-link {{ (request()->is('newclient/indexOld')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
+                                <p>
+                                    Anciens Clients migrés
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('newclient.oldClientsNotInTheNewSystem') }}" class="nav-link {{ (request()->is('newclient/indexOldNotExistInTheNewSystem')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
+                                <p>
+                                    Anciens Clients non migrés
+                                </p>
+                            </a>
+                        </li>
+
+                        @endif
+
+
                         @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
 
                         <li class="nav-item">
@@ -377,8 +400,17 @@
                                 </p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('edition.etatLivraisonPeriode') }}" class="nav-link {{ (route('edition.etatLivraisonPeriode') == url()->current()) ? 'active' : '' }}">
+                                <i class="nav-icon far  fa-list text-cyan"></i>
+                                <p>
+                                    Etat des Livraison
+                                </p>
+                            </a>
+                        </li>
                         @endif
-                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
+
+                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('edition.etatReglementperiode') }}" class="nav-link {{ (route('edition.etatReglementperiode') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -413,7 +445,7 @@
                             </a>
                         </li>
 
-                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
+                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('accusedocuments.indexAll') }}" class="nav-link {{ (route('accusedocuments.indexAll') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>

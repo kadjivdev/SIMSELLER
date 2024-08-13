@@ -44,7 +44,8 @@
                                         <div class="col-sm-2">
                                             <div class="form-group">
                                                 <label>Qte Livrer<span class="text-danger">*</span></label>
-                                                <input type="number" class="form-control form-control-sm" name="qtelivrer" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->qtelivrer}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
+                                                <input type="number" hidden class="form-control form-control-sm" name="qtelivrer" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->qtelivrer}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
+                                                <input type="number" disabled class="form-control form-control-sm" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->qtelivrer}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
                                                 @error('qtelivrer')
                                                     <span class="text-danger">{{ $message }}</span>
                                                 @enderror

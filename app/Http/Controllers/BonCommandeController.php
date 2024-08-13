@@ -167,7 +167,6 @@ class BonCommandeController extends Controller
     public function store(Request $request, BonCommande $boncommandes = NULL)
     {
         try {
-
             if ($boncommandes) {
 
                 $validator = Validator::make($request->all(), [

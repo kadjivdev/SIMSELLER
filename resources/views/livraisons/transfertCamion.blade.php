@@ -43,7 +43,7 @@
 
                             @if(session()->has('error'))
                             <div class="row">
-                                <div class="col-md-12 alert-dange alert">
+                                <div class="col-md-12 alert-danger alert">
                                     <i class="fa fa-check"></i> {{session()->get('error')}}
                                 </div>
                             </div>

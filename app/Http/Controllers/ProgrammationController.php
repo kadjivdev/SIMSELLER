@@ -136,7 +136,6 @@ class ProgrammationController extends Controller
                 //$programmations = $detailboncommandes->programmations()->where('statut', 'Valider')->get();
             }
         }
-
         $req = $request->statuts;
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }
@@ -378,6 +377,13 @@ class ProgrammationController extends Controller
     {
     }
 
+    ####_____REDIRECTION VERS LA PAGE DE TRANSFERT
+    public function getProgrammationById_redirect(Request $request,$programmation)
+    {
+        $programmation = Programmation::find($programmation);
+        $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
+        return view("livraisons.transfertCamion", compact('programmation', 'zones'));
+    }
 
 
     public function destroy(DetailBonCommande $detailboncommande, Programmation $programmation)

@@ -144,8 +144,8 @@
                                                         <td>{{ $programmation->code }}</td>
                                                         <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
                                                         <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
-                                                        <td>{{ $programmation->bl }}</td>
                                                         <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
+                                                        <td>{{ $programmation->bl_gest?$programmation->bl_gest:$programmation->bl }}</td>
                                                         <td>{{ $programmation->camion->immatriculationTracteur }}
                                                             ({{ $programmation->camion->marque->libelle }})
                                                         </td>
@@ -178,7 +178,9 @@
                                                             <td>{{ $programmation->code }}</td>
                                                             <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
                                                             <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
+                                                            <!--<td>{{ $programmation->detailboncommande->produit->libelle }}</td>-->
                                                             <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
+                                                            <td>{{ $programmation->bl_gest?$programmation->bl_gest:$programmation->bl }}</td>
                                                             <td>{{ $programmation->camion->immatriculationTracteur }}
                                                                 ({{ $programmation->camion->marque->libelle }})
                                                             </td>
@@ -207,14 +209,13 @@
                                             <th>Code Prog</th>
                                             <th>Date</th>
                                             <th>Fournisseur</th>
-                                            <th>BL</th>
                                             <th>Produit</th>
+                                            <th>BL</th>
                                             <th>Camion</th>
                                             <th>Chauffeur</th>
                                             <th>Zone</th>
                                             <th>Qté</th>
                                             <th>Client et Destination</th>
-                                           
                                         </tr>
                                         </tfoot>
                                     </table>

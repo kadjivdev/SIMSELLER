@@ -8,8 +8,8 @@
             <div class="row">
                 <div class="col-sm-6">
                     <h1 class="pb-3">REGLEMENT DE DETTE</h1>
-                    <strong class="">Client: </strong> <em>{{$client->nom}} {{$client->prenom}} </em> <br>
-                    <strong class="">Dette actuelle: </strong> <em class="bg-danger">{{$client->debit}} </em>
+                    <strong class="">Client: </strong> <em>{{$client->nom}} {{$client->prenom}} --- {{$client->raisonSociale}} </em> <br>
+                    <strong class="">Dette actuelle: </strong> <em class="bg-danger p-1">{{$client->debit_old?number_format($client->debit_old, '0', '', ' '):number_format(0, '0', '', ' ')}} </em>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -174,6 +174,7 @@
                                     <th>Compte</th>
                                     <th>Type</th>
                                     <th>Preuve</th>
+                                    <th>Opérateur</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -192,6 +193,7 @@
                                             <i class="bi bi-filetype-pdf"></i>
                                         </a>
                                     </td>
+                                    <td class="ml-5 pr-5">{{ $rglment->_Operator->name }} </td>
                                 </tr>
                                 @endforeach
                                 @endif
@@ -205,6 +207,7 @@
                                     <th>Compte</th>
                                     <th>Type</th>
                                     <th>Preuve</th>
+                                    <th>Operateur</th>
                                 </tr>
                             </tfoot>
                         </table>

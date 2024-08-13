@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Agent;
 use App\Models\Client;
+use App\Models\ClientOld;
 use App\Models\Compte;
 use App\Models\Departement;
 use App\Models\DetteReglement;
@@ -12,6 +14,7 @@ use App\Models\TypeClient;
 use App\Models\TypeDetailRecu;
 use App\Models\Vente;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -37,11 +40,31 @@ class clientsController extends Controller
 
     }
 
+    ###_____CLIENTS ANCIENS
+    public function oldClients(Request $request)
+    {
+        $oldClients = ClientOld::all();
+        return view('client.indexOld', compact('oldClients'));
+    }
+
+    ###_____CLIENTS ANCIENS N'EXISTANT PAS DANS LE NOUVEAU SYSTEM
+    public function oldClientsNotInTheNewSystem(Request $request)
+    {
+        $oldClients = ClientOld::all();
+        foreach ($oldClients as $oldClient) {
+            $client = Client::where(["raisonSociale" => $oldClient->nomUP])->first();
+            if (!$client) {
+                $un_existable_clients[] = $oldClient;
+            }
+        }
+
+        return view('client.indexOldNotExistInTheNewSystem', compact('un_existable_clients'));
+    }
+
     ####___REGLEMENT DES DETTES ANCIENNES
     function reglement(Request $request, Client $client)
     {
         if ($request->method() == "GET") {
-
             $comptes = Compte::all();
             $typedetailrecus = TypeDetailRecu::all();
             ###___
@@ -52,7 +75,7 @@ class clientsController extends Controller
 
         ###___Verifions si le client a une dette à regler
         if (!IsClientHasADebt($client->id)) {
-            return redirect()->route()->with("error", "Ce client n'a plus de dette à solder!");
+            return redirect()->BACK()->with("error", "Ce client n'a plus de dette à solder!");
         }
 
         // VALIDATION
@@ -67,7 +90,7 @@ class clientsController extends Controller
         ]);
 
         ###__VERIFICATION DU MONTANT
-        if ($request->get("montant") > - ($client->debit)) {
+        if ($request->get("montant") > - ($client->debit_old)) {
             return redirect()->back()->withInput()->with("error", "Le montant saisi depasse le montant à rembourser!");
         }
 
@@ -80,19 +103,40 @@ class clientsController extends Controller
 
         $data = array_merge($request->all(), ["operator" => request()->user()->id, "document" => $document, "client" => $client->id]);
 
+       
+        #####____ANNULATION DU CREDIT SI LA CREDITATION AVAIT ETE FAITE POUR COMPENSSER LA DETTE ANCIENNE
+
+        if (($client->debit_old == -($client->credit))) {
+            if($client->credit==-($client->debit)){
+                $client->debit = 0;
+            }
+            $client->credit = 0;
+        }
+
+        ###___ACTUALISATION DU DEBIT DU CLIENT
+        $client->debit_old = $client->debit_old + $request->montant;
+
+        ###___
         $dette_reglement = DetteReglement::create($data);
 
-        // dd($client->debit + $dette_reglement->montant);
-        ###___ACTUALISATION DU DEBIT DU CLIENT
-        $client->debit = $client->debit + $dette_reglement->montant;
-        $client->save();
-
-
         if ($dette_reglement) {
+            ###___VALIDATION DES NEW DATAS DU CLIENT
+            $client->save();
             return redirect()->back()->with("message", "Règlement de dette éffectué avec succès!");
         } else {
             return redirect()->back()->with("error", "Ooops!! Une erreure est survenue!");
         }
+    }
+
+    ####____DETAIL DE REGLEMENT
+    function reglementDetail(Request $request,$clientOldId ) {
+        $clientOld = ClientOld::find($clientOldId);
+        $client = Client::where(["raisonSociale" => $clientOld->nomUP])->first();
+
+        if (!$client) {
+            return redirect()->back()->with("error", "Ooops!! Vérifiez si ce client existe vraiment dans le nouveau système!");
+        }
+        return view("client.reglements.reglementDetail", compact("client"));
     }
 
     public function data()
