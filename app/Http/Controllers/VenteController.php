@@ -51,24 +51,23 @@ class VenteController extends Controller
 
     public function index(Request $request)
     {
-        // dd(Auth::user()->roles);
         $roles = Auth::user()->roles()->pluck('id')->toArray();
         $commandeclients = CommandeClient::whereIn('statut', ['Préparation', 'Vendue', 'Validée', 'Livraison partielle', 'Livrée']);
 
-        if ($request->debut && $request->fin){
+        if ($request->debut && $request->fin) {
             $commandeclients = $commandeclients->WhereBetween('dateBon', [$request->debut, $request->fin])->pluck('id');
-        }else{
+        } else {
             $commandeclients = $commandeclients->pluck('id');
         }
 
-        if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)){
+        if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
             $user = Auth::user();
-            if ($user->id==11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users",$user->id)->orderByDesc('code')->get();
-            }else {
+            if ($user->id == 11) {
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
+            } else {
                 $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
             }
-        }elseif (in_array(3, $roles)){
+        } elseif (in_array(3, $roles)) {
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         }
         return view('ventes.index', compact('ventes'));
@@ -123,7 +122,7 @@ class VenteController extends Controller
             ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
             ->join('camions', 'camions.id', '=', 'programmations.camion_id')
             ->join('chauffeurs', 'chauffeurs.id', '=', 'programmations.chauffeur_id')
-            ->select('ventes.code as vente', 'programmations.code', 'bon_commandes.code as codeBC', 'programmations.bl', 'camions.immatriculationTracteur', 'chauffeurs.nom', 'chauffeurs.prenom', 'vendus.qteVendu', 'ventes.destination', 'produits.libelle',)
+            ->select('ventes.code as vente', 'programmations.code', 'bon_commandes.code as codeBC', 'programmations.bl', 'camions.immatriculationTracteur', 'chauffeurs.nom', 'chauffeurs.prenom', 'vendus.qteVendu', 'ventes.destination', 'produits.libelle')
             // ->with("produit")
             ->orderByDesc('date')->get();
         return response()->json($ventes);
@@ -1239,13 +1238,18 @@ class VenteController extends Controller
     #######__________END UPDATE VENTE ________#################
 
 
-    #######__________UPDATE VENTE ________#################
+    #######__________DELETE VENTE ________#################
     function askDeleteVente(Request $request, Vente $vente)
     {
         ###___ON NE PEUT QUE MODIFIER LA VENTE QU'ON A PASSEE
         if (Auth::user()->id != $vente->user->id) {
             return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
         };
+
+        ###____SI LA VENTE EST DEJA PASSEE A LA COMPTABILITE ON NE PEUT PLUS LA SUPPRIMER
+        if ($vente->date_envoie_commercial || $vente->user_envoie_commercial) {
+            return redirect()->back()->with("error", "Désolé! Cette vente est déjà passée à la comptabilité! Vous ne pouvez plus la supprimer");
+        }
 
         if ($request->method() == "GET") {
             ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER

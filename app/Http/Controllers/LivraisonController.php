@@ -607,10 +607,10 @@ class LivraisonController extends Controller
             return back() /* redirect()->route("livraisons.index") */;
         }
 
-        if (($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == false) || ($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == null)) {
-            session()->flash("error", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est déjà en cours de vente.");
-            return back()/* redirect()->route("livraisons.index") */;
-        }
+        // if (($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == false) || ($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == null)) {
+        //     session()->flash("error", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est déjà en cours de vente.");
+        //     return back();
+        // }
 
         //Constitution de table de transfert
         $transfert = [];

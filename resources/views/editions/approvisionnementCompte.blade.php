@@ -18,7 +18,6 @@
         </div>
     </section>
 
-
     <section class="content">
         <div class="container-fluid">
             <div class="row">
@@ -68,6 +67,7 @@
                                             <thead class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
                                                     <th>#</th>
+                                                    <th>Reference</th>
                                                     <th>Client</th>
                                                     <th>Département</th>
                                                     <th>Date</th>
@@ -81,6 +81,7 @@
                                                 @foreach($mouvements as $key=>$mouvement)
                                                 <tr>
                                                     <td class="text-center">MVT-{{str_pad($key+1,6,'0',STR_PAD_LEFT)}}</td>
+                                                    <td class="text-center">{{$mouvement->_Reglement?$mouvement->_Reglement->reference:"---"}}</td>
                                                     <td class="text-center">{{$mouvement->compteClient->client->nom}} {{$mouvement->compteClient->client->prenom}}</td>
                                                     <td class="text-center"> <b> {{$mouvement->compteClient->client->departement?$mouvement->compteClient->client->departement->libelle:'---'}}</b> </td>
                                                     <td class="text-center">{{date_format(date_create($mouvement['dateMvt']),'d/m/Y H:i')}}</td>
@@ -94,6 +95,7 @@
                                             <tfoot class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
                                                     <th>#</th>
+                                                    <th>Reference</th>
                                                     <th>Client</th>
                                                     <th>Département</th>
                                                     <th>Date</th>

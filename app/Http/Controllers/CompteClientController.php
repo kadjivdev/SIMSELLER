@@ -80,7 +80,6 @@ class CompteClientController extends Controller
 
 
                     if ($reglement) {
-
                         $valeur = $parametre->valeur;
 
                         $valeur = $valeur + 1;
