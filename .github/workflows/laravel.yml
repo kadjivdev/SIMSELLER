@@ -29,7 +29,9 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
     - name: Install PHP dependencies
-      run: composer install --no-dev --optimize-autoloader
+      run: | 
+        composer install --no-dev --optimize-autoloader
+        coomposer update
         
     # - name: Generate app key
     #   run: php artisan key:generate
