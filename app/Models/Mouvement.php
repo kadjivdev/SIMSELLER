@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Mouvement extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
         'libelleMvt','dateMvt','montantMvt','compteClient_id','user_id','sens','reglement_id','destroy'
     ];
