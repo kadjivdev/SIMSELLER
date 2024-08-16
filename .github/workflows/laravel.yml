@@ -31,8 +31,8 @@ jobs:
     - name: Install PHP dependencies
       run: composer install --no-dev --optimize-autoloader
         
-    - name: Generate app key
-      run: php artisan key:generate
+    # - name: Generate app key
+    #   run: php artisan key:generate
 
     - name: FTP-Deploy-Action
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
