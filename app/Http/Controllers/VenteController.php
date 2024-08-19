@@ -721,7 +721,6 @@ class VenteController extends Controller
 
     public function postVenteAComptabiliser(Request $request)
     {
-
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
             // ->whereDate('ventes.created_at', '>=', $request->debut)
