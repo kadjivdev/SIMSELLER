@@ -26,12 +26,11 @@ jobs:
     
     - uses: actions/checkout@v4
     - name: Copy .env
-      run: php -r "file_exists('.env_prod');"
+      run: php -r "file_exists('.env');"
 
     - name: Install PHP dependencies
       run: | 
         composer install --no-dev --optimize-autoloader
-        composer update
         
     - name: Generate app key
       run: php artisan key:generate
