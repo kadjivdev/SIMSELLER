@@ -102,13 +102,13 @@
                                             <select class="form-control form-control-sm select2   @error('produit_id') is-invalid @enderror" onchange="selectDefaultDriver('{{old('programmation_id')}}')" id="produit" name="produit" style="width: 100%;">
                                                 <option selected>**Choisissez un produit**</option>
                                                 @if($vente->commandeclient->byvente == 1)
-                                                @foreach($products as $produit)
-                                                <option value="{{$produit->id}}" @if ($vente) @if (old('produit_id')) {{old('produit_id')==$produit->id?'selected':''}} @else {{$vente->produit_id==$produit->id?'selected':''}} @endif @else {{old('produit_id')==$produit->id?'selected':''}} @endif>{{ $produit->libelle }}</option>
-                                                @endforeach
+                                                    @foreach($products as $produit)
+                                                    <option value="{{$produit->id}}" @if ($vente) @if (old('produit_id')) {{old('produit_id')==$produit->id?'selected':''}} @else {{$vente->produit_id==$produit->id?'selected':''}} @endif @else {{old('produit_id')==$produit->id?'selected':''}} @endif>{{ $produit->libelle }}</option>
+                                                    @endforeach
                                                 @else
-                                                @foreach($vente->commandeclient->commanders as $cder)
-                                                <option value="{{$cder->produit->id}}" @if ($vente) @if (old('produit_id')) {{old('produit_id')==$cder->produit->id?'selected':''}} @else {{$vente->produit_id==$cder->produit->id?'selected':''}} @endif @else {{old('produit_id')==$cder->produit->id?'selected':''}} @endif>{{ $cder->produit->libelle }}</option>
-                                                @endforeach
+                                                    @foreach($vente->commandeclient->commanders as $cder)
+                                                    <option value="{{$cder->produit->id}}" @if ($vente) @if (old('produit_id')) {{old('produit_id')==$cder->produit->id?'selected':''}} @else {{$vente->produit_id==$cder->produit->id?'selected':''}} @endif @else {{old('produit_id')==$cder->produit->id?'selected':''}} @endif>{{ $cder->produit->libelle }}</option>
+                                                    @endforeach
                                                 @endif
                                             </select>
                                             @error('produit_id')
@@ -136,7 +136,7 @@
                                                     <label>Camion <span class="text-danger">*</span></label>
                                                     <select required class="form-control form-control-sm select2  @error('programmation_id') is-invalid @enderror" name="programmation_id" id="bl" onchange="getStockDisponible()" style="width: 100%;">
                                                         @foreach($vente->vendus as $vendu)
-                                                        <option value="{{ $vendu->programmation->id }}" selected>{{ $vendu->programmation->bl }}</option>
+                                                        <option value="{{ $vendu->programmation->id }}" selected>{{ $vendu->programmation->bl_gest?$vendu->programmation->bl_gest:$vendu->programmation->bl }}</option>
                                                         <!-- <option id="bl_0" selected disabled>** Choisissez un Camion **</option> -->
                                                         @endforeach
                                                     </select>

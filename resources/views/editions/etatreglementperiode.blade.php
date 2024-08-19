@@ -88,10 +88,9 @@
 
                                 <div class="col-md-12">
                                     <h4 class="col-12 text-center border border-info p-2 mb-2">
-
                                         Point des Règlements de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
-
                                     </h4>
+                                    <!--  -->
                                     <table id="example1" class="table table-bordered table-striped table-sm mt-2" style="font-size: 12px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
@@ -110,7 +109,6 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                           
                                             @php($montant = 0)
                                             @php($montantTotal = 0)
                                             @php($cpte = 0)
@@ -125,7 +123,6 @@
 
                                             @endif
                                             @if(($venteId == $item->id_vente)||($venteId == 0))
-
                                             <tr>
                                                 <td>{{++$key}}</td>
                                                 <td>{{$item->date}}</td>
@@ -137,7 +134,7 @@
                                                 <td>{{ $item->code_reglement}}</td>
                                                 <td>{{ $item->reference}}</td>
                                                 <td class="text-right">{{ $item->montant_reglement}}</td>
-                                                <td></td>
+                                                <td class="font-weight-bold text-danger" >{{number_format(($montant - $regle),0,',',' ')}}</td>
                                                 <td></td>
                                             </tr>
                                             @php($venteId = $item->id_vente)
@@ -145,23 +142,18 @@
                                             @php($regle = $regle + ($item->montant_reglement))
                                             @php( $regleTotal = $regleTotal+ ($item->montant_reglement))
 
-
-
-
                                             @else
                                             @php( $montantTotal = $montantTotal+$item->montant_vente)
                                             @php( $regleTotal = $regleTotal+ ($item->montant_reglement))
-                                            <tr>
+                                            <!-- <tr>
                                                 <td colspan="5" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold"></td>
                                                 <td></td>
                                                 <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
-                                                <!-- <td></td> -->
                                                 <td class="text-right @if (number_format(($montant - $regle),0,',',' ')>0) text-danger @else @endif font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <!-- <td class="text-right font-weight-bold"></td> -->
-                                                <!-- <td></td> -->
-                                            </tr>
+                                                <td class="text-right font-weight-bold"></td>
+                                            </tr> -->
                                             <tr>
                                                 <td>{{++$key}}</td>
                                                 <td>{{$item->date}}</td>
@@ -173,38 +165,36 @@
                                                 <td>{{ $item->code_reglement}}</td>
                                                 <td>{{ $item->reference}}</td>
                                                 <td class="text-right">{{ $item->montant_reglement}}</td>
-                                                <td></td>
+                                                <td class="font-weight-bold text-danger">{{number_format(($montant - $regle),0,',',' ')}}</td>
                                                 <td>{{ $item->recouvreur}}</td>
-                                                <td></td>
+                                                <!-- <td></td> -->
                                             </tr>
                                             @php($venteId = $item->id_vente)
                                             @php($montant = $item->montant_vente)
                                             @php($regle = 0)
                                             @php($regle = $regle + ($item->montant_reglement))
                                             @if ($key == session('resultat')['nbre'])
-                                            <tr>
+                                            <!-- <tr>
                                                 <td colspan="5" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold"></td>
                                                 <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold"></td>
-                                                <td></td>
-                                            </tr>
+                                            </tr> -->
                                             @endif
 
                                             @endif
 
                                             @endforeach
-                                            <tr>
+                                            <!-- <tr>
                                                 <td colspan="5" class="font-weight-bold text-success">Total</td>
                                                 <td class="text-right font-weight-bold text-success">{{number_format($montantTotal,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold text-success"></td>
                                                 <td colspan="2" class="text-right font-weight-bold text-success">{{number_format($regleTotal,0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold text-success">{{number_format(($montantTotal - $regleTotal),0,',',' ')}}</td>
                                                 <td class="text-right font-weight-bold text-success"></td>
-                                                <td></td>
-                                            </tr>
+                                            </tr> -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -216,7 +206,7 @@
 
                                 @endif
                             </div>
-                            @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                            <!-- if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())) -->
                             <div class="card-footer text-center no-print">
                                 @if(session('resultat'))
                                 @if(count(session('resultat')['reglements']) > 0)
@@ -224,7 +214,7 @@
                                 @endif
                                 @endif
                             </div>
-                            @endif
+                            <!-- endif -->
                         </div>
                     </div>
                 </div>

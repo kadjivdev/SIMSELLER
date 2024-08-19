@@ -373,11 +373,12 @@
                 </li>
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()||Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists()||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
                 <li class="nav-header">EDITION</li>
+
                 <li class="nav-item {{request()->route()->getPrefix() == '/edition' ? 'menu-open':''}}">
                     <a href="#" class="nav-link {{request()->route()->getPrefix() == '/edition' ? 'active':''}}">
                         <i class="nav-icon fas fa-regular fa-file"></i>
                         <p>
-                            Visuatilations & états
+                            Visuailations & états
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>

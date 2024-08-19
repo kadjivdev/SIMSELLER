@@ -143,8 +143,6 @@ class VenduController extends Controller
                     $vente->montant = $somme + ($request->qteVendu * $request->transport);
                     $ventes = $vente->update();
 
-
-
                     if ($ventes) {
 
                         if ($ver) {
@@ -168,6 +166,7 @@ class VenduController extends Controller
                                     $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
                                     $somme += $montants;
                                 }
+                                
                                 $vente->montant = $somme + ($request->qteVendu * $request->transport);
                                 $vente->update();
 

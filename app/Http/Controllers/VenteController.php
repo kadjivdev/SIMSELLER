@@ -1185,23 +1185,33 @@ class VenteController extends Controller
         // dd($vendu);
         if ($vendu) {
             $vendu->update([
-                "qteTotal" => $qteTotal,
+                "qteVendu" => $qteTotal,
                 "pu" => $pu
             ]);
         }
 
-        ###___MODIFICATION DE LA COMMANDE CLIENT (si la modification touche le client)
-        if ($request->client_id) {
-            $vente->commandeclient->update(["client_id" => $client]);
-        }
-
         ###_____MODIFICATION DE LA VENTE EN REEL
+        $somme = 0;
+        foreach ($vente->vendus as $vendu) {
+            $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
+            $somme += $montants;
+        }
+        $venteMontant = $somme;
+
         $vente->update([
             "qteTotal" => $qteTotal,
-            "montant" => $montant,
+            "montant" => $venteMontant,
             "produit_id" => $produit_id,
             "pu" => $pu,
         ]);
+
+        ###___MODIFICATION DE LA COMMANDE CLIENT (si la modification touche le client)
+        $vente->commandeclient->update(["client_id" => $client, "montant" => $venteMontant]);
+
+        ###___MODIFICATION DE LA PROGRAMMATION LIEE A CETTE VENTE
+        // $vendu->programmation->update([
+
+        // ]);
 
         ####____ON BLOQUE A NOUVEAU L'ACCES
         $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id])->get()->last();
