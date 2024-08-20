@@ -548,7 +548,6 @@ class VenteController extends Controller
 
     public function validationVente(Vente $vente)
     {
-
         if ($vente->statut == "Vendue") {
             Session()->flash('message', 'Vous avez déjà valider cette vente n° ' . $vente->code);
             return redirect()->route('ventes.index', ['vente' => $vente->id]);
@@ -574,6 +573,7 @@ class VenteController extends Controller
         } else
             abort(403);
     }
+
     public function initVente(Vente $vente)
     {
         $vente->update([
@@ -588,6 +588,7 @@ class VenteController extends Controller
         $vente->vendus()->delete();
         return redirect()->route('vendus.create', ['vente' => $vente->id])->with('msgSuppression', 'Vente initialisée.');
     }
+
     public function aComptabiliser(Vente $vente)
     {
         try {
@@ -611,6 +612,7 @@ class VenteController extends Controller
         }
         return response($clientParrain);
     }
+
     public function showVente(Vente $vente)
     {
         return response()->json($vente);
@@ -719,7 +721,7 @@ class VenteController extends Controller
 
         ###___les ventes passées par les utilisateurs associés à ce representant
         ###___un user ne peut plus voir 
-        $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users","!=",$current->id)->get(); ##Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
+        $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get(); ##Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
@@ -1173,41 +1175,49 @@ class VenteController extends Controller
 
         $request->validate([
             "pu" => ["numeric"],
-            "qteTotal" => ["numeric"],
+            "qteVendu" => ["numeric"],
             "produit" => ["numeric"],
         ]);
 
         ####____REFORMATTAGE DES DATAS
         $pu = $request->pu ? $request->pu : $vente->pu; ## $vente->pu;
-        $qteTotal = $request->qteTotal ? $request->qteTotal : $vente->qteTotal;
-        $montant = $pu * $qteTotal;
+        $qteVendu = $request->qteVendu;
+        $venteMontant = $pu * $qteVendu;
         $produit_id = $request->produit ? $request->produit : $request->produit_id;
         $client = $request->client_id ? $request->client_id : $vente->client_id;
         $programmation_id = $request->programmation_id;
 
-        // dd($programmation_id);
-
         ###___MODIFICATION DU VENDU
-        $vendu = Vendu::where(["vente_id" => $vente->id, "programmation_id" => $programmation_id])->first();
 
-        // dd($vendu);
+        $vp_vendu = Vendu::where(["vente_id" => $vente->id, "programmation_id" => $programmation_id])->first();
+        if ($vp_vendu) {
+            ### i.e la programmation n'a pas subie de modification
+            #### la vente est toujours associée à cette programmation
+            $vendu = $vp_vendu;
+        } else {
+            ### i.e la programmation a pas subie de modification
+            #### la vente n'est plus associée à cette programmation
+            $vendu =  $vente->vendus->first();
+        }
+
+        ###__Stock du camion
+        $programmation = Programmation::findOrFail($programmation_id);
+        $stock = $vendu->programmation->qteprogrammer - $programmation->vendus->sum("qteVendu");
+        if ($stock < $qteVendu) {
+            return redirect()->back()->with("error", "Le Stock de ce camion n'est que : " . $stock . " Veuillez bien diminuer la quantité");
+        }
+
         if ($vendu) {
             $vendu->update([
-                "qteVendu" => $qteTotal,
-                "pu" => $pu
+                "qteVendu" => $qteVendu,
+                "pu" => $pu,
+                "programmation_id" => $programmation_id,
             ]);
         }
 
         ###_____MODIFICATION DE LA VENTE EN REEL
-        $somme = 0;
-        foreach ($vente->vendus as $vendu) {
-            $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
-            $somme += $montants;
-        }
-        $venteMontant = $somme;
-
         $vente->update([
-            "qteTotal" => $qteTotal,
+            "qteTotal" => $qteVendu,
             "montant" => $venteMontant,
             "produit_id" => $produit_id,
             "pu" => $pu,

@@ -60,5 +60,4 @@ class Camion extends Model
     {
         return $this->belongsTo(Marque::class, 'marque_id', 'id');
     }
-
 }

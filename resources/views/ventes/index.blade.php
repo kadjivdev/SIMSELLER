@@ -164,18 +164,18 @@
                                             @endif
                                             @endif
                                             @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
-                                            @if ($vente->statut == 'Vendue')
-                                            <a class="btn btn-primary btn-sm" href="{{ route('ventes.show', ['vente'=>$vente->id]) }}"><i class="fa fa-print"></i></a>
-                                            @if(false)
-                                            <a class="btn btn-info btn-sm" href="{{ route('ventes.invalider', ['vente'=>$vente->id]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
-                                            @endif
+                                                @if ($vente->statut == 'Vendue')
+                                                <a class="btn btn-primary btn-sm" href="{{ route('ventes.show', ['vente'=>$vente->id]) }}"><i class="fa fa-print"></i></a>
+                                                @if(false)
+                                                <a class="btn btn-info btn-sm" href="{{ route('ventes.invalider', ['vente'=>$vente->id]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
+                                                @endif
                                             @elseif($vente->statut == 'Préparation')
-                                            @if($vente->vendus->count() > 0)
-                                            <a class="btn btn-success btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Valider"><i class="fa-solid fa-check"></i></a>
-                                            @endif
-                                            <a class="btn btn-secondary btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Ajouter Détails Vente"><i class="fa-solid fa-circle-plus"></i></a>
-                                            <!--<a class="btn btn-warning btn-sm" href="{{ route('ventes.edit', ['vente'=>$vente->id, 'statuts'=>$vente->commandeclient->type_commande_id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>-->
-                                            <a class="btn btn-danger btn-sm" href="{{ route('ventes.delete', ['vente'=>$vente->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
+                                                @if($vente->vendus->count() > 0)
+                                                <a class="btn btn-success btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Valider"><i class="fa-solid fa-check"></i></a>
+                                                @endif
+                                                <a class="btn btn-secondary btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Ajouter Détails Vente"><i class="fa-solid fa-circle-plus"></i></a>
+                                                <!--<a class="btn btn-warning btn-sm" href="{{ route('ventes.edit', ['vente'=>$vente->id, 'statuts'=>$vente->commandeclient->type_commande_id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>-->
+                                                <a class="btn btn-danger btn-sm" href="{{ route('ventes.delete', ['vente'=>$vente->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
                                             @else
 
                                             @endif

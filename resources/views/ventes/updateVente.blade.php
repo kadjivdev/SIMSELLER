@@ -55,7 +55,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="">
-                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}} </li>
+                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->commandeclient->client->raisonSociale}}</li>
                                         <li class="nav-item"> <b> <var>Reponsable de la vente: </var></b> {{$vente->user->name}} </li>
                                         <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit?$vente->produit->libelle:""}} </li>
                                         <li class="nav-item"> <b> <var>Vente Type: </var></b> {{$vente->typeVente->libelle}} </li>
@@ -78,9 +78,9 @@
                                         </div>
 
                                         <div class="form-group mb-3">
-                                            <label for="">Qte totale </label>
-                                            <input type="text" value="{{$vente->qteTotal}}" name="qteTotal" class="form-control">
-                                            @error('qteTotal')
+                                            <label for="">Qte Vendue: </label>
+                                            <input type="text" value="{{$vente->vendus->sum('qteVendu')}}" name="qteVendu" class="form-control">
+                                            @error('qteVendu')
                                             <span class="text-danger">{{$message}} </span>
                                             @enderror
                                         </div>
@@ -136,8 +136,7 @@
                                                     <label>Camion <span class="text-danger">*</span></label>
                                                     <select required class="form-control form-control-sm select2  @error('programmation_id') is-invalid @enderror" name="programmation_id" id="bl" onchange="getStockDisponible()" style="width: 100%;">
                                                         @foreach($vente->vendus as $vendu)
-                                                        <option value="{{ $vendu->programmation->id }}" selected>{{ $vendu->programmation->bl_gest?$vendu->programmation->bl_gest:$vendu->programmation->bl }}</option>
-                                                        <!-- <option id="bl_0" selected disabled>** Choisissez un Camion **</option> -->
+                                                        <option value="{{ $vendu->programmation->id }}" selected>{{ $vendu->programmation->camion->immatriculationTracteur }} </option>
                                                         @endforeach
                                                     </select>
                                                 </div>
@@ -150,7 +149,7 @@
                                         <div class="form-group mb-3">
                                             <label for="">Clients</label>
                                             <select id="client" class="form-control form-control-sm select2" name="client_id">
-                                                <option value="{{$vente->payeur->id}}" class="text-center" selected>{{$vente->commandeclient->client->nom}} {{$vente->commandeclient->client->prenom}}</option>
+                                                <option value="{{$vente->commandeclient->client->id}}" class="text-center" selected>{{$vente->commandeclient->client->raisonSociale}}</option>
                                                 @foreach($clients as $client)
                                                 <option value="{{$client->id}}">
                                                     {{ $client->raisonSociale }}

@@ -41,7 +41,6 @@
                                     {{ $message }}
                                 </div>
                             @endif
-                            
                             @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)                                                            
                             <div class="card-header">
                                 <a href="{{ route('newclient.create') }}" class="btn btn-success btn-sm">
