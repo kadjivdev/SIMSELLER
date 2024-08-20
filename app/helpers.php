@@ -53,6 +53,19 @@ function IsThisVenteUpdateDemandeAlreadyModified($vente)
     return false;
 }
 
+function GetVenteUpdatedDate($vente)
+{
+    $last_update = $vente->_updateDemandes->last();
+
+    if ($last_update) {
+       
+        $date = date("d/m/Y H:m:s", strtotime($last_update->created_at));
+        return $date;
+    }
+
+    return null;
+}
+
 
 ###############======== DELETE VENTE ===========#########
 function IsThisVenteDeleteDemandeOnceMade($vente)
@@ -119,6 +132,18 @@ function GetVenteTraitedDateViaCode($venteCode)
     return null;
 }
 
+function GetVenteDeleteDate($vente)
+{
+    $last_delete = $vente->_deleteDemandes->last();
+
+    if ($last_delete) {
+       
+        $date = date("d/m/Y H:m:s", strtotime($last_delete->created_at));
+        return $date;
+    }
+
+    return null;
+}
 
 ###___Verifions si le client a une dette à regler
 function IsClientHasADebt($clientId)

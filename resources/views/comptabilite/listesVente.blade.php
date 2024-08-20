@@ -68,8 +68,10 @@
                                         <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                             <thead class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
-                                                    <th>#</th>
                                                     <th>Code</th>
+
+                                                    <th>Modifée</th>
+
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
                                                     <th>Type de Vente</th>
@@ -88,8 +90,19 @@
                                             <tbody>
                                                 @foreach(session('resultat')['AComptabilisers'] as $key=>$AComptabiliser)
                                                 <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
-                                                    <td>{{ ++$key }}</td>
                                                     <td class="text-center">{{ $AComptabiliser->code }}</td>
+
+                                                    <td class="text-center">
+                                                        <span class="btn btn-sm bg-light" style="font-weight: bold;">
+                                                            @if(IsThisVenteUpdateDemandeAlreadyModified($AComptabiliser))
+                                                            <i class="bi bi-check2-all text-success"></i>
+                                                            {{GetVenteUpdatedDate($AComptabiliser)}}
+                                                            @else
+                                                            <i class="bi bi-x text-danger"></i>
+                                                            @endif
+                                                        </span>
+                                                    </td>
+
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                     <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
                                                     <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
@@ -108,8 +121,10 @@
                                             </tbody>
                                             <tfoot class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
-                                                    <th>#</th>
                                                     <th>Code</th>
+
+                                                    <th>Modifée</th>
+
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
                                                     <th>Type de Vente</th>
@@ -154,8 +169,10 @@
                                     <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
-                                                <th>#</th>
                                                 <th>Code</th>
+
+                                                <th>Modifée</th>
+
                                                 <th>Date Vente</th>
                                                 <th>Date Validation</th>
                                                 <th>Type de Vente</th>
@@ -172,8 +189,19 @@
                                         <tbody>
                                             @foreach(session('resultat')['AComptabilisersAdjeOla'] as $key=>$AComptabiliser)
                                             <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
-                                                <td>{{ ++$key }}</td>
                                                 <td class="text-center">{{ $AComptabiliser->code }}</td>
+
+                                                <td class="text-center">
+                                                    <span class="btn btn-sm bg-light" style="font-weight: bold;">
+                                                        @if(IsThisVenteUpdateDemandeAlreadyModified($AComptabiliser))
+                                                        <i class="bi bi-check2-all text-success"></i>
+                                                        {{GetVenteUpdatedDate($AComptabiliser)}}
+                                                        @else
+                                                        <i class="bi bi-x text-danger"></i>
+                                                        @endif
+                                                    </span>
+                                                </td>
+
                                                 <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                 <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
                                                 <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
@@ -190,8 +218,8 @@
                                         </tbody>
                                         <tfoot class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
-                                                <th>#</th>
                                                 <th>Code</th>
+                                                <th>Modifée</th>
                                                 <th>Date Vente</th>
                                                 <th>Date Validation</th>
                                                 <th>Type de Vente</th>
