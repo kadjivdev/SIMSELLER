@@ -9,7 +9,6 @@ class Representant extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'matricule', 'civilite', 'nom', 'prenom', 'telephone' , 'telephonepro', 'email', 'photo'
     ];
@@ -19,8 +18,8 @@ class Representant extends Model
     {
         return $this->hasMany(Zone::class, 'representant_id', 'id');
     }
+
     public function users(){
         return $this->hasMany(User::class,'representant_id','id');
     }
-
 }

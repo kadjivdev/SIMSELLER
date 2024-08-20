@@ -68,6 +68,12 @@
                                         <th>Date Vente</th>
                                         <th>Type de Vente</th>
                                         <th>Payeur</th>
+
+                                        <th>Chauffeur</th>
+                                        <th>Bl</th>
+                                        <th>Camion</th>
+                                        <th>Destination</th>
+
                                         <th>PU Ciment</th>
                                         <th>Qté</th>
                                         <th>Total. Ciment</th>
@@ -78,7 +84,6 @@
                                         @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
                                         <th>Action</th>
                                         @endif
-
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -98,6 +103,24 @@
                                         <td class="text-center">{{ date_format(date_create($AEnvoyer->date),'d/m/Y') }}</td>
                                         <td class="text-center">{{ $AEnvoyer->typeVente->libelle }}</td>
                                         <td class="">{{ count($AEnvoyer->filleuls) > 0 ? $AEnvoyer->filleuls['nomPrenom']." (IFU: ".$AEnvoyer->filleuls['ifu'].")" : $AEnvoyer->commandeclient->client->raisonSociale.' ('.$AEnvoyer->commandeclient->client->ifu.')' }}</td>
+                                        <td class="text-center">
+                                            @foreach ( $AEnvoyer->vendus as $vendu )
+                                            <b>{{ $vendu->programmation->chauffeur->nom }} ({{ $vendu->programmation->chauffeur->prenom  }})</b> <br>
+                                            @endforeach
+                                        </td>
+                                        <td class="text-center">
+                                            @foreach ( $AEnvoyer->vendus as $vendu )
+                                            <b>{{ $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl }}</b> <br>
+                                            @endforeach
+                                        </td>
+                                        <td class="text-center">
+                                            @foreach ( $AEnvoyer->vendus as $vendu )
+                                            <b>{{ $vendu->programmation->camion->immatriculationTracteur }} ({{ $vendu->programmation->camion->immatriculationRemorque  }})</b> <br>
+                                            @endforeach
+                                        </td>
+                                        <td class="text-center">{{$AEnvoyer->destination}}</td>
+
+
                                         <td class="text-right">{{ number_format($AEnvoyer->pu,0,'',' ') }}</td>
                                         <td class="text-right">{{ number_format($AEnvoyer->qteTotal,0,'',' ') }}</td>
                                         <td class="text-right">{{ number_format(($AEnvoyer->pu*$AEnvoyer->qteTotal),0,'',' ') }}</td>
@@ -119,6 +142,12 @@
                                         <th>Date Vente</th>
                                         <th>Type de Vente</th>
                                         <th>Payeur</th>
+
+                                        <th>Chauffeur</th>
+                                        <th>Bl</th>
+                                        <th>Camion</th>
+                                        <th>Destination</th>
+
                                         <th>PU Ciment</th>
                                         <th>Qté</th>
                                         <th>Total. Ciment</th>

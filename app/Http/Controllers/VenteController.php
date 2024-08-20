@@ -710,7 +710,16 @@ class VenteController extends Controller
 
     public function venteAEnvoyerComptabiliser()
     {
-        $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
+        ####____
+        $current = Auth::user();
+        $user_representant = $current->representant; ###___il est representant ou il est sous un representant
+
+        ###___les users associés à ce representant
+        $representant_users =  User::where(["representent_id" => $user_representant->id])->pluck("id"); ## $user_representant->users;
+
+        ###___les ventes passées par les utilisateurs associés à ce representant
+        ###___un user ne peut plus voir 
+        $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users","!=",$current->id)->get(); ##Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->get();
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 

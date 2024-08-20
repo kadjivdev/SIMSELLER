@@ -13,12 +13,10 @@ class Vendu extends Model
         'vente_id', 'programmation_id', 'qteVendu', 'pu', 'remise', 'users'
     ];
 
-
     public function vente()
     {
         return $this->belongsTo(Vente::class, 'vente_id', 'id');
     }
-
 
     public function programmation()
     {

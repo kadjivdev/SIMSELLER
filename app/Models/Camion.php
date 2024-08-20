@@ -14,7 +14,6 @@ class Camion extends Model
         'marque_id', 'immatriculationTracteur', 'immatriculationRemorque', 'nombreIssieu', 'tonnage', 'statut', 'photo', 'chauffeur_id', 'avaliseur_id'
     ];
 
-
     public static $Rules = [
         'marque' => ['required', 'string', 'max:255'],
         'immatriculationTracteur' => ['required', 'unique:camions,immatriculationTracteur'],
