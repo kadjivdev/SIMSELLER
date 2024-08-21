@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>COMPTABILITE</h1>
+                    <h1>COMPTABILITE -- VENTES SUPPRIMEE</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -27,7 +27,7 @@
                 <div class="col-md-12">
                     <div class="card card-secondary">
                         <div class="card-body">
-                            <form method="post" id="form_bc" action="{{route('ventes.postVenteAComptabiliser')}}">
+                            <form method="post" id="form_bc" action="{{route('ventes.postVenteAComptabiliserDeleted')}}">
                                 @csrf
                                 <div class="row no-print">
                                     <div class="col-1"></div>
@@ -60,7 +60,7 @@
                                 @if(session('resultat'))
                                 <div class="col-md-12">
                                     <h4 class="col-12 text-center border border-info p-2 mb-2">
-                                        Liste des vente en instance de traitement de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
+                                        Liste des vente supprimées de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
                                     </h4>
                                     @if(count(session('resultat')['AComptabilisers']) > 0)
                                     <!-- /.card-header -->
@@ -69,52 +69,31 @@
                                             <thead class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
                                                     <th>Code</th>
-
-                                                    <th>Modifée</th>
-
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
                                                     <th>Type de Vente</th>
-                                                    <th>Payeur</th>
+                                                    <th>Client</th>
                                                     <th>Qté</th>
                                                     <th>Montant</th>
                                                     <th>Transport</th>
                                                     <th>Total</th>
                                                     <th>Statut</th>
-                                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
-                                                    <th>Action</th>
-                                                    @endif
-                                                    <th>Créer le </th>
+                                                    <th>Date de suppression</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach(session('resultat')['AComptabilisers'] as $key=>$AComptabiliser)
                                                 <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
                                                     <td class="text-center">{{ $AComptabiliser->code }}</td>
-
-                                                    <td class="text-center">
-                                                        <span class="btn btn-sm bg-light" style="font-weight: bold;">
-                                                            @if(IsThisVenteModified($AComptabiliser))
-                                                            <i class="bi bi-check2-all text-success"></i>
-                                                            {{GetVenteUpdatedDate($AComptabiliser)}}
-                                                            @else
-                                                            <i class="bi bi-x text-danger"></i>
-                                                            @endif
-                                                        </span>
-                                                    </td>
-
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                     <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
-                                                    <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
-                                                    <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
-                                                    <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
-                                                    <td class="text-right">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
-                                                    <td class="text-right">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
-                                                    <td class="text-right">{{ number_format($AComptabiliser->montant+$AComptabiliser->transport,0,'',' ') }}</td>
-                                                    <td class="text-right"><span class="badge badge-success">{{ $AComptabiliser->statut }}</span></td>
-                                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
-                                                    <td><a class="btn btn-success btn-block btn-sm" href="{{route('ventes.ventATraiter',$AComptabiliser->id)}}">Traiter</a> </td>
-                                                    @endif
+                                                    <td class="text-center">{{ $AComptabiliser->_TypeVente?$AComptabiliser->_TypeVente->libelle:"---" }}</td>
+                                                    <td class="text-center">{{ $AComptabiliser->commandeclient->client->nom }} {{ $AComptabiliser->commandeclient->client->prenom }}</td>
+                                                    <td class="text-center">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
+                                                    <td class="text-center">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
+                                                    <td class="text-center">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
+                                                    <td class="text-center">{{ number_format($AComptabiliser->montant+$AComptabiliser->transport,0,'',' ') }}</td>
+                                                    <td class="text-center"><span class="badge badge-success">{{ $AComptabiliser->statut }}</span></td>
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->created_at),'d/m/Y') }}</td>
                                                 </tr>
                                                 @endforeach
@@ -122,22 +101,16 @@
                                             <tfoot class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
                                                     <th>Code</th>
-
-                                                    <th>Modifée</th>
-
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
                                                     <th>Type de Vente</th>
-                                                    <th>Payeur</th>
+                                                    <th>Client</th>
                                                     <th>Qté</th>
                                                     <th>Montant</th>
                                                     <th>Transport</th>
                                                     <th>Total</th>
                                                     <th>Statut</th>
-                                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
-                                                    <th>Action</th>
-                                                    @endif
-                                                    <th>Créer le </th>
+                                                    <th>Date de suppression</th>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -158,97 +131,12 @@
                                     Aucune information trouvée pour votre requête.
                                 </div>
                                 @endif
-                                @if(count(session('resultat')['AComptabilisersAdjeOla']) > 0)
-                                <!-- /.card-header -->
-                                <div class="col-12 text-center">
-                                    <center>
-                                        <h4>VENTE ADJE OLA</h4>
-                                    </center>
-                                </div>
-                                <div class="card-body">
-                                    <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
-                                        <thead class="text-white text-center bg-gradient-gray-dark">
-                                            <tr>
-                                                <th>Code</th>
-
-                                                <th>Modifée</th>
-
-                                                <th>Date Vente</th>
-                                                <th>Date Validation</th>
-                                                <th>Type de Vente</th>
-                                                <th>Payeur</th>
-                                                <th>Qté</th>
-                                                <th>Montant</th>
-                                                <th>Transport</th>
-                                                <th>Total</th>
-                                                <th>Statut</th>
-                                                <th>Action</th>
-                                                <th>Crée le</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach(session('resultat')['AComptabilisersAdjeOla'] as $key=>$AComptabiliser)
-                                            <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
-                                                <td class="text-center">{{ $AComptabiliser->code }}</td>
-
-                                                <td class="text-center">
-                                                    <span class="btn btn-sm bg-light" style="font-weight: bold;">
-                                                        @if(IsThisVenteModified($AComptabiliser))
-                                                        <i class="bi bi-check2-all text-success"></i>
-                                                        {{GetVenteUpdatedDate($AComptabiliser)}}
-                                                        @else
-                                                        <i class="bi bi-x text-danger"></i>
-                                                        @endif
-                                                    </span>
-                                                </td>
-
-                                                <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
-                                                <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
-                                                <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
-                                                <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
-                                                <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
-                                                <td class="text-right">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
-                                                <td class="text-right">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
-                                                <td class="text-right">{{ number_format($AComptabiliser->montant+$AComptabiliser->transport,0,'',' ') }}</td>
-                                                <td class="text-right"><span class="badge badge-success">{{ $AComptabiliser->statut }}</span></td>
-                                                <td><a class="btn btn-success btn-block btn-sm" href="{{route('ventes.ventATraiter',$AComptabiliser->id)}}">Traiter</a> </td>
-                                                <td class="text-center">{{ date_format(date_create($AComptabiliser->created_at),'d/m/Y') }}</td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                        <tfoot class="text-white text-center bg-gradient-gray-dark">
-                                            <tr>
-                                                <th>Code</th>
-                                                <th>Modifée</th>
-                                                <th>Date Vente</th>
-                                                <th>Date Validation</th>
-                                                <th>Type de Vente</th>
-                                                <th>Payeur</th>
-                                                <th>Qté</th>
-                                                <th>Montant</th>
-                                                <th>Transport</th>
-                                                <th>Total</th>
-                                                <th>Statut</th>
-                                                <th>Action</th>
-                                                <th>Crée le</th>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-
-                                </div>
 
                             </div>
                             @else
-                            <div class="col-12 text-center">
-                                <center>
-                                    <h4>VENTE ADJE OLA</h4>
-                                </center>
-                            </div>
                             <div class="col-12 text-center border border-info p-2">
                                 Aucune information trouvée pour votre requête.
                             </div>
-                            @endif
-
                             @endif
                         </div>
 

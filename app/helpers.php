@@ -53,13 +53,23 @@ function IsThisVenteUpdateDemandeAlreadyModified($vente)
     return false;
 }
 
+function IsThisVenteModified($vente)
+{
+    $demandModified = $vente->_updateDemandes->where("modified",true)->last();
+    if ($demandModified) {
+        return true;
+    }
+    ####__else
+    return false;
+}
+
 function GetVenteUpdatedDate($vente)
 {
-    $last_update = $vente->_updateDemandes->last();
+    $demandModified = $vente->_updateDemandes->where("modified",true)->last();
 
-    if ($last_update) {
-       
-        $date = date("d/m/Y H:m:s", strtotime($last_update->created_at));
+    if ($demandModified) {
+
+        $date = date("d/m/Y H:m:s", strtotime($demandModified->updated_at));
         return $date;
     }
 
@@ -137,7 +147,7 @@ function GetVenteDeleteDate($vente)
     $last_delete = $vente->_deleteDemandes->last();
 
     if ($last_delete) {
-       
+
         $date = date("d/m/Y H:m:s", strtotime($last_delete->created_at));
         return $date;
     }
@@ -184,5 +194,5 @@ function _ClientDebtReste($client)
 function Somm($a, $b)
 {
     // dd($a,$b);
-    return number_format($a + $b,'0', '', ' ');
+    return number_format($a + $b, '0', '', ' ');
 }

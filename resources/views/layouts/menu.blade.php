@@ -614,6 +614,19 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('ventes.venteAComptabiliserDeleted') }}" class="nav-link {{ (request()->is('/comptabilite/viewVenteComptabiliser')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-file-alt  text-cyan"></i>
+                                <p>Vente supprimées</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('ventes.venteAComptabiliserUpdated') }}" class="nav-link {{ (request()->is('/comptabilite/viewVenteComptabiliser')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-file-alt  text-cyan"></i>
+                                <p>Vente Modifiées</p>
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 @endif

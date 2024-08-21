@@ -18,6 +18,7 @@ use App\Models\Parametre;
 use App\Models\TypeCommande;
 use Illuminate\Http\Request;
 use App\Models\CommandeClient;
+use App\Models\DeletedVente;
 use App\Models\DetailBonCommande;
 use App\Models\filleuil;
 use App\Models\Fournisseur;
@@ -508,8 +509,40 @@ class VenteController extends Controller
 
     public function destroy(Vente $vente)
     {
-        ControlesTools::generateLog($vente, 'Vente', 'Suppression ligne');
+        ###___ENREGISTREMENT DE LA VENTE A SUPPRIMER 
+        $data = [
+            "code" =>$vente->code,
+            "date" => $vente->date,
+            "montant" => $vente->montant,
+            "statut" => $vente->statut,
+            "commande_client_id" => $vente->commande_client_id,
+            "users" => $vente->users,
+            "pu" => $vente->pu,
+            "qteTotal" => $vente->qteTotal,
+            "remise" => $vente->remise,
+            "produit_id" => $vente->produit_id,
+            "type_vente_id" => $vente->type_vente_id,
+            "vente_validation" => $vente->vente_validation,
+            "transport" => $vente->transport,
+            "destination" => $vente->destination,
+            "ctl_payeur" => $vente->ctl_payeur,
+            "date_comptabilisation" => $vente->date_comptabilisation,
+           
+            "date_traitement" => $vente->date_traitement,
+            "user_traitement" => $vente->user_traitement,
+            "date_envoie_commercial" => $vente->date_envoie_commercial,
+            "user_envoie_commercial" => $vente->user_envoie_commercial,
+            "comptabiliser" => $vente->comptabiliser,
+            "comptabiliser_history" => $vente->comptabiliser_history,
+            "annuler" => $vente->annuler,
+            "valide" => $vente->valide,
+            "validated_date" => $vente->validated_date,
+            "traited_date" => $vente->traited_date
+        ];
+        DeletedVente::create($data);
 
+        ###___
+        ControlesTools::generateLog($vente, 'Vente', 'Suppression ligne');
         if ($vente->vendus) {
             $vente->vendus()->delete();
             $vente->commandeclient()->delete();
@@ -773,6 +806,60 @@ class VenteController extends Controller
 
         return redirect()->route('ventes.venteAComptabiliser')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
+
+    #####____GET DES VENTES SUPPRIMEES
+    public function getVenteAComptabiliserDeleted()
+    {
+        return view('comptabilite.listesVenteDeleted');
+    }
+
+    #####____POST DES VENTES SUPPRIMEES
+    public function postVenteAComptabiliserDeleted(Request $request)
+    {
+        $AComptabilisers = DeletedVente::whereBetween("created_at",[$request->debut,$request->fin])->orderBy('date', 'DESC')->get();
+
+        session(['debut_compta' => $request->debut]);
+        session(['fin_compta' => $request->fin]);
+
+        return redirect()->route('ventes.venteAComptabiliserDeleted')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'debut' => $request->debut, 'fin' => $request->fin]);
+    }
+
+
+    #####____GET DES VENTES MODIFEES
+    public function getVenteAComptabiliserUpdated()
+    {
+        return view('comptabilite.listesVenteUpdated');
+    }
+
+    #####____POST DES VENTES MODIFIEES
+    public function postVenteAComptabiliserUpdated(Request $request)
+    {
+        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', '<>', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+
+        session(['debut_compta' => $request->debut]);
+        session(['fin_compta' => $request->fin]);
+
+        return redirect()->route('ventes.venteAComptabiliserUpdated')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'debut' => $request->debut, 'fin' => $request->fin]);
+    }
+
+
 
     public function ventATraiter(Vente $vente)
     {
@@ -1274,10 +1361,10 @@ class VenteController extends Controller
             return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
         };
 
-        ###____SI LA VENTE EST DEJA PASSEE A LA COMPTABILITE ON NE PEUT PLUS LA SUPPRIMER
-        if ($vente->date_envoie_commercial || $vente->user_envoie_commercial) {
-            return redirect()->back()->with("error", "Désolé! Cette vente est déjà passée à la comptabilité! Vous ne pouvez plus la supprimer");
-        }
+        // ###____SI LA VENTE EST DEJA PASSEE A LA COMPTABILITE ON NE PEUT PLUS LA SUPPRIMER
+        // if ($vente->date_envoie_commercial || $vente->user_envoie_commercial) {
+        //     return redirect()->back()->with("error", "Désolé! Cette vente est déjà passée à la comptabilité! Vous ne pouvez plus la supprimer");
+        // }
 
         if ($request->method() == "GET") {
             ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER

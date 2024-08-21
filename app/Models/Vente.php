@@ -52,11 +52,6 @@ class Vente extends Model
     public function getFilleulsAttribute($value){
         return $value ? json_decode($value,true) : [];
     }
-    /*
-    public function getAsk_historyAttribute($value){
-        return $value ? json_decode($value,true) : [];
-    } 
-    */
 
     ####___DEMANDES DE MODIFICATIONS
     public function _updateDemandes(){

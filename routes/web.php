@@ -185,8 +185,15 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/vente-a-comptabilise/{vente}', 'aComptabiliser')->name('ventes.aComptabiliser');
             Route::get('/vente-a-envoyer-comptabilise', 'venteAEnvoyerComptabiliser')->name('ventes.venteAEnvoyerComptabiliser');
             Route::post('/vente-envoyer', 'envoieComptabilite')->name('ventes.envoieComptabilite');
+
             Route::get('/vente-a-comptabilise', 'getVenteAComptabiliser')->name('ventes.venteAComptabiliser');
+            Route::get('/vente-a-comptabilise-deleted', 'getVenteAComptabiliserDeleted')->name('ventes.venteAComptabiliserDeleted');
+            Route::get('/vente-a-comptabilise-updated', 'getVenteAComptabiliserUpdated')->name('ventes.venteAComptabiliserUpdated');
+
             Route::post('/vente-a-comptabilise', 'postVenteAComptabiliser')->name('ventes.postVenteAComptabiliser');
+            Route::post('/vente-a-deleted', 'postVenteAComptabiliserDeleted')->name('ventes.postVenteAComptabiliserDeleted');
+            Route::post('/vente-a-updated', 'postVenteAComptabiliserUpdated')->name('ventes.postVenteAComptabiliserUpdated');
+
             Route::get('/vente-a-comptabilises', 'postVenteAComptabiliser')->name('ventes.getPostVenteAComptabiliser');
             Route::get('/vente-a-traiter/{vente}', 'ventATraiter')->name('ventes.ventATraiter');
             Route::post('/reglement-en-attente/{vente}', 'reglement-en-attente')->name('ventes.reglementEnAttente');
