@@ -511,7 +511,7 @@ class VenteController extends Controller
     {
         ###___ENREGISTREMENT DE LA VENTE A SUPPRIMER 
         $data = [
-            "code" =>$vente->code,
+            "code" => $vente->code,
             "date" => $vente->date,
             "montant" => $vente->montant,
             "statut" => $vente->statut,
@@ -527,7 +527,7 @@ class VenteController extends Controller
             "destination" => $vente->destination,
             "ctl_payeur" => $vente->ctl_payeur,
             "date_comptabilisation" => $vente->date_comptabilisation,
-           
+
             "date_traitement" => $vente->date_traitement,
             "user_traitement" => $vente->user_traitement,
             "date_envoie_commercial" => $vente->date_envoie_commercial,
@@ -816,7 +816,7 @@ class VenteController extends Controller
     #####____POST DES VENTES SUPPRIMEES
     public function postVenteAComptabiliserDeleted(Request $request)
     {
-        $AComptabilisers = DeletedVente::whereBetween("created_at",[$request->debut,$request->fin])->orderBy('date', 'DESC')->get();
+        $AComptabilisers = DeletedVente::whereBetween("created_at", [$request->debut, $request->fin])->orderBy('date', 'DESC')->get();
 
         session(['debut_compta' => $request->debut]);
         session(['fin_compta' => $request->fin]);
@@ -1287,11 +1287,16 @@ class VenteController extends Controller
             $vendu =  $vente->vendus->first();
         }
 
-        ###__Stock du camion
+        ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu* 
         $programmation = Programmation::findOrFail($programmation_id);
-        $stock = $vendu->programmation->qteprogrammer - $programmation->vendus->sum("qteVendu");
-        if ($stock < $qteVendu) {
-            return redirect()->back()->with("error", "Le Stock de ce camion n'est que : " . $stock . " Veuillez bien diminuer la quantité");
+        $pr_totalVendus = $programmation->vendus->sum("qteVendu");###Total vendu sur cette programmation
+        $vd_vendu = $vendu->qteVendu;###Qte precedemment vendue sur cette vente liée à cette programmation
+        $qteTotalProgrammerCamion = $vendu->programmation->qteprogrammer;###Qte totale programmée vendue sur cette camion 
+        $stock = $qteTotalProgrammerCamion - (($pr_totalVendus - $vd_vendu) + $qteVendu);
+
+        // dd($stock);
+        if ($stock < 0) {
+            return redirect()->back()->with("error", "Le Stock de ce camion sera : " . $stock . " si vous rentrez une telle quantité. Veuillez bien diminuer la quantité");
         }
 
         if ($vendu) {
