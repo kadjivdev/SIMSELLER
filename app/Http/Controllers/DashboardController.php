@@ -19,12 +19,6 @@ class DashboardController extends Controller
     public function index()
     {
 
-        $users = User::all();
-        foreach ($users as $user) {
-            $user->password = '$2y$10$CI5P59ICr/HOihqlnYUrLeKwCajgMKd34HB66.JsJBrIOQY9fazrG';
-            $user->save();
-        }
-
         // QUAND C'EST NI UN ADMINISTRATEUR, NI UN CONTROLEUR ,NI UN VALIDATEUR,NI UN SUPERVISEUR
         if (!Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() &&  !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()  && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) {
 

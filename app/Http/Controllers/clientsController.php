@@ -57,7 +57,6 @@ class clientsController extends Controller
                 $un_existable_clients[] = $oldClient;
             }
         }
-
         return view('client.indexOldNotExistInTheNewSystem', compact('un_existable_clients'));
     }
 
@@ -103,11 +102,11 @@ class clientsController extends Controller
 
         $data = array_merge($request->all(), ["operator" => request()->user()->id, "document" => $document, "client" => $client->id]);
 
-       
+
         #####____ANNULATION DU CREDIT SI LA CREDITATION AVAIT ETE FAITE POUR COMPENSSER LA DETTE ANCIENNE
 
-        if (($client->debit_old == -($client->credit))) {
-            if($client->credit==-($client->debit)){
+        if (($client->debit_old == - ($client->credit))) {
+            if ($client->credit == - ($client->debit)) {
                 $client->debit = 0;
             }
             $client->credit = 0;
@@ -129,7 +128,8 @@ class clientsController extends Controller
     }
 
     ####____DETAIL DE REGLEMENT
-    function reglementDetail(Request $request,$clientOldId ) {
+    function reglementDetail(Request $request, $clientOldId)
+    {
         $clientOld = ClientOld::find($clientOldId);
         $client = Client::where(["raisonSociale" => $clientOld->nomUP])->first();
 
@@ -266,9 +266,7 @@ class clientsController extends Controller
         }
     }
     // Liste des agents affecter à un client.
-    public function affectationAgentListe()
-    {
-    }
+    public function affectationAgentListe() {}
 
     public function edit(Client $client)
     {
