@@ -92,7 +92,7 @@
                                                 @foreach(session('resultat')['AComptabilisers'] as $key=>$AComptabiliser)
                                                 <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
                                                     <td class="text-center">{{ $AComptabiliser->code }}</td>
-                                                    <td class="text-center">{{ $AComptabiliser->user->representant->nom }} {{ $AComptabiliser->user->representant->prenom }}</td>
+                                                    <td class="text-center" style="font-weight: bold;">{{ $AComptabiliser->user->representant->nom }} {{ $AComptabiliser->user->representant->prenom }}</td>
 
                                                     <td class="text-center">
                                                         <span class="btn btn-sm bg-light" style="font-weight: bold;">
