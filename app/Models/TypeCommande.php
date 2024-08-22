@@ -9,6 +9,7 @@ class TypeCommande extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'libelle',
     ];

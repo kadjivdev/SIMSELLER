@@ -49,6 +49,7 @@ class Vente extends Model
     public function typeVente(){
         return $this->belongsTo(TypeCommande::class);
     }
+    
     public function getFilleulsAttribute($value){
         return $value ? json_decode($value,true) : [];
     }

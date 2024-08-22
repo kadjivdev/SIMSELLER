@@ -21,16 +21,16 @@ jobs:
     - name: Install PHP and Composer
       uses: shivammathur/setup-php@v2
       with:
-          php-version: "8.0" # Adjust to match the PHP version used by your Laravel project
+          php-version: "8.0.30" # Adjust to match the PHP version used by your Laravel project
           tools: 'composer'
     
     # - uses: actions/checkout@v4
     # - name: Copy .env
     #   run: php -r "file_exists('.env');"
 
-    - name: Install PHP dependencies
-      run: | 
-        composer install --no-dev --optimize-autoloader
+    # - name: Install PHP dependencies
+    #   run: | 
+    #     composer install --no-dev --optimize-autoloader
         
     # - name: Generate app key
     #   run: php artisan key:generate

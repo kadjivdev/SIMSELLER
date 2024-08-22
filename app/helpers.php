@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Client;
+use App\Models\TypeCommande;
 use App\Models\Vente;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Number;
 
@@ -153,6 +154,28 @@ function GetVenteDeleteDate($vente)
     }
 
     return null;
+}
+
+function GetVenteDeletedType($venteDeleted)
+{
+    $type = TypeCommande::find($venteDeleted->type_vente_id);
+    if ($type) {
+        $type = $type->libelle ;
+        return $type;
+    }
+
+    return "---";
+}
+
+function GetVenteDeletedClient($venteDeleted)
+{
+    $client = Client::find($venteDeleted->ctl_payeur);
+    if ($client) {
+        $client = $client->raisonSociale ;
+        return $client;
+    }
+
+    return "---";
 }
 
 ###___Verifions si le client a une dette à regler

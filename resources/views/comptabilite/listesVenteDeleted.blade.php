@@ -87,8 +87,8 @@
                                                     <td class="text-center">{{ $AComptabiliser->code }}</td>
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                     <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
-                                                    <td class="text-center">{{ $AComptabiliser->_TypeVente?$AComptabiliser->_TypeVente->libelle:"---" }}</td>
-                                                    <td class="text-center">{{ $AComptabiliser->commandeclient->client->nom }} {{ $AComptabiliser->commandeclient->client->prenom }}</td>
+                                                    <td class="text-center">{{ GetVenteDeletedType($AComptabiliser)}}</td>
+                                                    <td class="text-center">{{ GetVenteDeletedClient($AComptabiliser)}} </td>
                                                     <td class="text-center">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
                                                     <td class="text-center">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
                                                     <td class="text-center">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
@@ -116,15 +116,6 @@
                                         </table>
 
                                     </div>
-                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
-                                    <div class="card-footer text-center no-print">
-                                        @if(session('resultat'))
-                                        @if(count(session('resultat')['AComptabilisers']) > 0)
-                                        <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                                        @endif
-                                        @endif
-                                    </div>
-                                    @endif
                                 </div>
                                 @else
                                 <div class="col-12 text-center border border-info p-2">
@@ -140,15 +131,6 @@
                             @endif
                         </div>
 
-                        @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
-                        <div class="card-footer text-center no-print">
-                            @if(session('resultat'))
-                            @if(count(session('resultat')['AComptabilisersAdjeOla']) > 0)
-                            <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                            @endif
-                            @endif
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>

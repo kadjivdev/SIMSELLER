@@ -816,7 +816,10 @@ class VenteController extends Controller
     #####____POST DES VENTES SUPPRIMEES
     public function postVenteAComptabiliserDeleted(Request $request)
     {
-        $AComptabilisers = DeletedVente::whereBetween("created_at", [$request->debut, $request->fin])->where("date_envoie_commercial", "!=", null)->orderBy('date', 'DESC')->get();
+        $AComptabilisers = DeletedVente::where("date_envoie_commercial", "!=", null)->orderBy('date', 'DESC')
+            ->whereDate('created_at', '>=', $request->debut)
+            ->whereDate('created_at', '<=', $request->fin)
+            ->get();
 
         session(['debut_compta' => $request->debut]);
         session(['fin_compta' => $request->fin]);
@@ -1287,14 +1290,21 @@ class VenteController extends Controller
             $vendu =  $vente->vendus->first();
         }
 
-        ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu* 
+        ####____
         $programmation = Programmation::findOrFail($programmation_id);
         $pr_totalVendus = $programmation->vendus->sum("qteVendu"); ###Total vendu sur cette programmation
+
+        ###___Stock actuel du camion
+        $current_stock = $programmation->qteprogrammer - $pr_totalVendus;
+        if ($qteVendu > $current_stock) {
+            return redirect()->back()->with("error", "La quantité entrée est supérieure au stock du camion choisi. Veuillez bien diminuer la quantité");
+        }
+
+        ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu* 
         $vd_vendu = $vendu->qteVendu; ###Qte precedemment vendue sur cette vente liée à cette programmation
         $qteTotalProgrammerCamion = $vendu->programmation->qteprogrammer; ###Qte totale programmée vendue sur cette camion 
         $stock = $qteTotalProgrammerCamion - (($pr_totalVendus - $vd_vendu) + $qteVendu);
 
-        // dd($stock);
         if ($stock < 0) {
             return redirect()->back()->with("error", "Le Stock de ce camion sera : " . $stock . " si vous rentrez une telle quantité. Veuillez bien diminuer la quantité");
         }
