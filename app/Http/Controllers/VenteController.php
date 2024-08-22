@@ -816,7 +816,7 @@ class VenteController extends Controller
     #####____POST DES VENTES SUPPRIMEES
     public function postVenteAComptabiliserDeleted(Request $request)
     {
-        $AComptabilisers = DeletedVente::whereBetween("created_at", [$request->debut, $request->fin])->orderBy('date', 'DESC')->get();
+        $AComptabilisers = DeletedVente::whereBetween("created_at", [$request->debut, $request->fin])->where("date_envoie_commercial", "!=", null)->orderBy('date', 'DESC')->get();
 
         session(['debut_compta' => $request->debut]);
         session(['fin_compta' => $request->fin]);
@@ -1289,9 +1289,9 @@ class VenteController extends Controller
 
         ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu* 
         $programmation = Programmation::findOrFail($programmation_id);
-        $pr_totalVendus = $programmation->vendus->sum("qteVendu");###Total vendu sur cette programmation
-        $vd_vendu = $vendu->qteVendu;###Qte precedemment vendue sur cette vente liée à cette programmation
-        $qteTotalProgrammerCamion = $vendu->programmation->qteprogrammer;###Qte totale programmée vendue sur cette camion 
+        $pr_totalVendus = $programmation->vendus->sum("qteVendu"); ###Total vendu sur cette programmation
+        $vd_vendu = $vendu->qteVendu; ###Qte precedemment vendue sur cette vente liée à cette programmation
+        $qteTotalProgrammerCamion = $vendu->programmation->qteprogrammer; ###Qte totale programmée vendue sur cette camion 
         $stock = $qteTotalProgrammerCamion - (($pr_totalVendus - $vd_vendu) + $qteVendu);
 
         // dd($stock);
