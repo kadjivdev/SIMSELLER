@@ -5,6 +5,14 @@ use App\Models\TypeCommande;
 use App\Models\Vente;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Number;
 
+function IS_FOFANA_ACCOUNT($user){
+    if ($user->id==7) {
+        return true;
+    }
+
+    return false;
+}
+
 function IsThisVenteUpdateDemandeOnceMade($vente)
 {
     $demand = $vente->_updateDemandes->last();
@@ -12,7 +20,6 @@ function IsThisVenteUpdateDemandeOnceMade($vente)
         if ($demand->demandeur == auth()->user()->id) {
             return true;
         }
-
         ####__else
         return false;
     }
@@ -219,3 +226,5 @@ function Somm($a, $b)
     // dd($a,$b);
     return number_format($a + $b, '0', '', ' ');
 }
+
+

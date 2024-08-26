@@ -20,6 +20,6 @@ class Representant extends Model
     }
 
     public function users(){
-        return $this->hasMany(User::class,'representant_id','id');
+        return $this->hasMany(User::class,'representent_id','id');
     }
 }

@@ -53,95 +53,95 @@
                                     </tr>
                                 </thead>
                                 <tbody class="table-body">
-                                    @if (count($venteUpdateDemands) > 0)
                                     @foreach($venteUpdateDemands as $demand)
-                                    @if(!$demand->modified)
-                                    <tr style="align-items: center;">
-                                        <td>{{ $loop->index +1 }}</td>
-                                        <td>
-                                            @if($demand->_Vente)
-                                            {{$demand->_Vente->code}}
-                                            @else
-                                            <span class="text-danger">supprimé</span>
-                                            @endif
-                                        </td>
-                                        <td>{{$demand->_Demandeur->name}}</td>
-                                        <td>
-                                            @if($demand->valide)
-                                            <span class="bg-success text-white p-1">Validé</span>
-                                            @else
-                                            @if($demand->modified)
-                                            <span class="bg-success text-white p-1">Déjà modifiée</span>
-                                            @else
-                                            <span class="bg-warning text-white p-1">En attente</span>
-                                            @endif
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <textarea name="" class="form-control" rows="2" id="">{{$demand->raison}}
-                                            </textarea>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="{{$demand->prouve_file}}" target="_blank" rel="noopener noreferrer">
-                                                <img src="{{$demand->prouve_file}}" title="Visualiser" alt="" style="width: 50px;border-radius:10px;cursor:pointer">
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <form id="update_form" action="{{route('ventes.validation')}}" method="post">
-                                                @csrf
-                                                <input type="text" name="demand" value="{{$demand->id}}" hidden>
-                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->modified) disabled @endif >Valider</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endif
+                                        @if(!$demand->modified)
+                                        <tr style="align-items: center;">
+                                            <td>{{ $demand->modified }}</td>
+                                            <td>
+                                                @if($demand->_Vente)
+                                                {{$demand->_Vente->code}}
+                                                @else
+                                                <span class="text-danger">supprimé</span>
+                                                @endif
+                                            </td>
+                                            <td>{{$demand->_Demandeur->name}}</td>
+                                            <td>
+                                                @if($demand->valide)
+                                                <span class="bg-success text-white p-1">Validé</span>
+                                                @else
+                                                @if($demand->modified)
+                                                <span class="bg-success text-white p-1">Déjà modifiée</span>
+                                                @else
+                                                <span class="bg-warning text-white p-1">En attente</span>
+                                                @endif
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <textarea name="" class="form-control" rows="1" id="">{{$demand->raison}}
+                                                </textarea>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{$demand->prouve_file}}" target="_blank" rel="noopener noreferrer">
+                                                    <img src="{{$demand->prouve_file}}" title="Visualiser" alt="" style="width: 50px;border-radius:10px;cursor:pointer">
+                                                </a>
+                                            </td>
+                                            <td class="text-center d-flex">
+                                                <form id="update_form" action="{{route('ventes.validation')}}" method="post">
+                                                    @csrf
+                                                    <input type="text" name="demand" value="{{$demand->id}}" hidden>
+                                                    <button type="submit" class="btn btn-sm btn-success mr-2" @if($demand->valide || $demand->modified) disabled @endif > <i class="bi bi-check-circle"></i> </button>
+                                                </form>
+
+                                                @if(!$demand->valide)
+                                                <form id="update_form" action="{{route('ventes.DeleteDemandVenteUpdate',$demand->id)}}" method="post">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger mt-1"><i class="bi bi-x-square-fill"></i></button>
+                                                </form>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endif
                                     @endforeach
 
                                     @foreach($venteUpdateDemands as $demand)
-                                    @if($demand->modified)
-                                    <tr class="bg-dark" style="align-items: center;" >
-                                        <td>{{ $loop->index +1 }}</td>
-                                        <td>
-                                            @if($demand->_Vente)
-                                            {{$demand->_Vente->code}}
-                                            @else
-                                            <span class="text-danger">supprimé</span>
-                                            @endif
-                                        </td>
-                                        <td>{{$demand->_Demandeur->name}}</td>
-                                        <td>
-                                            @if($demand->valide)
-                                            <span class="bg-success text-white p-1">Validé</span>
-                                            @else
-                                            @if($demand->modified)
-                                            <span class="bg-success text-white p-1">Déjà modifiée</span>
-                                            @else
-                                            <span class="bg-warning text-white p-1">En attente</span>
-                                            @endif
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <textarea name="" class="form-control" rows="1" id="">{{$demand->raison}}
-                                            </textarea>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="{{$demand->prouve_file}}" target="_blank" rel="noopener noreferrer">
-                                                <img src="{{$demand->prouve_file}}" title="Visualiser" alt="" style="width: 50px;border-radius:10px;cursor:pointer">
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <form id="update_form" action="{{route('ventes.validation')}}" method="post">
-                                                @csrf
-                                                <input type="text" name="demand" value="{{$demand->id}}" hidden>
-                                                <button type="submit" class="btn btn-sm btn-success" @if($demand->valide || $demand->modified) disabled @endif >Valider</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endif
+                                        @if($demand->modified)
+                                        <tr class="bg-secondary" style="align-items: center;">
+                                        <td>{{ $demand->modified }}</td>
+                                            <td>
+                                                @if($demand->_Vente)
+                                                {{$demand->_Vente->code}}
+                                                @else
+                                                <span class="text-danger">supprimé</span>
+                                                @endif
+                                            </td>
+                                            <td>{{$demand->_Demandeur->name}}</td>
+                                            <td>
+                                                @if($demand->valide)
+                                                <span class="bg-success text-white p-1">Validé</span>
+                                                @else
+                                                @if($demand->modified)
+                                                <span class="bg-success text-white p-1">Déjà modifiée</span>
+                                                @else
+                                                <span class="bg-warning text-white p-1">En attente</span>
+                                                @endif
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <textarea name="" class="form-control" rows="1" id="">{{$demand->raison}}
+                                                </textarea>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{$demand->prouve_file}}" target="_blank" rel="noopener noreferrer">
+                                                    <img src="{{$demand->prouve_file}}" title="Visualiser" alt="" style="width: 50px;border-radius:10px;cursor:pointer">
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                ---
+                                            </td>
+                                        </tr>
+                                        @endif
                                     @endforeach
-                                    @else
-                                    <p class="text-center">Aucune demande en attente!</p>
-                                    @endif
                                 </tbody>
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
@@ -187,7 +187,9 @@
             "autoWidth": false,
             "buttons": ["excel", "pdf", "print"],
             "pageLength": 15,
-            "order": [[6, 'desc']],
+            // "order": [
+            //     [6, 'desc']
+            // ],
             "columnDefs": [{
                     "targets": 5,
                     "orderable": false

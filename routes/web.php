@@ -172,11 +172,13 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::match(["GET", "POST"], '/askUpdateVente/{vente?}', 'askUpdateVente')->name('ventes.askUpdateVente');
             Route::post('/updateVente/{vente?}', '_updateVente')->name('ventes.updateVente');
             Route::match(['GET', "POST"], '/ventes/validation/', 'Validation')->name('ventes.validation');
+            Route::delete('/ventes/deleteVenteUpdate/{demand}', 'DeleteDemandVenteUpdate')->name('ventes.DeleteDemandVenteUpdate');
 
             ###_____DELETE DE VENTE
             Route::match(["GET", "POST"], '/askDeleteVente/{vente?}', 'askDeleteVente')->name('ventes.askDeleteVente');
             Route::post('/deleteVente/{vente?}', '_deleteVente')->name('ventes.deleteVente');
             Route::match(['GET', "POST"], '/ventes/deleteValidation/', 'venteDeleteValidation')->name('ventes.deleteValidation');
+            Route::delete('/ventes/deleteVenteDelete/{demand}', 'DeleteDemandVenteDelete')->name('ventes.DeleteDemandVenteDelete');
         });
     });
 
