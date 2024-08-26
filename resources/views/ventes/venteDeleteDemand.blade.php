@@ -92,13 +92,13 @@
                                                 <button type="submit" class="btn btn-sm btn-success mr-2" @if($demand->valide || $demand->deleted) disabled @endif ><i class="bi bi-check-circle"></i> </button>
                                             </form>
 
-                                            <!-- if(!$demand->valide) -->
+                                            @if(!$demand->valide)
                                             <form id="update_form" action="{{route('ventes.DeleteDemandVenteDelete',$demand->id)}}" method="post">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger mt-1"><i class="bi bi-x-square-fill"></i></button>
                                             </form>
-                                            <!-- endif -->
+                                            @endif
                                         </td>
                                     </tr>
                                     @endif
