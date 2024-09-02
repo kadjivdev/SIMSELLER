@@ -34,7 +34,6 @@ class LivraisonController extends Controller
         $repre = $user->representant;
         $zones = $repre->zones;
 
-        // dd($request->statuts);
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -129,10 +128,13 @@ class LivraisonController extends Controller
         }
 
         if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()) {
+            // LE VENDEUR NE VERRA DESORMAIS QUE LES LIVRAISONS DE SA ZONE
             if ($request->debut && $request->fin)
-                $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'))->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                // $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'))->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                $programmations = $programmations->where('zone_id', $user->zone_id)->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
             else
-                $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'));
+                // $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'));
+                $programmations = $programmations->where('zone_id', $user->zone_id);
         }
 
         return view('livraisons.index', compact('programmations', 'req'));

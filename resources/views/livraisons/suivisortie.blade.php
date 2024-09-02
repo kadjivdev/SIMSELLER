@@ -104,7 +104,6 @@
                                            style="font-size: 11px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                         <tr>
-                                            <th>#</th>
                                             <th>Code</th>
                                             <th>Code Prog</th>
                                             <th>Date</th>
@@ -115,7 +114,9 @@
                                             <th>Zone</th>
                                             <th>Qté</th>
                                             <th>Date sortie</th>
-                                            <th>Bord Liv</th>
+                                            <th>Bord Liv </th>
+                                            <th>BLs</th>
+                                            <th>##DIF##</th>
                                             <th>Action</th>
                                         </tr>
                                         </thead>
@@ -127,8 +128,7 @@
                                                     @php($dateDebut = new DateTime($programmation->dateprogrammer))
                                                     @php($dateFin = new DateTime(date('Y-m-d')))
                                                     @php($difference = $dateDebut->diff($dateFin))
-                                                        <tr class="">
-                                                        <td>{{ $compteur++ }}</td>
+                                                    <tr class="">
                                                         <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
                                                         <td>{{ $programmation->code }}</td>
                                                         <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
@@ -152,18 +152,30 @@
                                                         </td>
                                                         <td class="">
                                                             <div class="form-group" style="font-size: 14px">
-                                                                <!-- <div class="text-center">
-                                                                    <small class="text-danger">BL/BL_GEST: {{$programmation->bl}} / {{$programmation->bl_gest}} </small>
-                                                                </div> -->
                                                                 <input type="text" class="form-control col-md-12" onchange="handleBordLivChange('{{ $programmation->id }}', this)" value="{{$programmation->bl_gest ?  : ''}}"@if ($programmation->bl_gest && $programmation->detailboncommande->boncommande->statut=="Livrer") readonly @endif >
                                                                 <div class="message-container-bl d-none"></div> <!-- Conteneur pour le message -->
                                                                 <small class="text-primary text-center d-block"> {{$programmation->detailboncommande->boncommande->statut}} </small>
-
                                                             </div>
                                                         </td>
 
+                                                        <td class="text-center">
+                                                            {{ $programmation->bl_gest }}/{{ $programmation->bl }}
+                                                        </td>
+
+                                                        <td class="text-danger text-center">
+                                                            @if($programmation->bl_gest && $programmation->bl)
+                                                                @if($programmation->bl_gest!=$programmation->bl)
+                                                                <span>diff</span>
+                                                                <i class="bi bi-x-circle"></i>
+                                                                <div class="form-group" style="font-size: 14px">
+                                                                    <input type="text" class="form-control col-md-12" onchange="handleBordLivChange('{{ $programmation->id }}', this)" value="{{$programmation->bl_gest ?  : ''}}">
+                                                                    <div class="message-container-bl d-none"></div> <!-- Conteneur pour le message -->
+                                                                </div>
+                                                                @endif
+                                                            @endif
+                                                        </td>
+
                                                         <td >
-                                                            
                                                             <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
                                                             <a target="_blank" href="{{route('livraisons.getTransfert',$programmation->id)}} "title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
                                                             <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
@@ -182,7 +194,6 @@
 
                                                     @if($request['fournisseur'] == $programmation->detailboncommande->boncommande->fournisseur->id)
                                                         <tr class="">
-                                                            <td>{{ $compteur++ }}</td>
                                                             <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
                                                             <td>{{ $programmation->code }}</td>
                                                             <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
@@ -210,6 +221,22 @@
                                                                     <div class="message-container-bl d-none"></div> <!-- Conteneur pour le message -->
                                                                 </div>
                                                             </td>
+
+                                                            <td class="text-center">
+                                                                {{ $programmation->bl_gest }}/{{ $programmation->bl }}
+                                                            </td>
+                                                            <td class="text-danger text-center">
+                                                                @if($programmation->bl_gest && $programmation->bl)
+                                                                    @if($programmation->bl_gest!=$programmation->bl)
+                                                                    <span>diff</span>
+                                                                    <i class="bi bi-x-circle"></i>
+                                                                    <div class="form-group" style="font-size: 14px">
+                                                                        <input type="text" class="form-control col-md-12" onchange="handleBordLivChange('{{ $programmation->id }}', this)" value="{{$programmation->bl_gest ?  : ''}}">
+                                                                        <div class="message-container-bl d-none"></div> <!-- Conteneur pour le message -->
+                                                                    </div>
+                                                                    @endif
+                                                                @endif
+                                                            </td>
                                                             <td>
                                                                 <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
                                                                 <a target="_blank" href="{{route('livraisons.getTransfert',$programmation->id)}} "title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right"></i></a>
@@ -226,7 +253,6 @@
                                         </tbody>
                                         <tfoot class="text-white text-center bg-gradient-gray-dark">
                                         <tr>
-                                            <th>#</th>
                                             <th>Code</th>
                                             <th>Code Prog</th>
                                             <th>Date</th>
@@ -237,7 +263,9 @@
                                             <th>Zone</th>
                                             <th>Qté</th>
                                             <th>Date sortie</th>
-                                            <th>Bord Liv</th>
+                                            <th>Bord Liv </th>
+                                            <th>BLs</th>
+                                            <th>##DIF##</th>
                                             <th>Action</th>
                                         </tr>
                                         </tfoot>
@@ -570,7 +598,7 @@
                 "responsive": true,
                 "lengthChange": false,
                 "autoWidth": false,
-                "buttons": ["pdf", "print"],
+                "buttons": ["pdf", "print","csv","excel"],
                 "order": [
                     [1, 'asc']
                 ],

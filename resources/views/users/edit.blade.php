@@ -35,9 +35,8 @@
                             <form method="POST" action="{{ route('users.update', ['user' => $user->id]) }}">
                                 @csrf
                                 <div class="card-body">
-
                                     <div class="input-group mb-3 col-sm-12">
-                                        <select name="representent_id" id="" class="form-control form-control-sm">
+                                        <select name="representent_id" id="" class="form-control form-control-sm select2">
                                             <option value="">Selectionnez un représentant</option>
                                             @foreach ($representents as $representent)
                                                 <option value="{{ $representent->id }}"
@@ -49,6 +48,21 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
+
+                                    <div class="input-group mb-3 col-sm-12">
+                                        <select name="zone_id" id="" class="form-control form-control-sm select2">
+                                            <option value="">Selectionnez une zone</option>
+                                            @foreach ($zones as $zone)
+                                                <option value="{{ $zone->id }}"
+                                                    {{ $user->zone_id == $zone->id ? 'selected' : '' }}>
+                                                    {{ $zone->libelle }}  </option>
+                                            @endforeach
+                                        </select>
+                                        @error('zone_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
                                     <div class="row">
                                         <div class="col-sm-6">
                                             <div class="input-group mb-3">

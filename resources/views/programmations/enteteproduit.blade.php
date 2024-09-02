@@ -28,7 +28,7 @@
                                     <ul class="m-4 mb-0 fa-ul text-muted text-md">
                                         <div class="row">
                                             <div class="col-sm-12">
-                                                <b><li class=""><span class="fa-li"><i class="fa-solid fa-box-open"></i></span> Qte Programmé :  {{ $total  }}</li></b>
+                                                <b><li class=""><span class="fa-li"><i class="fa-solid fa-box-open"></i></span> Qte Programmé :  {{ number_format($total,2,","," ")  }}</li></b>
                                             </div>
                                         </div>
                                     </ul>

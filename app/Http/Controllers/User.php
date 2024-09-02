@@ -27,14 +27,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
-
-    
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'avoirs', 'user_id', 'role_id');
@@ -46,4 +41,7 @@ class User extends Authenticatable
         return $this->belongsTo(Representant::class, 'representent_id');
     }
 
+    public function zone(){
+        return $this->belongsTo(Zone::class, 'zone_id');
+    }
 }

@@ -33,7 +33,6 @@ Route::prefix('detailboncommandes')->group(function () {
 
     Route::controller(DetailBonCommandeController::class)->group(function () {
 
-
         Route::post('/store', 'store');
 
 

@@ -13,6 +13,14 @@ function IS_FOFANA_ACCOUNT($user){
     return false;
 }
 
+function IS_HIPLYTE_ACCOUNT($user){
+    if ($user->id==11) {
+        return true;
+    }
+
+    return false;
+}
+
 function IsThisVenteUpdateDemandeOnceMade($vente)
 {
     $demand = $vente->_updateDemandes->last();

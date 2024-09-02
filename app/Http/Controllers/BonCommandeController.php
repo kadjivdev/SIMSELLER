@@ -194,7 +194,7 @@ class BonCommandeController extends Controller
                 if ($boncommande) {
                     BonCommandeTools::ajusterProduitFournisseur($boncommandes);
                     BonCommandeTools::calculerTotalCommande($boncommandes);
-                    Session()->flash('messagebc', 'Les informations de l\'entête de la commande on été mise à jour avec sèccès.');
+                    Session()->flash('messagebc', 'Les informations de l\'entête de la commande on été mise à jour avec succès.');
                     return redirect()->route('boncommandes.edit', ['boncommande' => $boncommandes->id]);
                 }
             } else {

@@ -44,7 +44,7 @@
                                         <div class="col-sm-2">
                                             <div class="form-group">
                                                 <label>Qte Livrer<span class="text-danger">*</span></label>
-                                                <input type="number" hidden class="form-control form-control-sm" name="qtelivrer" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->qtelivrer}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
+                                                <input type="number" hidden class="form-control form-control-sm" name="qtelivrer" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->vendus->sum('qteVendu')}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
                                                 <input type="number" disabled class="form-control form-control-sm" style="text-transform: uppercase"  value="@if($programmation->qtelivrer){{old('qtelivrer')?old('qtelivrer'):$programmation->qteprogrammer-$programmation->vendus->sum('qteVendu')}}@else{{@old('qtelivrer')?@old('qtelivrer'):$programmation->qteprogrammer}}@endif"  autocomplete="qtelivrer" min="1" autofocus required>
                                                 @error('qtelivrer')
                                                     <span class="text-danger">{{ $message }}</span>
@@ -113,9 +113,7 @@
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </button>
                                             @else
-                                                <button type="submit" class="btn btn-sm btn-success btn-block" @if ((intval($programmation->qteprogrammer) - intval($programmation->qtelivrer)) == 0)
-                                                    disabled
-                                                @endif>
+                                                <button type="submit" class="btn btn-sm btn-success btn-block" @if ((intval($programmation->qteprogrammer) - intval($programmation->vendus->sum("qteVendu"))) == 0) disabled @endif>
                                                     {{ __('Enregistrer') }}
                                                     <i class="fa-solid fa-floppy-disk"></i>
                                                 </button>

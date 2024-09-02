@@ -147,9 +147,11 @@ class ProgrammationController extends Controller
         $camions = Camion::all();
         $chauffeurs = Chauffeur::all();
         $avaliseurs = Avaliseur::all();
+
         $programmations = $detailboncommande->programmations()->orderByDesc('id')->get();
         $totalValider = $detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
-        $total = number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
+
+        $total = collect($totalValider)->sum('qteprogrammer');# number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
         return view('programmations.create', compact('detailboncommande', 'boncommandes', 'zones', 'avaliseurs', 'camions', 'chauffeurs', 'programmations', 'programmation', 'total'));
     }
 

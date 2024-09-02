@@ -71,7 +71,7 @@ class VenteController extends Controller
         } elseif (in_array(3, $roles)) {
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         }
-        
+
         return view('ventes.index', compact('ventes'));
     }
 
@@ -541,7 +541,7 @@ class VenteController extends Controller
             "validated_date" => $vente->validated_date,
             "traited_date" => $vente->traited_date
         ];
-        DeletedVente::create($data);
+        $venteDeleted = DeletedVente::create($data);
 
         ###___
         ControlesTools::generateLog($vente, 'Vente', 'Suppression ligne');
@@ -554,10 +554,23 @@ class VenteController extends Controller
             $vente->delete();
         }
 
+        ####====
+        foreach ($vente->vendus as $vendu) {
+            $programmation = $vendu->programmation;
+            $bl = $programmation->bl;
+            $bl_gest = $programmation->bl_gest;
+
+            if ($bl_gest != $bl) {
+                $programmation->bl = null;
+                $programmation->bl_gest = null;
+                $programmation->statut = 'Valider';
+                $programmation->save();
+            }
+        }
+
         ######_____
         ####____ON BLOQUE A NOUVEAU L'ACCES
         $venteDeleteDemande =  VenteDeleteDemand::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "deleted" => false])->first();
-
         if ($venteDeleteDemande) {
             $venteDeleteDemande->valide = false;
             $venteDeleteDemande->deleted = true;
@@ -751,16 +764,21 @@ class VenteController extends Controller
         $current = Auth::user();
         $user_representant = $current->representant; ###___il est representant ou il est sous un representant
 
+        if (IS_HIPLYTE_ACCOUNT($current) ) {
+            $user_representant = $current;
+        }
+
+        ##____
         if (IS_FOFANA_ACCOUNT($current)) {
-            $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get(); 
-        }else {
+            $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
+        } else {
             ###___les users associés à ce representant
             $representant_users =  User::where(["representent_id" => $user_representant->id])->pluck("id"); ## $user_representant->users;
             ###___les ventes passées par les utilisateurs associés à ce representant
-            $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get(); 
+            $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
         }
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
-    } 
+    }
 
     public function getVenteAComptabiliser()
     {
@@ -1280,7 +1298,6 @@ class VenteController extends Controller
         $programmation_id = $request->programmation_id;
 
         ###___MODIFICATION DU VENDU
-
         $vp_vendu = Vendu::where(["vente_id" => $vente->id, "programmation_id" => $programmation_id])->first();
         if ($vp_vendu) {
             ### i.e la programmation n'a pas subie de modification
@@ -1368,13 +1385,14 @@ class VenteController extends Controller
         return view("ventes.venteUpdateDemand", compact("venteUpdateDemands"));
     }
 
-    public function DeleteDemandVenteUpdate(Request $request, UpdateVente $demand) {
+    public function DeleteDemandVenteUpdate(Request $request, UpdateVente $demand)
+    {
         if (!$demand) {
-            return back()->with("error","Cette demande de modification n'existe plus!");
+            return back()->with("error", "Cette demande de modification n'existe plus!");
         }
 
         $demand->delete();
-        return back()->with("message","Demande annulée avec succès!");
+        return back()->with("message", "Demande annulée avec succès!");
     }
     #######__________END UPDATE VENTE ________#################
 
@@ -1490,12 +1508,13 @@ class VenteController extends Controller
         return view("ventes.venteDeleteDemand", compact("venteDeleteDemands"));
     }
 
-    public function DeleteDemandVenteDelete(Request $request, VenteDeleteDemand $demand) {
+    public function DeleteDemandVenteDelete(Request $request, VenteDeleteDemand $demand)
+    {
         if (!$demand) {
-            return back()->with("error","Cette demande de suppression n'existe plus!");
+            return back()->with("error", "Cette demande de suppression n'existe plus!");
         }
 
         $demand->delete();
-        return back()->with("message","Demande annulée avec succès!");
+        return back()->with("message", "Demande annulée avec succès!");
     }
 }

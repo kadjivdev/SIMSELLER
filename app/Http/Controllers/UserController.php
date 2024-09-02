@@ -6,6 +6,7 @@ use App\Mail\MessagePasseword;
 use App\Models\Representant;
 use App\Models\UpdateVente;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -83,7 +84,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $representents = Representant::all();
-        return view('users.edit', compact('user', 'representents'));
+        $zones = Zone::all();
+        return view('users.edit', compact('user', 'representents',"zones"));
     }
 
 
@@ -93,6 +95,7 @@ class UserController extends Controller
 
             $request->validate([
                 'representent_id' => ['required', 'integer'],
+                'zone_id' => ['required', 'integer'],
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['string', 'email'],
             ]);
@@ -105,13 +108,12 @@ class UserController extends Controller
             }
 
             $user->representent_id = $request->representent_id;
+            $user->zone_id = $request->zone_id;
             $user->name = $request->name;
             $user->email = $request->email;
             $user->update();
 
             if ($user) {
-
-
                 Session()->flash('message', 'Utilisateur modifié avec succès!');
                 return redirect()->route('users.index');
             }
@@ -119,6 +121,7 @@ class UserController extends Controller
 
             $request->validate([
                 'representent_id' => ['required', 'integer'],
+                'zone_id' => ['required', 'integer'],
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['string', 'email', 'max:255', 'unique:users'],
                 'password' => [
@@ -141,6 +144,7 @@ class UserController extends Controller
 
             $user = $user->update([
                 'representent_id' => $request->representent_id,
+                'zone_id' => ['required', 'integer'],
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
