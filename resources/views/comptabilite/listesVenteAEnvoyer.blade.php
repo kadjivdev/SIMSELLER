@@ -50,7 +50,7 @@
                         <!-- /.card-header -->
                         <div class="card-body">
                             @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                            @if(!IS_FOFANA_ACCOUNT(auth()->user()))
+                            @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
                             <form action="{{route('ventes.envoieComptabilite')}}" method="post">
                                 @csrf
                                 <input type="text" id="ventes" name="ventes" hidden>
@@ -84,7 +84,7 @@
                                         <th>Total</th>
                                         <th>Statut</th>
                                         @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()))
+                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
                                         <th>Action</th>
                                         @endif
                                         @endif
@@ -134,7 +134,7 @@
                                         <td class="text-right "><span class="badge badge-success">{{ $AEnvoyer->statut }}</span></td>
 
                                         @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()))
+                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
                                         <td class="text-right "><a data-id="{{$AEnvoyer->id}}" class="btn btn-success btn-sm" href="#" onclick="charger({{ $AEnvoyer->id }})" data-toggle="modal" data-target="#modal-lg"> Demande </a></td>
                                         @endif
                                         @endif
@@ -162,7 +162,7 @@
                                         <th>Total</th>
                                         <th>Statut</th>
                                         @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()))
+                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
                                         <th>Action</th>
                                         @endif
                                         @endif

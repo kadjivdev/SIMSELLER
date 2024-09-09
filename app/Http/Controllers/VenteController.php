@@ -769,7 +769,7 @@ class VenteController extends Controller
         }
 
         ##____
-        if (IS_FOFANA_ACCOUNT($current)) {
+        if (IS_FOFANA_ACCOUNT($current) || IS_AIME_ACCOUNT($current) ) {
             $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
         } else {
             ###___les users associés à ce representant

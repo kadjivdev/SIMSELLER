@@ -145,7 +145,7 @@ class LivraisonController extends Controller
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
         $zones = $repre->zones;
-        
+
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -765,7 +765,8 @@ class LivraisonController extends Controller
                     break;
             }
         }
-
+        $programmations = $programmations->chunkById(1);
+        // dd($programmations);
         return redirect()->route('livraisons.suivicamion')->with([
             'resultat' => $programmations,
             'request' => $request->all(),

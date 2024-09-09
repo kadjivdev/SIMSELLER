@@ -19,7 +19,7 @@ class ControlesTools
                 
             ]
         );
-        $textMail = 'Nous venons constater une opération suspecte. Merci de vous connecter pour les détails.';
-        Mail::send(new SuspectMail(['email'=>'arnaudex2013@gmail.com'],'Opération suspecte sur la table '.$table,$textMail));
+        // $textMail = 'Nous venons constater une opération suspecte. Merci de vous connecter pour les détails.';
+        // Mail::send(new SuspectMail(['email'=>'arnaudex2013@gmail.com'],'Opération suspecte sur la table '.$table,$textMail));
     }
 }
