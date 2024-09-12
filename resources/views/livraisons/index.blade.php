@@ -118,7 +118,7 @@
                                     <?php $compteur = 1; ?>
                                     @foreach($programmations as $programmation)
                                     @if($programmation->bl)
-                                    @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu')) >)
+                                    @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu')))
                                     <tr>
                                         <td>{{ $compteur++ }}</td>
                                         <td>{{ $programmation->detailboncommande->boncommande->code }}</td>

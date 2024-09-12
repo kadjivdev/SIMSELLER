@@ -384,7 +384,8 @@
                     </a>
                     <ul class="nav nav-treeview">
 
-                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()|| Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
+                        @if(Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()|| Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
+                        @if(Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('edition.stock') }}" class="nav-link {{ (route('edition.stock') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -410,8 +411,10 @@
                             </a>
                         </li>
                         @endif
+                        @endif
 
                         @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
+                        @if(Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('edition.etatReglementperiode') }}" class="nav-link {{ (route('edition.etatReglementperiode') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -428,7 +431,6 @@
                                 </p>
                             </a>
                         </li>
-
                         <li class="nav-item">
                             <a href="{{ route('edition.etatCompte') }}" class="nav-link {{ (route('edition.etatCompte') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -445,8 +447,10 @@
                                 </p>
                             </a>
                         </li>
+                        @endif
 
-                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
+                        @if(Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists() && Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('accusedocuments.indexAll') }}" class="nav-link {{ (route('accusedocuments.indexAll') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -466,14 +470,6 @@
                                 <i class="nav-icon far  fa-list text-cyan"></i>
                                 <p>
                                     Etat livraison commande
-                                </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('edition.etatventeperiode') }}" class="nav-link {{ (route('edition.etatventeperiode') == url()->current()) ? 'active' : '' }}">
-                                <i class="nav-icon far  fa-list text-cyan"></i>
-                                <p>
-                                    Etat des ventes
                                 </p>
                             </a>
                         </li>
@@ -502,6 +498,16 @@
                                 </p>
                             </a>
                         </li>
+                        @endif
+                        <li class="nav-item">
+                            <a href="{{ route('edition.etatventeperiode') }}" class="nav-link {{ (route('edition.etatventeperiode') == url()->current()) ? 'active' : '' }}">
+                                <i class="nav-icon far  fa-list text-cyan"></i>
+                                <p>
+                                    Etat des ventes
+                                </p>
+                            </a>
+                        </li>
+
                         @endif
                         @endif
                     </ul>

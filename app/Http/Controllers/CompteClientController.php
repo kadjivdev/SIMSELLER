@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\Validator;
 class CompteClientController extends Controller
 {
     public function __construct()
-    {       
+    {
 
-      /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
+        /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
         ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['RECOUVREUR', 'SUPERVISEUR'])->exists();
     
         if (!$possedeAuMoinsUnDroit) {
@@ -34,7 +34,7 @@ class CompteClientController extends Controller
     public function show(Client $client)
     {
         $compteClient = $client->compteClients;
-        $compteClient = count($compteClient) > 0 ? $compteClient[0]: CompteTools::addCompte($client->id, auth()->user()->id);
+        $compteClient = count($compteClient) > 0 ? $compteClient[0] : CompteTools::addCompte($client->id, auth()->user()->id);
         $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->paginate()->toArray();
         $mouvements = collect($mouvements)->sortByDesc('id')->all();
         return view('compteClients.show', compact('compteClient', 'mouvements', 'client'));
@@ -46,7 +46,7 @@ class CompteClientController extends Controller
         $typedetailrecus = TypeDetailRecu::all();
         return view('compteClients.appro', compact('client', 'comptes', 'typedetailrecus'));
     }
-    
+
     public function postAppro(Request $request, Client $client)
     {
         try {
@@ -67,7 +67,14 @@ class CompteClientController extends Controller
                     $format = env('FORMAT_REGLEMENT');
                     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
                     $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-                    
+
+                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
+                    $_rg_existe = Reglement::where("reference", strtoupper($request->reference))->first();
+                    if ($_rg_existe) {
+                        return back()->with("error", "Cette reference existe déjà");
+                    }
+
+                    #####___
                     $reglement = Reglement::create([
                         'code' => $code,
                         'reference' => strtoupper($request->reference),
@@ -94,7 +101,7 @@ class CompteClientController extends Controller
                         $client->update();
 
                         $compteClient = CompteClient::find($client->id);
-                        
+
                         $compteClient->solde = $client->credit + $client->debit;
                         $compteClient->update();
 
@@ -129,6 +136,12 @@ class CompteClientController extends Controller
                     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
                     $code = $format . str_pad($parametre->valeur, 4, "0", STR_PAD_LEFT);
 
+                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
+                    $_rg_existe = Reglement::where("reference", strtoupper($request->reference))->first();
+                    if ($_rg_existe) {
+                        return back()->with("error", "Cette reference existe déjà");
+                    }
+
                     $reglement = Reglement::create([
                         'code' => $code,
                         'reference' => strtoupper($request->reference),
@@ -155,7 +168,7 @@ class CompteClientController extends Controller
 
                         $client->credit = $client->credit + $request->montant;
                         $client->update();
-                        
+
                         $compteClient = CompteClient::find($client->id);
                         $compteClient->solde = $client->credit + $client->debit;
                         $compteClient->update();
@@ -183,6 +196,12 @@ class CompteClientController extends Controller
                     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
                     $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
 
+                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
+                    $_rg_existe = Reglement::where("reference",strtoupper($request->reference))->first();
+                    if ($_rg_existe) {
+                        return back()->with("error","Cette reference existe déjà");
+                    }
+
                     $reglement = Reglement::create([
                         'code' => $code,
                         'reference' => strtoupper($request->reference),
@@ -206,23 +225,23 @@ class CompteClientController extends Controller
                         $parametre = $parametres->update([
                             'valeur' => $valeur,
                         ]);
-                        
+
                         if ($parametre) {
                             $mouvement = Mouvement::create([
-                                'libelleMvt'=>$request->libelleMvt,
-                                'dateMvt'=>$request->date,
-                                'montantMvt'=>$request->montant,
-                                'compteClient_id'=>$client->compteClients[0]->id,
-                                'user_id'=>auth()->user()->id,
-                                'sens'=>1,
-                                'reglement_id'=>$reglement->id
+                                'libelleMvt' => $request->libelleMvt,
+                                'dateMvt' => $request->date,
+                                'montantMvt' => $request->montant,
+                                'compteClient_id' => $client->compteClients[0]->id,
+                                'user_id' => auth()->user()->id,
+                                'sens' => 1,
+                                'reglement_id' => $reglement->id
                             ]);
-                            if($mouvement){
+                            if ($mouvement) {
                                 $compte = $mouvement->compteClient;
-                               /*  $compte->solde = $compte->solde + $request->montant;
+                                /*  $compte->solde = $compte->solde + $request->montant;
                                 $compte->update(); */
 
-                                $client = $compte->client ;
+                                $client = $compte->client;
                                 $client->credit = $client->credit + $request->montant;
                                 $client->update();
 
@@ -242,11 +261,11 @@ class CompteClientController extends Controller
                         'compte_id' => ['required'],
                         'typedetailrecu_id' => ['required'],
                     ]);
-                   
+
                     if ($validator->fails()) {
                         return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
                     }
-                   
+
                     /* Uploader les documents dans la base de données */
                     $filename = time() . '.' . $request->document->extension();
 
@@ -260,13 +279,19 @@ class CompteClientController extends Controller
                     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
                     $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
 
+                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
+                    $_rg_existe = Reglement::where("reference",strtoupper($request->reference))->first();
+                    if ($_rg_existe) {
+                        return back()->with("error","Cette reference existe déjà");
+                    }
+
                     $reglement = Reglement::create([
                         'code' => $code,
                         'reference' => strtoupper($request->reference),
                         'date' => $request->date,
                         'montant' => $request->montant,
                         'document' => $file,
-                        'vente_id' =>null,
+                        'vente_id' => null,
                         'compte_id' => $request->compte_id,
                         'type_detail_recu_id' => $request->typedetailrecu_id,
                         'user_id' => auth()->user()->id
@@ -287,20 +312,20 @@ class CompteClientController extends Controller
 
                         if ($parametre) {
                             $mouvement = Mouvement::create([
-                                'libelleMvt'=>$request->libelleMvt,
-                                'dateMvt'=>$request->date,
-                                'montantMvt'=>$request->montant,
-                                'compteClient_id'=>$client->compteClients[0]->id,
-                                'reglement_id'=> $reglement->id,
-                                'sens'=>0,
-                                'user_id'=>auth()->user()->id
+                                'libelleMvt' => $request->libelleMvt,
+                                'dateMvt' => $request->date,
+                                'montantMvt' => $request->montant,
+                                'compteClient_id' => $client->compteClients[0]->id,
+                                'reglement_id' => $reglement->id,
+                                'sens' => 0,
+                                'user_id' => auth()->user()->id
                             ]);
-                            if($mouvement){
+                            if ($mouvement) {
                                 $compte = $mouvement->compteClient;
                                 /* $compte->solde = $compte->solde + $request->montant;
                                 $compte->update(); */
-                                
-                                $client = $compte->client ;
+
+                                $client = $compte->client;
                                 $client->credit = $client->credit + $request->montant;
                                 $client->update();
 
@@ -322,50 +347,48 @@ class CompteClientController extends Controller
             }
         }
     }
-    public function delete(Mouvement $mouvement, Client $client){
-        return view('compteClients.delete',compact('mouvement', 'client'));
+    public function delete(Mouvement $mouvement, Client $client)
+    {
+        return view('compteClients.delete', compact('mouvement', 'client'));
     }
 
     public function destroy(Mouvement $mouvement, Client $client)
     {
-        if($mouvement->compteClient_id){
+        if ($mouvement->compteClient_id) {
             $mouvementnew = Mouvement::create([
-                'libelleMvt'=>"suppression approvisionnement",
-                'dateMvt'=>Carbon::now(),
-                'montantMvt'=>$mouvement->montantMvt,
-                'compteClient_id'=>$mouvement->compteClient_id,
-                'user_id'=>auth()->user()->id,
-                'sens'=>2,
-                'reglement_id'=>$mouvement->reglement_id,
-                'destroy'=>true
+                'libelleMvt' => "suppression approvisionnement",
+                'dateMvt' => Carbon::now(),
+                'montantMvt' => $mouvement->montantMvt,
+                'compteClient_id' => $mouvement->compteClient_id,
+                'user_id' => auth()->user()->id,
+                'sens' => 2,
+                'reglement_id' => $mouvement->reglement_id,
+                'destroy' => true
             ]);
 
-            $mouvement->destroy=true;
+            $mouvement->destroy = true;
             $mouvement->update();
 
             $reglement = Reglement::find($mouvement->reglement_id);
-            ControlesTools::generateLog($reglement,'reglement','Suppression règlement');
+            ControlesTools::generateLog($reglement, 'reglement', 'Suppression règlement');
 
             $reglement->delete();
 
-            if($mouvementnew){
+            if ($mouvementnew) {
                 $compte = $mouvementnew->compteClient;
                 $Client = $compte->client;
                 $Client->credit = $Client->credit - $mouvement->montantMvt;
-                $Client->update();              
-                
+                $Client->update();
+
                 $compte->solde = $client->credit + $client->debit;
                 $compte->update();
-
             }
-            
         }
-        
 
-        if ($mouvement){
+
+        if ($mouvement) {
             Session()->flash('message', 'Approvisionnement Modifier  avec succès');
             return redirect()->route('compteClient.show', ['client' => $client->id]);
         }
     }
-
 }

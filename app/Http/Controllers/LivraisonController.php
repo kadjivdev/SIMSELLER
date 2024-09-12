@@ -765,8 +765,10 @@ class LivraisonController extends Controller
                     break;
             }
         }
-        $programmations = $programmations->chunkById(1);
-        // dd($programmations);
+        $programmations = collect($programmations);
+        $programmations = $programmations->chunk(10);
+        // $programmations = $programmations->all();
+
         return redirect()->route('livraisons.suivicamion')->with([
             'resultat' => $programmations,
             'request' => $request->all(),
