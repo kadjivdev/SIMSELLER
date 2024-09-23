@@ -54,13 +54,6 @@ class VenteController extends Controller
 
     public function index(Request $request)
     {
-        // $programmation = Programmation::find(901);
-        // dd($programmation->vendus);
-
-        // $rgl = Reglement::where("vente_id",64)->get();
-        // dd($rgl);
-
-        // dd(Mouvement::where("reglement_id",4472)->get());
         $roles = Auth::user()->roles()->pluck('id')->toArray();
         $commandeclients = CommandeClient::whereIn('statut', ['Préparation', 'Vendue', 'Validée', 'Livraison partielle', 'Livrée']);
 
@@ -81,7 +74,6 @@ class VenteController extends Controller
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         }
 
-        // $ventes = $ventes->having("id","<",100);
         return view('ventes.index', compact('ventes'));
     }
 

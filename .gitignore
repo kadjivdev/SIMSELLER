@@ -16,7 +16,7 @@ public_html/storage
 public_html/hot
 
 storage/*.key
-.env
+# .env
 # .env_prod
 Homestead.yaml
 Homestead.json
