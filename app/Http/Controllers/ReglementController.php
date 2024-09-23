@@ -122,6 +122,7 @@ class ReglementController extends Controller
                             'reglement_id' => $reglement->id,
                             'destroy' => true
                         ]);
+                        
                         if ($mouvement) {
                             $compte = $mouvement->compteClient;
                             $compte->solde = $compte->solde - $request->montant;
@@ -133,8 +134,8 @@ class ReglementController extends Controller
                             $client->update();
 
                             //$compte = $mouvement->compteClient;
-                            $compte->solde = $client->credit + $client->debit;
-                            $compte->update();
+                            // $compte->solde = $client->credit + $client->debit;
+                            // $compte->update();
                         }
 
                         if ($parametre) {
@@ -264,8 +265,6 @@ class ReglementController extends Controller
                         'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
                         'compte_id' => ['required'],
                         'typedetailrecu_id' => ['required'],
-
-
                     ]);
 
                     if ($validator->fails()) {
@@ -331,7 +330,6 @@ class ReglementController extends Controller
             }
         }
     }
-
 
 
     public function show(DetailRecu $detailRecu)

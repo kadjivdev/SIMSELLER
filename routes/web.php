@@ -489,6 +489,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             // GESTION DES APPROVISIONNEMENTS
             Route::match(["GET", "POST"], '/etat-compte-approvisionnement', 'CompteApprovisionnement')->name('edition.compteApprovisionnement');
+
+            // RESTORER LES VENTES SUPPRIMEES AU SOLDE DU CLIENT
+            Route::get('/{client}/restoreVenteDeleted', 'RestoreVenteDeleted')->name('edition.RestoreVenteDeleted');
         });
     });
 
@@ -1305,6 +1308,8 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         Route::get('newclient/index/', 'index')->name('newclient.index');
         Route::get('newclient/indexOld/', 'oldClients')->name('newclient.oldClients');
         Route::get('newclient/indexOldNotExistInTheNewSystem/', 'oldClientsNotInTheNewSystem')->name('newclient.oldClientsNotInTheNewSystem');
+
+        Route::post('affect-to-zone/', 'AffectToZone')->name('newclient.AffectToZone');
 
         ####___REGLEMENT DES DETTES ANCIENNES
         Route::match(["GET","POST"],'newclient/reglement/{client?}', 'reglement')->name('newclient.reglement');

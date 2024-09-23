@@ -23,6 +23,11 @@ class Client extends Model
         return $this->belongsTo(Departement::class, 'departement_id', 'id');
     }
 
+    public function _Zone()
+    {
+        return $this->belongsTo(Zone::class, 'zone_id', 'id');
+    }
+
     public function vente()
     {
         return $this->hasMany(Vente::class);
@@ -53,5 +58,9 @@ class Client extends Model
     public function _detteReglements()
     {
         return $this->hasMany(DetteReglement::class, 'client', 'id');
+    }
+    public function _deletedVentes()
+    {
+        return $this->hasMany(DeletedVente::class, 'ctl_payeur');
     }
 }

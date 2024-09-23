@@ -207,7 +207,6 @@
                                                             @else
                                                                 <option id="bl_0" selected disabled>** Choisissez un Camion **</option>
                                                             @endif
-
                                                         </select>
                                                     </div>
                                                     @error('programmation_id')
@@ -447,7 +446,6 @@
 
 @section('script')
     <script>
-        
         let user = {{auth()->user()->id}};
         $(document).ready(function (){
             selectDefaultDriver('{{old('programmation_id')}}');

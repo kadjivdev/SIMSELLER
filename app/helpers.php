@@ -5,24 +5,36 @@ use App\Models\TypeCommande;
 use App\Models\Vente;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Number;
 
-function IS_FOFANA_ACCOUNT($user){
-    if ($user->id==7) {
+function IS_FOFANA_ACCOUNT($user)
+{
+    if ($user->id == 7) {
         return true;
     }
 
     return false;
 }
 
-function IS_AIME_ACCOUNT($user){
-    if ($user->id==2) {
+function IS_AIME_ACCOUNT($user)
+{
+    if ($user->id == 2) {
         return true;
     }
 
     return false;
 }
 
-function IS_HIPLYTE_ACCOUNT($user){
-    if ($user->id==11) {
+function IS_RODOLPHO_ACCOUNT($user)
+{
+    if ($user->id == 19) {
+        return true;
+    }
+
+    return false;
+}
+
+function IS_HIPLYTE_ACCOUNT($user)
+{
+    if ($user->id == 11) {
         return true;
     }
 
@@ -79,7 +91,7 @@ function IsThisVenteUpdateDemandeAlreadyModified($vente)
 
 function IsThisVenteModified($vente)
 {
-    $demandModified = $vente->_updateDemandes->where("modified",true)->last();
+    $demandModified = $vente->_updateDemandes->where("modified", true)->last();
     if ($demandModified) {
         return true;
     }
@@ -89,7 +101,7 @@ function IsThisVenteModified($vente)
 
 function GetVenteUpdatedDate($vente)
 {
-    $demandModified = $vente->_updateDemandes->where("modified",true)->last();
+    $demandModified = $vente->_updateDemandes->where("modified", true)->last();
 
     if ($demandModified) {
 
@@ -183,8 +195,18 @@ function GetVenteDeletedType($venteDeleted)
 {
     $type = TypeCommande::find($venteDeleted->type_vente_id);
     if ($type) {
-        $type = $type->libelle ;
+        $type = $type->libelle;
         return $type;
+    }
+
+    return "---";
+}
+
+function GetClientZone($client)
+{
+    if ($client->_Zone) {
+        $zone = $client->_Zone->libelle;
+        return $zone;
     }
 
     return "---";
@@ -194,7 +216,7 @@ function GetVenteDeletedClient($venteDeleted)
 {
     $client = Client::find($venteDeleted->ctl_payeur);
     if ($client) {
-        $client = $client->raisonSociale ;
+        $client = $client->raisonSociale;
         return $client;
     }
 
@@ -242,5 +264,3 @@ function Somm($a, $b)
     // dd($a,$b);
     return number_format($a + $b, '0', '', ' ');
 }
-
-

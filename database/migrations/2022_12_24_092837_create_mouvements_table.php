@@ -11,6 +11,7 @@ class CreateMouvementsTable extends Migration
      *
      * @return void
      */
+    
     public function up()
     {
         Schema::create('mouvements', function (Blueprint $table) {
@@ -29,6 +30,7 @@ class CreateMouvementsTable extends Migration
      *
      * @return void
      */
+
     public function down()
     {
         Schema::dropIfExists('mouvements');

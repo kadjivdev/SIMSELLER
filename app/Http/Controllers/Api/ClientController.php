@@ -12,4 +12,9 @@ class ClientController extends Controller
         $clients = Client::all('id','raisonSociale');
         return response($clients);
     }
+
+    public function Retrieve(Request $request,$id){
+        $client = Client::find($id);
+        return response($client);
+    }
 }

@@ -18,7 +18,6 @@ class CommandeClient extends Model
         return $this->belongsTo(TypeCommande::class, 'type_commande_id', 'id');
     }
 
-
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
@@ -29,25 +28,22 @@ class CommandeClient extends Model
         return $this->belongsTo(Client::class, 'client_id', 'id');
     }
 
-
     public function zone()
     {
         return $this->belongsTo(Zone::class, 'zone_id', 'id');
     }
-
 
     public function commanders()
     {
         return $this->hasMany(Commander::class, 'commande_client_id', 'id');
     }
 
-
     public function ventes()
     {
         return $this->hasMany(Vente::class, 'commande_client_id', 'id');
     }
+
     function user(){
         return $this->belongsTo(User::class,'users');
     }
-
 }

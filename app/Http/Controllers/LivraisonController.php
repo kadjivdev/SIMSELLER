@@ -137,6 +137,8 @@ class LivraisonController extends Controller
                 $programmations = $programmations->where('zone_id', $user->zone_id);
         }
 
+        // $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)->orderByDesc('code')->get();
+
         return view('livraisons.index', compact('programmations', 'req'));
     }
 

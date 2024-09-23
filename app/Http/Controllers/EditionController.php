@@ -230,6 +230,8 @@ class EditionController extends Controller
             $credit = $client->credit;
             $debit = $client->debit;
         }
+
+        $ventesDleted = $client->_deletedVentes;
         ####____
         $reglements = array_sum($reglement_amonts);
 
@@ -285,7 +287,7 @@ class EditionController extends Controller
         }
 
         $_sommeVentes = $ventes->sum('montant');
-        $_reglements = $reglements;
+        // $_reglements = $reglements;
         $_client = $client;
         $montant = 0;
         $regle = 0;
@@ -298,8 +300,11 @@ class EditionController extends Controller
             $_regle = $regle + $item->reglements()->sum('montant');
         }
 
+
+        // dd($ventes,$_montant,$_regle);
         #####____
-        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_reglements" => $_reglements, "_montant" => $_montant, "_regle" => $_regle]);
+        // "_reglements" => $_reglements, 
+        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
     }
 
     public function etatCompte()
@@ -390,7 +395,6 @@ class EditionController extends Controller
 
     public function postEtatLivCde(Request $request)
     {
-
         $fournisseur = Fournisseur::find($request->fournisseur);
         $newBcs = [];
         if (!$request->fournisseur) {
@@ -404,17 +408,17 @@ class EditionController extends Controller
                 $qteBc = $bc->detailboncommandes()->sum('qteCommander');
                 $montBc = $bc->montant;
 
-                if ($bc->code=="BCI-0258") {
+                if ($bc->code == "BCI-0258") {
                     $valider = $bc->detailboncommandes[0]->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
                     // dd(number_format(collect($valider)->sum('qteprogrammer'), 2, ",", " "));
                 }
 
                 // dd($totalValider);
                 $totalValider = $bc->detailboncommandes[0]->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
-                $_qteprogrammer = collect($totalValider)->sum('qteprogrammer');# number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
-                $_qteLiv = collect($totalValider)->sum('qtelivrer') ;#number_format(collect($totalValider)->sum('qtelivrer'), 2, ",", " ");
-                $_Montprog = collect($totalValider)->sum('qteprogrammer')*$bc->detailboncommandes[0]->pu;# number_format(collect($totalValider)->sum('qteprogrammer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
-                $_MontLiv = collect($totalValider)->sum('qtelivrer')*$bc->detailboncommandes[0]->pu;# number_format(collect($totalValider)->sum('qtelivrer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
+                $_qteprogrammer = collect($totalValider)->sum('qteprogrammer'); # number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
+                $_qteLiv = collect($totalValider)->sum('qtelivrer'); #number_format(collect($totalValider)->sum('qtelivrer'), 2, ",", " ");
+                $_Montprog = collect($totalValider)->sum('qteprogrammer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qteprogrammer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
+                $_MontLiv = collect($totalValider)->sum('qtelivrer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qtelivrer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
                 // dd($total);
 
                 // $qteLiv = DB::select(
@@ -448,16 +452,16 @@ class EditionController extends Controller
 
                 // dd($qteLiv);
                 // if ($qteBc >= $_qteLiv) {
-                    $item->bc = $bc;
-                    $item->qteBc = $qteBc;
-                    $item->montBc = $montBc;
-                    $item->qteprog = $_qteprogrammer;
-                    $item->Montprog = $_Montprog;
-                    $item->qteLiv = $_qteLiv;
-                    $item->MontLiv = $_MontLiv;
-                    $item->qteVendu = $qteVendu;
-                    $item->montVendu = $montVendu;
-                    $newBcs[] = $item;
+                $item->bc = $bc;
+                $item->qteBc = $qteBc;
+                $item->montBc = $montBc;
+                $item->qteprog = $_qteprogrammer;
+                $item->Montprog = $_Montprog;
+                $item->qteLiv = $_qteLiv;
+                $item->MontLiv = $_MontLiv;
+                $item->qteVendu = $qteVendu;
+                $item->montVendu = $montVendu;
+                $newBcs[] = $item;
                 // }
 
                 // if ($bc->code=="BCI-0258") {
@@ -983,5 +987,37 @@ class EditionController extends Controller
 
         session()->put('result', true);
         return view('editions.approvisionnementCompte', compact('mouvements', 'startDate', 'endDate'));
+    }
+
+    // RESTORER LES VENTES SUPPRIMEES AU SOLDE DU CLIENT
+    function RestoreVenteDeleted(Request $request, Client $client)
+    {
+        $ventes = $client->_deletedVentes->where("restituted", false);
+
+        if (count($ventes) ==0) {
+            return back()->with("error", "Pas de ventes à restituer!");
+        }
+        ###___
+        $compteClient = $client->compteClients->first();
+        $venteAmount =  $ventes->sum("montant");
+
+        $compteClient->solde = $compteClient->solde + $venteAmount;
+        $compteClient->save();
+        ###____
+
+        $client = $compteClient->client;
+        $client->credit = $client->credit + $venteAmount;
+        $client->debit = $client->debit - $venteAmount;
+        $client->save();
+
+        ###___
+        foreach ($ventes as $vente) {
+            $vente->restituted = true;
+            $vente->restitutor = auth()->user()->id;
+            $vente->save();
+        }
+
+        ###___
+        return back()->with("message", "Montant des ventes restitué avec succès!");
     }
 }

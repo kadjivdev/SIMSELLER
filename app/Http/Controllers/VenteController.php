@@ -22,8 +22,10 @@ use App\Models\DeletedVente;
 use App\Models\DetailBonCommande;
 use App\Models\filleuil;
 use App\Models\Fournisseur;
+use App\Models\Mouvement;
 use App\Models\Produit;
 use App\Models\Programmation;
+use App\Models\Reglement;
 use App\Models\UpdateVente;
 use App\Models\Vendu;
 use App\Models\VenteDeleteDemand;
@@ -52,6 +54,13 @@ class VenteController extends Controller
 
     public function index(Request $request)
     {
+        // $programmation = Programmation::find(901);
+        // dd($programmation->vendus);
+
+        // $rgl = Reglement::where("vente_id",64)->get();
+        // dd($rgl);
+
+        // dd(Mouvement::where("reglement_id",4472)->get());
         $roles = Auth::user()->roles()->pluck('id')->toArray();
         $commandeclients = CommandeClient::whereIn('statut', ['Préparation', 'Vendue', 'Validée', 'Livraison partielle', 'Livrée']);
 
@@ -64,14 +73,15 @@ class VenteController extends Controller
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
             $user = Auth::user();
             if ($user->id == 11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->where("id","<",1000)->get();
             } else {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->where("id","<",1000)->get();
             }
         } elseif (in_array(3, $roles)) {
-            $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
+            $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->where("id","<",1000)->get();
         }
 
+        // $ventes = $ventes->having("id","<",100);
         return view('ventes.index', compact('ventes'));
     }
 
@@ -138,27 +148,31 @@ class VenteController extends Controller
         $repre = $user->representant;
 
         $zones = $repre->zones;
+        // dd($repre);
         if ($repre->nom == 'DIRECTION') {
             $zones = Zone::all();
+            $clients = Client::all();
+        } else {
+            $clients = Client::where("zone_id", [$user->zone_id])->get();
         }
 
         if ($request->statuts) {
             if ($request->statuts == 1) {
-                $clients = Client::all();
+                // $clients = Client::all();
                 //$zones = Zone::all();
                 $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
                 $commandeclients = CommandeClient::whereIn('statut', ['Non livrée', 'Livraison partielle'])->get();
                 $req = $request->statuts;
             } elseif ($request->statuts == 2) {
-                $clients = Client::all();
+                // $clients = Client::all();
                 //$zones = Zone::all();
                 $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
                 $commandeclients = CommandeClient::where('statut', 'Validée')->orWhere('statut', 'Livraison partielle')->whereNull('byvente')->where('type_commande_id', 2)->get();
                 $req = $request->statuts;
             }
         } else {
-            $clients = Client::all();
-            //$zones = Zone::all();
+            // $clients = Client::all();
+            // $zones = Zone::all();
             $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
             $commandeclients = CommandeClient::whereIn('statut', ['Non livrée', 'Livraison partielle'])->get();
             $req = 1;
@@ -166,6 +180,7 @@ class VenteController extends Controller
 
         $redirectto = $request->redirectto;
         $vente = NULL;
+
         return view('ventes.create', compact('vente', 'typecommandeclient', 'clients', 'commandeclients', 'zones', 'redirectto', 'req', 'typeVente'));
     }
 
@@ -511,6 +526,9 @@ class VenteController extends Controller
 
     public function destroy(Vente $vente)
     {
+        if (!$vente) {
+            return redirect()->back()->with("error", "Cette vente n'existe plus!");
+        };
         ###___ENREGISTREMENT DE LA VENTE A SUPPRIMER 
         $data = [
             "code" => $vente->code,
@@ -527,7 +545,7 @@ class VenteController extends Controller
             "vente_validation" => $vente->vente_validation,
             "transport" => $vente->transport,
             "destination" => $vente->destination,
-            "ctl_payeur" => $vente->ctl_payeur,
+            "ctl_payeur" => $vente->commandeclient->client->id,
             "date_comptabilisation" => $vente->date_comptabilisation,
 
             "date_traitement" => $vente->date_traitement,
@@ -539,7 +557,9 @@ class VenteController extends Controller
             "annuler" => $vente->annuler,
             "valide" => $vente->valide,
             "validated_date" => $vente->validated_date,
-            "traited_date" => $vente->traited_date
+            "traited_date" => $vente->traited_date,
+            "restitutor" => auth()->user()->id,
+            "restituted" => true,
         ];
         $venteDeleted = DeletedVente::create($data);
 
@@ -548,6 +568,36 @@ class VenteController extends Controller
         if ($vente->vendus) {
             $vente->vendus()->delete();
             $vente->commandeclient()->delete();
+
+            // ####____ SUPPRESSION DES REGLEMENTS LIES A CETTE VENTE
+            foreach ($vente->reglements as $regle) {
+                ###___
+                $mvts = $regle->_mouvements;
+
+                foreach ($mvts as $mvt) {
+                    $compteClient = $mvt->compteClient;
+                    $compteClient->solde = $compteClient->solde + $regle->montant;
+                    $compteClient->save();
+
+                    ###____
+                    $client = $compteClient->client;
+                    $client->credit = $client->credit + $regle->montant;
+                    $client->debit = $client->debit - $regle->montant;
+                    $client->save();
+
+                    ###___
+                    // $compteClient->solde = $client->credit + $client->debit;
+                    // $compteClient->save();
+
+                    ####____Suppression du Mouvement
+                    $mvt->delete();
+                }
+
+                ####____SUPPRESSION DU REGLEMENT
+                $regle->delete();
+            }
+            // ####___
+
             $vente->delete();
         } else {
             $vente->commandeclient()->delete();
@@ -568,7 +618,6 @@ class VenteController extends Controller
             }
         }
 
-        ######_____
         ####____ON BLOQUE A NOUVEAU L'ACCES
         $venteDeleteDemande =  VenteDeleteDemand::where(["vente" => $vente->id, "demandeur" => auth()->user()->id, "deleted" => false])->first();
         if ($venteDeleteDemande) {
@@ -764,12 +813,12 @@ class VenteController extends Controller
         $current = Auth::user();
         $user_representant = $current->representant; ###___il est representant ou il est sous un representant
 
-        if (IS_HIPLYTE_ACCOUNT($current) ) {
+        if (IS_HIPLYTE_ACCOUNT($current)) {
             $user_representant = $current;
         }
 
         ##____
-        if (IS_FOFANA_ACCOUNT($current) || IS_AIME_ACCOUNT($current) ) {
+        if (IS_FOFANA_ACCOUNT($current) || IS_AIME_ACCOUNT($current) || IS_RODOLPHO_ACCOUNT($current)) {
             $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
         } else {
             ###___les users associés à ce representant
@@ -1319,7 +1368,7 @@ class VenteController extends Controller
             return redirect()->back()->with("error", "La quantité entrée est supérieure au stock du camion choisi. Veuillez bien diminuer la quantité");
         }
 
-        ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu* 
+        ###__Ce que le stock du camion deviendra si on ajoute le nouveau *qteVendu*  
         $vd_vendu = $vendu->qteVendu; ###Qte precedemment vendue sur cette vente liée à cette programmation
         $qteTotalProgrammerCamion = $vendu->programmation->qteprogrammer; ###Qte totale programmée vendue sur cette camion 
         $stock = $qteTotalProgrammerCamion - (($pr_totalVendus - $vd_vendu) + $qteVendu);

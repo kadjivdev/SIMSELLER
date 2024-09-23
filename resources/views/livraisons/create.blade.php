@@ -107,7 +107,7 @@
                                             </a>
                                         </div>
                                         <div class="col-sm-4">
-                                            @if ($programmation->bl)
+                                            <!-- @if ($programmation->bl && !$programmation->transfert)
                                                 <button type="submit" class="btn btn-sm btn-warning btn-block">
                                                     {{ __('Modifier') }}
                                                     <i class="fa-solid fa-pen-to-square"></i>
@@ -117,7 +117,12 @@
                                                     {{ __('Enregistrer') }}
                                                     <i class="fa-solid fa-floppy-disk"></i>
                                                 </button>
-                                            @endif
+                                            @endif -->
+
+                                            <button type="submit" class="btn btn-sm btn-success btn-block" @if ((intval($programmation->qteprogrammer) - intval($programmation->vendus->sum("qteVendu"))) == 0) disabled @endif>
+                                                {{ __('Enregistrer') }}
+                                                <i class="fa-solid fa-floppy-disk"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

@@ -32,7 +32,7 @@ class CheckStock implements Rule
         if($this->programmation_id){
             $programmation = Programmation::find($this->programmation_id);
             $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
-            $stockDispo = $programmation->qtelivrer - $qteVendu;
+            $stockDispo = $programmation->qteprogrammer - $qteVendu;
             if($value > $stockDispo){
                 $this->messageText = "Le stock disponible ($stockDispo) insuffisant.";
                 return false;

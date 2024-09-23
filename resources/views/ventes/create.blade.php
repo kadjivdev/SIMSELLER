@@ -83,7 +83,9 @@
                                                 <label>Client payeur<span class="text-danger">*</span></label>
                                                 <select class="form-control form-control-sm select2" name="ctl_payeur" style="width: 100%;" id="ctl_payeur" onchange="filleulTypeCheck()">
                                                     <option selected disabled></option>
+                                                    @if(count($clients)>0)
                                                     <option value="{{$client->id}}">Lui même</option>
+                                                    @endif
                                                     <option value="0">Autre personne</option>
                                                 </select>
                                                 @error('ctl_payeur')
@@ -121,7 +123,6 @@
                                             @enderror
                                         </div>
                                     </div>
-
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-3">

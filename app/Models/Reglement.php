@@ -4,14 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reglement extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'code','reference', 'date', 'montant','document', 'vente_id', 'compte_id', 'type_detail_recu_id','user_id','observation_validation','user_validateur_id','statut'
+        'code',
+        'reference',
+        'date',
+        'montant',
+        'document',
+        'vente_id',
+        'compte_id',
+        'type_detail_recu_id',
+        'user_id',
+        'observation_validation',
+        'user_validateur_id',
+        'statut'
     ];
-    
+
     public function vente()
     {
         return $this->belongsTo(Vente::class, 'vente_id', 'id');
@@ -27,7 +39,13 @@ class Reglement extends Model
     {
         return $this->belongsTo(TypeDetailRecu::class, 'type_detail_recu_id', 'id');
     }
-	public function utilisateur(){
-        return $this->belongsTo(User::class,'user_id');
+    public function utilisateur()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function _mouvements(): HasMany
+    {
+        return $this->hasMany(Mouvement::class, "reglement_id");
     }
 }

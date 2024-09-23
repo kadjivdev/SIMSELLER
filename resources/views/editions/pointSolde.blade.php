@@ -18,6 +18,22 @@
         </div>
     </section>
 
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12">
+                    @if(session()->has("message"))
+                    <div class="alert alert-success">{{session()->get("message")}}</div>
+                    @endif
+
+                    @if(session()->has("error"))
+                    <div class="alert alert-danger">{{session()->get("erro")}}</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="content">
         <div class="container-fluid">
             <div class="row">
@@ -40,11 +56,11 @@
                                                 @endforeach
                                             </select> -->
                                             <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>-->
-                                               @foreach ($clients as $client)
-                                               <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
-                                                   {{ $client->raisonSociale }}
-                                               </option>
-                                               @endforeach
+                                                @foreach ($clients as $client)
+                                                <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
+                                                    {{ $client->raisonSociale }}
+                                                </option>
+                                                @endforeach
                                             </select>
 
                                         </div>
@@ -71,28 +87,6 @@
                             <!--  -->
 
                             <div class="row">
-                                <!--<div class="col-md-3 col-sm-6 col-12">-->
-                                <!--    <div class="info-box">-->
-                                <!--        <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>-->
-                                <!--        <div class="info-box-content">-->
-                                <!--            <span class="info-box-text">AVOIR EN COMPTE</span>-->
-                                <!--            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['SommeCompte'], '0', '', ' '): number_format($SommeCompte, '0', '', ' ')  }}</span>-->
-                                <!--        </div>-->
-                                <!--    </div>-->
-                                <!--</div>-->
-
-                                <!-- <div class="col-md-3 col-sm-6 col-12">
-                                    <div class="info-box">
-                                        <span class="info-box-icon bg-danger"><i class="fas fa-hand-holding-usd"></i></span>
-                                        <div class="info-box-content">
-                                            <span class="info-box-text">DEBIT</span>
-                                            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['debit'], '0', '', ' '): number_format($debit, '0', '', ' ')  }}</span>
-                                        </div>
-
-                                    </div>
-
-                                </div> -->
-
                                 <div class="col-md-6 col-sm-6 col-12">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-warning"><i class="fas fa-hand-holding-usd"></i></span>
@@ -137,9 +131,9 @@
                                                             <span class="info-box-text">Il nous devait:</span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['debit_old'], '0', '', ' ')}}</span>
                                                             @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists())
-                                                                @if(IsClientHasADebt(session('resultat')['client']['id']))
-                                                                <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success">Regler</a> 
-                                                                @endif
+                                                            @if(IsClientHasADebt(session('resultat')['client']['id']))
+                                                            <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success">Regler</a>
+                                                            @endif
                                                             @endif
                                                         </div>
                                                     </div>
@@ -148,7 +142,7 @@
                                                     <div class="info-box">
                                                         <span class="info-box-icon bg-dark" style="width: 50px!important;"><i class="bi bi-cash-coin"></i></span>
                                                         <div class="info-box-content">
-                                                            <span class="info-box-text">Nous lui devions  </span>
+                                                            <span class="info-box-text">Nous lui devions </span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['credit_old'], '0', '', ' ')}}</span>
                                                         </div>
                                                     </div>
@@ -166,20 +160,22 @@
                                     <br>
                                     <div class="info-box">
                                         <div class="info-box-content text-white bg-black">
-                                            <strong class="info-box-text">Il nous doit au total:  </strong>
+                                            <strong class="info-box-text">Il nous doit au total: </strong>
                                             <!--<strong>Vendu: {{session('resultat')['_montant'] ? session('resultat')['_montant']:""}}  </strong>-->
                                             <!--<strong>Vendu: {{session('resultat')['_regle'] ? session('resultat')['_regle']:""}}  </strong>-->
-                                            @php($reste = (session('resultat')['_montant'] ? session('resultat')['_montant']:0)-(session('resultat')['_regle'] ? session('resultat')['_regle']:0))
-                                            <span class="info-box-number" style="font-size: large">{{Somm(-session('resultat')['client']['debit_old'],$reste)}} FCFA</span>
+                                            <!-- @php($reste = (session('resultat')['_montant'] ? session('resultat')['_montant']:0)-(session('resultat')['_regle'] ? session('resultat')['_regle']:0)) -->
+                                            <input type="hidden" id="debit_old" value="{{-session('resultat')['client']['debit_old']}}">
+                                            <span class="info-box-number" style="font-size: large" id="totalDu"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="row">
                                 @if (count(session('resultat')['ventes']) > 0)
                                 <div class="col-md-12">
                                     <h4 class="col-12 text-center border border-info p-2 mb-2">
+                                        Count: {{count(session('resultat')['ventes'])}}
                                         @if (session('resultat')['client'] != null)
                                         Point du solde de {{ session('resultat')['client']->raisonSociale }}
                                         @else
@@ -192,11 +188,20 @@
                                     @php($qte = 0)
                                     @php($montant = 0)
                                     @php($regle = 0)
+
+                                    <!--  -->
+                                    <div class="text-center">
+                                        <button type="button" class="btn btn-sm btn-warning my-1 text-center text-uppercase" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                            <i class="bi bi-eye"></i> Ventes supprimées
+                                        </button>
+                                    </div>
+                                    <!--  -->
                                     <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 11px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
                                                 <th>#</th>
                                                 <th>Code</th>
+                                                <th>Bl</th>
                                                 <th>date</th>
                                                 <th>Client/Destination</th>
                                                 <th>Type</th>
@@ -218,6 +223,15 @@
                                             <tr style="align-items: center!important;">
                                                 <td>{{ $cpt }}</td>
                                                 <td>{{ $item->code }}</td>
+                                                <td class="text-center font-weight-bold">
+                                                    @if(count($item->vendus)>0)
+                                                    @foreach ($item->vendus as $vendu )
+                                                    <span class="badge bg-dark">{{ $vendu->programmation->bl_gest?$vendu->programmation->bl_gest:'--'}} / {{$vendu->programmation->bl?$vendu->programmation->bl:'--'}}</span>
+                                                    @endforeach
+                                                    @else
+                                                    ---
+                                                    @endif
+                                                </td>
                                                 <td>{{ date_format(date_create($item->date), 'd/m/Y') }}
                                                 </td>
                                                 <td>
@@ -264,11 +278,10 @@
                                                 </td> -->
                                             </tr>
                                             @endforeach
-
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="6" class="font-weight-bold">Total</td>
+                                                <td colspan="7" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">
                                                     {{ number_format($qte, 0, ',', ' ') }}
                                                 </td>
@@ -281,6 +294,7 @@
                                                 <td id="Tr" colspan="2" class="text-left font-weight-bold">
                                                     {{ number_format($montant - $regle, 0, ',', ' ') }}
                                                 </td>
+                                                <input type="hidden" id="montant_regle" value="{{$montant - $regle}}">
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -289,16 +303,103 @@
                                 <div class="col-12 text-center border border-info p-2">
                                     Aucun stock trouvé pour votre requête.
                                 </div>
+                                <input type="hidden" id="montant_regle" value="0">
                                 @endif
                             </div>
+
+                            <!-- modal ventes supprimées -->
+                            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content bg-transparent">
+                                        <!-- <div class="modal-header">
+                                            <h4 class="text-dark">Liste des ventes supprimées de ce client</h4>
+                                        </div>
+                                        <div class="modal-body"> -->
+                                        <!-- VENTES SUPPRIMEES POUR CE CLIENT -->
+                                        <!-- <div class="card-body"> -->
+                                        @if (count(session('resultat')['ventesDleted']) > 0)
+                                        <table class="table table-bordered table-striped table-sm" style="font-size: 12px">
+                                            <thead class="text-white text-center bg-gradient-gray-dark">
+                                                <tr>
+                                                    <th>Code</th>
+                                                    <th>Date Vente</th>
+                                                    <th>Date Validation</th>
+                                                    <th>Type de Vente</th>
+                                                    <th>Client</th>
+                                                    <th>Qté</th>
+                                                    <th>Transport</th>
+                                                    <th>Total</th>
+                                                    <th>Statut</th>
+                                                    <th>Date de suppression</th>
+                                                    <th>Montant</th>
+                                                    <th>Restituée</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach(session('resultat')['ventesDleted'] as $key=>$vente)
+                                                <tr class="bg-warning">
+                                                    <td class="text-center">{{ $vente->code }}</td>
+                                                    <td class="text-center">{{ date_format(date_create($vente->date),'d/m/Y') }}</td>
+                                                    <td class="text-center">{{$vente->validated_date? date_format(date_create($vente->validated_date),'d/m/Y'):"---" }}</td>
+                                                    <td class="text-center">{{ GetVenteDeletedType($vente)}}</td>
+                                                    <td class="text-center">{{ GetVenteDeletedClient($vente)}} </td>
+                                                    <td class="text-center">{{ number_format($vente->qteTotal,0,'',' ') }}</td>
+                                                    <td class="text-center">{{ number_format($vente->transport,0,'',' ') }}</td>
+                                                    <td class="text-center">{{ number_format($vente->montant+$vente->transport,0,'',' ') }}</td>
+                                                    <td class="text-center"><span class="badge badge-success">{{ $vente->statut }}</span></td>
+                                                    <td class="text-center">{{ date_format(date_create($vente->created_at),'d/m/Y') }}</td>
+                                                    <td class="text-center">{{ number_format($vente->montant,0,'',' ') }}</td>
+                                                    <td class="texte-center">
+                                                        @if($vente->restituted)
+                                                        <span class="badge bg-success">Oui</span>
+                                                        @else
+                                                        <span class="badge bg-danger">Non</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot class="text-white bg-dark">
+                                                <tr>
+                                                    <td colspan="8" class="font-weight-bold">Total </td>
+
+                                                    <td colspan="2" class="text-left font-weight-bold">
+                                                        {{ number_format(session('resultat')['ventesDleted']->sum("montant"),0,'',' ' )  }} FCFA
+                                                    </td>
+                                                    <td colspan="2" class="text-center font-weight-bold">
+
+                                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists()==true || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()==true || Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists()==true)
+                                                        @if(count(session('resultat')['ventesDleted']->where("restituted", false))>0)
+                                                        <a href="{{route('edition.RestoreVenteDeleted',session('resultat')['client'])}}" class="btn btn-sm btn-light" style="cursor: pointer!important;z-index:100!important;"><i class="bi bi-cash-coin"></i> Restituer</a>
+                                                        @else
+                                                        <span class="badge bg-light">Déjà restitué</span>
+                                                        @endif
+                                                        @endif
+                                                    </td>
+                                                    <input type="hidden" id="montant_regle" value="{{$montant - $regle}}">
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        @else
+                                        <div class="col-12 text-center border border-info p-2">
+                                            Aucune vente supprimée du compte de ce client.
+                                        </div>
+                                        @endif
+                                        <!-- </div> -->
+                                        <!-- </div> -->
+                                    </div>
+                                </div>
+                            </div>
                             @endif
+
+                            <!-- 
                             <div class="card-footer text-center no-print">
                                 @if (session('resultat'))
                                 @if (count(session('resultat')['ventes']) > 0)
                                 <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
                                 @endif
                                 @endif
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -317,9 +418,11 @@
         // Récupérer les éléments
         var tdReste = $('#Tr');
         var spanReste = $('#reste');
+        var totalDu = $('#totalDu');
+        var debit_old = $('#debit_old');
 
         // Mettre la valeur initiale dans l'élément
-        spanReste.html(tdReste.text());
+        spanReste.html(tdReste.text() ? tdReste.text() : "00");
 
         // Déclencher la mise à jour de la valeur si besoin
         // (si la valeur de tdReste ne change pas dynamiquement)
@@ -330,8 +433,12 @@
         // Attacher l'événement change à l'élément
         tdReste.on('change', function() {
             // Mettre la nouvelle valeur dans l'élément
-            spanReste.html($(this).text());
+            spanReste.html($(this));
+
         });
+
+        var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
+        totalDu.html(sommDu ? sommDu : "00")
     });
 
     $(function() {

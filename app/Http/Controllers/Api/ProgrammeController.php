@@ -42,7 +42,7 @@ class ProgrammeController extends Controller
     public function getStockDisponible(Programmation $programmation)
     {
         $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
-        $stockDispo = $programmation->qtelivrer - $qteVendu;
+        $stockDispo = $programmation->qteprogrammer - $qteVendu;
         return response($stockDispo);
     }
 

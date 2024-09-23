@@ -13,6 +13,7 @@ use App\Models\Porteuille;
 use App\Models\TypeClient;
 use App\Models\TypeDetailRecu;
 use App\Models\Vente;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,9 @@ class clientsController extends Controller
             // $clients = Client::orderBy('id','desc')->paginate(1000);          
             $clients = Client::orderBy('id', 'desc')->get();
         }
-        return view('client.index', compact('clients'));
+
+        $zones = Zone::all();
+        return view('client.index', compact('clients', "zones"));
         // <!-- {{ $clients->links('pagination') }}  à ajouter à la fin du tableau pour affichage de la pagination laravel -->
 
     }
@@ -45,6 +48,25 @@ class clientsController extends Controller
     {
         $oldClients = ClientOld::all();
         return view('client.indexOld', compact('oldClients'));
+    }
+
+    ####___AFFECTER UN CLIENT A UNE ZONE
+    public function AffectToZone(Request $request)
+    {
+        $formData = $request->all();
+
+        Validator::make($formData, [
+            "client_id" => ["required"],
+            "zone_id" => ["required"],
+        ])->validate();
+
+        ####__
+        $client = Client::find($formData["client_id"]);
+        $client->zone_id = $formData["zone_id"];
+        $client->save();
+
+        ####___
+        return back()->with("message", "Affectation effectuée avec succès!");
     }
 
     ###_____CLIENTS ANCIENS N'EXISTANT PAS DANS LE NOUVEAU SYSTEM

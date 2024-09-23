@@ -14,18 +14,15 @@ class Programmation extends Model
          'detail_bon_commande_id', 'zone_id', 'avaliseur_id','camion_id', 'chauffeur_id','dateSortie','cloture', 'historiques'
     ];
 
-
     public function detailboncommande()
     {
         return $this->belongsTo(DetailBonCommande::class, 'detail_bon_commande_id', 'id');
     }
 
-
     public function vendus()
     {
         return $this->hasMany(Vendu::class, 'programmation_id', 'id');
     }
-
 
     public function zone()
     {
