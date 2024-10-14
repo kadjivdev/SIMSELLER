@@ -29,14 +29,15 @@
             <div class="row">
                 <div class="col-md-6" style="border-right: 1px solid;">
                     <!-- Small boxes (Stat box) -->
-                    <h3 class="text-center">APPROVISIONNEMENT</h3>
+                    <!-- <h3 class="text-center">APPROVISIONNEMENT</h3> -->
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
                             <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <h3>{{$boncommandesP}}</h3>
+                                    <button class="btn btn-sm btn-light  w-100 text-center"><strong>{{number_format($boncommandesP,0,'',' ')}} </strong> </button>
+
                                     <p>Commande en préparation.</p>
                                 </div>
                                 <div class="icon">
@@ -46,13 +47,13 @@
                             </div>
                         </div>
                         <!-- ./col -->
-        
+
                         <div class="col-md-6">
                             <!-- small box -->
                             <div class="small-box bg-success">
                                 <div class="inner">
-                                    <h3>{{ $boncommandesV }}</h3>
-        
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong>{{number_format($boncommandesV,0,'',' ')}}</strong> </button>
+
                                     <p>Bon de Commande Validé</p>
                                 </div>
                                 <div class="icon">
@@ -61,15 +62,15 @@
                                 <a href="{{ route('boncommandes.index') }}" class="small-box-footer">En savoir plus <i class="fas fa-arrow-circle-right"></i> @if($sansRecu > 0) <h2 class="badge badge-warning float-lg-right small-box-footer" style="margin-top: 3px; margin-right: 5px">Sans reçu : {{$sansRecu}}</h2> @endif</a>
                             </div>
                         </div>
-        
+
                         <!-- ./col -->
                         <div class="col-md-6">
                             <!-- small box -->
                             <div class="small-box bg-dark">
                                 <div class="inner">
-                                    <h3>{{ $produitNP }}</h3>
-        
-                                    <p>Camion en attente.</p>
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong>{{number_format($produitNP,0,'',' ')}}</strong> </button>
+
+                                    <p>Camion livrés.</p>
                                 </div>
                                 <div class="icon">
                                     <i class="nav-icon fa-brands fa-product-hunt"></i>
@@ -82,9 +83,9 @@
                             <!-- small box -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
-                                    <h3>{{ $nbrLiv }} | {{$qteLiv}} T</h3>
-        
-                                    <p>Camion livré | Quantité</p>
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong>{{number_format($qteLiv,0,'',' ')}} T</strong> </button>
+
+                                    <p>Quantité Livrée</p>
                                 </div>
                                 <div class="icon">
                                     <i class="nav-icon far fa-solid fa-truck"></i>
@@ -96,15 +97,15 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h3 class="text-center">VENTE</h3>
+                    <!-- <h3 class="text-center">VENTE</h3> -->
                     <hr>
                     <div class="row">
                         <div class="col-md-6">
                             <!-- small box -->
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <h3>{{number_format($vente,0,'',' ')}}</h3>
-        
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong>{{number_format($vente,0,'',' ')}} FCFA</strong></button>
+
                                     <p>Point vente semaine</p>
                                 </div>
                                 <div class="icon">
@@ -118,9 +119,8 @@
                             <!-- small box -->
                             <div class="small-box bg-success">
                                 <div class="inner">
-                                    <h3>{{$cde}}</h3>
-        
-                                    <p>Commandes clients de la semaine</p>
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong>{{number_format($cde,0,'',' ')}} </strong> </button>
+                                    <p>Commandes validées de la semaine</p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-stats-bars"></i>
@@ -133,9 +133,9 @@
                             <!-- small box -->
                             <div class="small-box bg-warning">
                                 <div class="inner">
-                                    <h3>{{$client}}</h3>
-        
-                                    <p>Client à relancer</p>
+                                    <button class="btn btn-sm btn-light  w-100 text-center"> <strong> {{number_format($umpaid_vente,0,'',' ')}}</strong></button>
+
+                                    <p>Ventes non reglées</p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-person-add"></i>
@@ -148,9 +148,9 @@
                             <!-- small box -->
                             <div class="small-box bg-danger">
                                 <div class="inner">
-                                    <h3>{{number_format($impayer,0,'',' ')}}</h3>
-        
-                                    <p>Impayés</p>
+                                    <button class="btn btn-sm btn-light w-100 text-center"> <strong>{{number_format($impayer,0,'',' ')}} </strong></button>
+
+                                    <p>Reste à régler</p>
                                 </div>
                                 <div class="icon">
                                     <i class="ion ion-pie-graph"></i>

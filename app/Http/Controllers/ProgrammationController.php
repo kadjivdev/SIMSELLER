@@ -55,9 +55,7 @@ class ProgrammationController extends Controller
                     //$programmations = $detailboncommandes->programmations()->where('statut', 'Valider')->get();    
                 }
             } elseif ($request->statuts == 2) {
-
                 if ($request->debut && $request->fin) {
-
                     $boncommandesV = BonCommande::where('statut', 'Valider')->whereBetween('dateBon', [$request->debut, $request->fin])->pluck('id');
                     $programmations = Programmation::pluck('detail_bon_commande_id');
                     $detailboncommandes = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)
@@ -157,6 +155,7 @@ class ProgrammationController extends Controller
 
     public function store(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
+        dd($request->all());
         try {
             if ($programmation) {
                 $validator = Validator::make($request->all(), [
@@ -167,7 +166,6 @@ class ProgrammationController extends Controller
                     'camion_id' => ['required', new camionProgrammationRule($request->qteprogrammer)],
                     'chauffeur_id' => ['required'],
                     'avaliseur_id' => ['required'],
-
                 ]);
 
                 if ($validator->fails()) {
@@ -194,6 +192,7 @@ class ProgrammationController extends Controller
                     'chauffeur_id' => $request->chauffeur_id,
                     'avaliseur_id' => $request->avaliseur_id,
                     'historiques' => $historique,
+                    'observation' => $request->observation,
                 ]);
 
 
@@ -269,7 +268,8 @@ class ProgrammationController extends Controller
                     'zone_id' => $request->zone_id,
                     'camion_id' => $request->camion_id,
                     'chauffeur_id' => $request->chauffeur_id,
-                    'avaliseur_id' => $request->avaliseur_id
+                    'avaliseur_id' => $request->avaliseur_id,
+                    'observation' => $request->observation,
                 ]);
 
                 if ($programmation) {
@@ -310,7 +310,6 @@ class ProgrammationController extends Controller
         $programmations = $detailboncommande->programmations()->orderByDesc('id')->get();
         return view('programmations.annuler', compact('detailboncommande', 'programmation', 'programmations', 'total'));
     }
-
 
     public function allvalidate(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation)
     {
@@ -358,6 +357,7 @@ class ProgrammationController extends Controller
                     'nom' => $zone->representant->nom . ' ' . $zone->representant->prenom,
                     'email' => $zone->representant->email
                 ];
+                
                 $subject = 'ANNULATION PROGRAMMATION N° ' . $programmation->code . ' DU ' . date_format(date_create($programmation->dateprogrammer), 'd/m/Y');
                 $message_html = "<p style='color: red'>Nous vous informons que la programmation ci-dessous a été annulée pour votre zone. merci de ne pas prendre ça en compte.</p>";
                 $lienAction = route('programmations.index');
@@ -375,6 +375,7 @@ class ProgrammationController extends Controller
             }
         }
     }
+
     public function delete(DetailBonCommande $detailboncommande, Programmation $programmation)
     {
     }
@@ -386,7 +387,6 @@ class ProgrammationController extends Controller
         $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
         return view("livraisons.transfertCamion", compact('programmation', 'zones'));
     }
-
 
     public function destroy(DetailBonCommande $detailboncommande, Programmation $programmation)
     {

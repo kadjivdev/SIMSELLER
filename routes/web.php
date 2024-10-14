@@ -491,7 +491,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::match(["GET", "POST"], '/etat-compte-approvisionnement', 'CompteApprovisionnement')->name('edition.compteApprovisionnement');
 
             // RESTORER LES VENTES SUPPRIMEES AU SOLDE DU CLIENT
-            Route::get('/{client}/restoreVenteDeleted', 'RestoreVenteDeleted')->name('edition.RestoreVenteDeleted');
+            Route::get('/{vente}/{client}/restoreVenteDeleted', 'RestoreVenteDeleted')->name('edition.RestoreVenteDeleted');
         });
     });
 
@@ -1225,7 +1225,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     });
 
     Route::prefix('vente')->group(function () {
-
         Route::controller(ReglementController::class)->group(function () {
 
             Route::get('/reglement/{vente}', 'index')->name('reglements.index');

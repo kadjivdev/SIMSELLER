@@ -135,6 +135,16 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label>Observation<span class="text-danger"> (facultatif)</span></label>
+                                           <textarea name="observation" value="{{old('observation')}}" class="form-control" rows="5" placeholder="Laissez une observation ici ...."></textarea>
+                                            @error('observation')
+                                            <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-sm-4">
@@ -191,6 +201,7 @@
                                                     <!-- <th>Date Sortie</th> -->
                                                     <th>BL</th>
                                                     <th>Statut</th>
+                                                    <th>Observation</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -233,6 +244,9 @@
                                                         @elseif($programmation->statut == 'Livrer')
                                                         <span class="badge badge-primary">{{ $programmation->statut }}</span>
                                                         @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <textarea name="" rows="1" class="form-control" id="" disabled>{{ $programmation->observation?$programmation->observation:"---" }}</textarea>
                                                     </td>
                                                     @if ($programmation->detailboncommande->boncommande->status !='livrer')
                                                     <td class="text-center">

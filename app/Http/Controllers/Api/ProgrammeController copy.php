@@ -17,7 +17,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class ProgrammeController extends Controller
+class _ProgrammeController extends Controller
 {
     public function getChauffeurByCamionId(Camion $camion)
     {

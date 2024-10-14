@@ -131,7 +131,6 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        
                                         @endif
                                         @endif
                                     </tr>

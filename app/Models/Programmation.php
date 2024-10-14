@@ -11,7 +11,7 @@ class Programmation extends Model
 
     protected $fillable = [
         'code','imprimer', 'transfert', 'dateprogrammer', 'qteprogrammer','datelivrer', 'qtelivrer', 'bl','bl_gest', 'document', 'statut',
-         'detail_bon_commande_id', 'zone_id', 'avaliseur_id','camion_id', 'chauffeur_id','dateSortie','cloture', 'historiques'
+         'detail_bon_commande_id', 'zone_id', 'avaliseur_id','camion_id', 'chauffeur_id','dateSortie','cloture', 'historiques',"observation"
     ];
 
     public function detailboncommande()

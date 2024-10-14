@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\CommandeClient;
 use App\Models\Compte;
 use App\Models\CompteClient;
+use App\Models\DeletedVente;
 use App\Models\DetailBonCommande;
 use App\Models\Fournisseur;
 use App\Models\Mouvement;
@@ -404,6 +405,10 @@ class EditionController extends Controller
                 $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->get();
 
             foreach ($bcs as $bc) {
+                // $_bon = BonCommande::where("code","BCI-0013")->first();
+                // $_bon_programmations = $_bon->detailboncommandes[0]->programmations->whereNotNull("qtelivrer")->whereIn('statut', ['Valider', 'Livrer', 'Vendu']);
+                // dd($_bon_programmations->sum('qteprogrammer'),$_bon_programmations->sum('qtelivrer'));
+
                 $item = new \stdClass();
                 $qteBc = $bc->detailboncommandes()->sum('qteCommander');
                 $montBc = $bc->montant;
@@ -464,7 +469,7 @@ class EditionController extends Controller
                 $newBcs[] = $item;
                 // }
 
-                // if ($bc->code=="BCI-0258") {
+                // if ($bc->code=="BCI-0013") {
                 //     dd($item);
                 // }
             }
@@ -990,16 +995,19 @@ class EditionController extends Controller
     }
 
     // RESTORER LES VENTES SUPPRIMEES AU SOLDE DU CLIENT
-    function RestoreVenteDeleted(Request $request, Client $client)
+    function RestoreVenteDeleted(Request $request, DeletedVente $vente, Client $client)
     {
-        $ventes = $client->_deletedVentes->where("restituted", false);
-
-        if (count($ventes) ==0) {
-            return back()->with("error", "Pas de ventes à restituer!");
+        if ($vente->restituted) {
+            return back()->with("error", "Vente déjà restituée");
         }
+
+        if (!$client) {
+            return back()->with("error", "Ce client n'existe pas");
+        }
+
         ###___
         $compteClient = $client->compteClients->first();
-        $venteAmount =  $ventes->sum("montant");
+        $venteAmount =  $vente->montant;
 
         $compteClient->solde = $compteClient->solde + $venteAmount;
         $compteClient->save();
@@ -1011,13 +1019,11 @@ class EditionController extends Controller
         $client->save();
 
         ###___
-        foreach ($ventes as $vente) {
-            $vente->restituted = true;
-            $vente->restitutor = auth()->user()->id;
-            $vente->save();
-        }
+        $vente->restituted = true;
+        $vente->restitutor = auth()->user()->id;
+        $vente->save();
 
         ###___
-        return back()->with("message", "Montant des ventes restitué avec succès!");
+        return back()->with("message", "Montant de vente restitué avec succès!");
     }
 }

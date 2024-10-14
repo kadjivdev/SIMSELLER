@@ -42,7 +42,6 @@ class VenduController extends Controller
 
     public function create(Vente $vente,  Vendu $vendu = NULL)
     {
-        // dd("gogo");
         $ver = Vente::where('id', $vente->id)->first();
         $commandeclient = CommandeClient::findOrFail($vente->commande_client_id);
         if ($ver == NULL) {
@@ -67,7 +66,6 @@ class VenduController extends Controller
 
         foreach ($vente->vendus as $vendu) {
             $_bl = $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl;
-            // dd($vendu->programmation);
             if ($_bl) {
                 $bl = $_bl;
             }
@@ -122,7 +120,6 @@ class VenduController extends Controller
                     return redirect()->route('vendus.create', ['vente' => $vente->id, 'vendu' => $vendu->id])->withErrors($validator->errors())->withInput();
                 }
 
-
                 $vendus = $vendu->update([
                     'vente_id' => $vente->id,
                     'programmation_id' => $request->programmation_id,
@@ -133,7 +130,6 @@ class VenduController extends Controller
                 ]);
 
                 if ($vendus) {
-
                     $vendus = $vendu->where('vente_id', $vente->id)->get();
                     $somme = 0;
                     foreach ($vendus as $vendu) {
@@ -203,6 +199,7 @@ class VenduController extends Controller
                             'transport' => ['required']
                         ]);
                     }
+                    
                 } else {
                     $validator = Validator::make($request->all(), [
                         'produit_id' => ['required'],

@@ -137,8 +137,6 @@ class LivraisonController extends Controller
                 $programmations = $programmations->where('zone_id', $user->zone_id);
         }
 
-        // $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)->orderByDesc('code')->get();
-
         return view('livraisons.index', compact('programmations', 'req'));
     }
 
@@ -328,7 +326,6 @@ class LivraisonController extends Controller
                 }
 
                 if ($bordereauLivraison != $request->bl) {
-
                     Session()->flash('error', 'Vous devez revoir le bordereau de livraison.');
                     return redirect()->route('livraisons.index', ['programmation' => $programmation->id]);
                 }

@@ -133,10 +133,10 @@
             const quantite = parseInt(tonnage.value);
 
             // Calculer le montant
-            const montantCalcule = quantite * <?php echo $prixTonnage ?>;
+            const montantCalcule =  quantite * <?php echo $prixTonnage ?>;
 
             // Mettre à jour la valeur de l'input montant
-            montant.value = montantCalcule;
+            montant.value = Math.round(montantCalcule);
         };
     });
 

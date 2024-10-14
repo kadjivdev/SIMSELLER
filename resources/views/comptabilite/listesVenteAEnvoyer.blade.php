@@ -49,8 +49,8 @@
 
                         <!-- /.card-header -->
                         <div class="card-body">
-                            @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                            @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
+                            <!-- if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user())) -->
+                            @if(IS_RODOLPHO_ACCOUNT(auth()->user()))
                             <form action="{{route('ventes.envoieComptabilite')}}" method="post">
                                 @csrf
                                 <input type="text" id="ventes" name="ventes" hidden>
@@ -61,7 +61,7 @@
                                 </div>
                             </form>
                             @endif
-                            @endif
+                            <!-- endif -->
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                 <thead class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
@@ -83,18 +83,18 @@
                                         <th>Total. Transport</th>
                                         <th>Total</th>
                                         <th>Statut</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
+                                        <!-- if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists()) -->
+                                        @if(IS_RODOLPHO_ACCOUNT(auth()->user()))
                                         <th>Action</th>
                                         @endif
-                                        @endif
+                                        <!-- endif -->
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($AEnvoyers as $key => $AEnvoyer )
                                     <tr class="{{$AEnvoyer->statut == "Vendue" ? 'bg-warning':'' }}">
                                         <td class="">
-                                            @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
+                                            @if(IS_RODOLPHO_ACCOUNT(auth()->user()))
                                             <div class="form-group">
                                                 <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
                                                     <input type="checkbox" class="custom-control-input checkbox-vente" id="customSwitch{{ $AEnvoyer->id }}" data-vente-id="{{ $AEnvoyer->id }}">
@@ -133,10 +133,8 @@
                                         <td class="text-right">{{ number_format((($AEnvoyer->pu*$AEnvoyer->qteTotal)+($AEnvoyer->transport*$AEnvoyer->qteTotal)),0,'',' ') }}</td>
                                         <td class="text-right "><span class="badge badge-success">{{ $AEnvoyer->statut }}</span></td>
 
-                                        @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
+                                        @if(IS_RODOLPHO_ACCOUNT(auth()->user()))
                                         <td class="text-right "><a data-id="{{$AEnvoyer->id}}" class="btn btn-success btn-sm" href="#" onclick="charger({{ $AEnvoyer->id }})" data-toggle="modal" data-target="#modal-lg"> Demande </a></td>
-                                        @endif
                                         @endif
                                     </tr>
                                     @endforeach
@@ -161,10 +159,8 @@
                                         <th>Total. Transport</th>
                                         <th>Total</th>
                                         <th>Statut</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists())
-                                        @if(!IS_FOFANA_ACCOUNT(auth()->user()) && !IS_AIME_ACCOUNT(auth()->user()))
+                                        @if(IS_RODOLPHO_ACCOUNT(auth()->user()))
                                         <th>Action</th>
-                                        @endif
                                         @endif
                                     </tr>
                                 </tfoot>

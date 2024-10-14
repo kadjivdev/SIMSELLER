@@ -77,6 +77,7 @@
                                         Utilisateur : {{session('resultat')['user']->name}}
                                     </h4>
                                     @endif
+
                                     <table id="example1" class="table table-bordered table-striped table-sm mt-2" style="font-size: 12px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
@@ -101,6 +102,7 @@
                                             @php($regle = 0)
                                             @php($totalTrans = 0)
                                             @php($totalQte = 0)
+
                                             @foreach(session('resultat')['ventes'] as $key=>$item)
                                             <tr>
                                                 @php($cpt++)
@@ -142,17 +144,8 @@
                                                 </td>
                                             </tr>
                                             @endforeach
-                                            <tr class="bg-info">
-                                                <td colspan="5" class="font-weight-bold">Total</td>
-                                                <td class="text-center font-weight-bold">-</td>
-                                                <td class="text-right font-weight-bold">{{number_format($totalQte,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">-</td>
-                                                <td class="text-right font-weight-bold">{{number_format($totalTrans,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format(($montant+$totalTrans) - $regle,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">-</td>
-                                            </tr>
+                                        </tbody>
+                                        <tfoot>
                                             <tr>
                                                 <th>#</th>
                                                 <th class="text-center">Code</th>
@@ -168,9 +161,58 @@
                                                 <th class="text-center">Reste</th>
                                                 <th class="no-print">Echéance</th>
                                             </tr>
-                                        </tbody>
+                                        </tfoot>
                                     </table>
                                 </div>
+
+                                <table class="table table-bordered table-striped table-sm mt-2" style="font-size: 12px">
+                                    <thead class="text-white text-center bg-gradient-gray-dark">
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th class="no-print"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="bg-info">
+                                            <td colspan="26" class="font-weight-bold">Total</td>
+                                            <td class="text-center font-weight-bold">-</td>
+                                            <td class="text-right font-weight-bold">Qte :{{number_format($totalQte,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">Amount :{{number_format($montant,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">-</td>
+                                            <td class="text-right font-weight-bold">Transport :{{number_format($totalTrans,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">Regle :{{number_format($regle,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">Reste :{{number_format(($montant+$totalTrans) - $regle,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
                                 @else
                                 <div class="col-12 text-center border border-info p-2">
                                     Aucun information trouvée pour votre requête.
@@ -204,7 +246,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print","excel","csv"],
             "order": [
                 [0, 'desc']
             ],

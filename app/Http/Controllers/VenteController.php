@@ -66,7 +66,7 @@ class VenteController extends Controller
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
             $user = Auth::user();
             if ($user->id == 11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("id", $user->id)->orderByDesc('code')->get();
             } else {
                 $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
             }
@@ -76,7 +76,6 @@ class VenteController extends Controller
 
         return view('ventes.index', compact('ventes'));
     }
-
 
     public function indexCreate(Request $request)
     {
@@ -140,13 +139,15 @@ class VenteController extends Controller
         $repre = $user->representant;
 
         $zones = $repre->zones;
-        // dd($repre);
+
         if ($repre->nom == 'DIRECTION') {
             $zones = Zone::all();
             $clients = Client::all();
         } else {
             $clients = Client::where("zone_id", [$user->zone_id])->get();
         }
+
+        // $clients = Client::all();
 
         if ($request->statuts) {
             if ($request->statuts == 1) {
@@ -359,19 +360,6 @@ class VenteController extends Controller
                 }
             }
         }
-
-
-
-        /*  }
-        catch (Exception $e) {
-            if (env('APP_DEBUG') == TRUE) {
-                return $e;
-            }
-            else {
-                Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
-                return redirect()->route('vendus.index');
-            }
-        } */
     }
 
     /**
@@ -810,14 +798,15 @@ class VenteController extends Controller
         }
 
         ##____
-        if (IS_FOFANA_ACCOUNT($current) || IS_AIME_ACCOUNT($current) || IS_RODOLPHO_ACCOUNT($current)) {
-            $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
-        } else {
-            ###___les users associés à ce representant
-            $representant_users =  User::where(["representent_id" => $user_representant->id])->pluck("id"); ## $user_representant->users;
-            ###___les ventes passées par les utilisateurs associés à ce representant
-            $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
-        }
+        $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
+        // if (IS_AIME_ACCOUNT($current) || IS_RODOLPHO_ACCOUNT($current)) {
+        // } 
+        // else {
+        //     ###___les users associés à ce representant
+        //     $representant_users =  User::where(["representent_id" => $user_representant->id])->pluck("id"); ## $user_representant->users;
+        //     ###___les ventes passées par les utilisateurs associés à ce representant
+        //     $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
+        // }
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
@@ -1252,7 +1241,7 @@ class VenteController extends Controller
                     return view("ventes.askUpdateVente", compact('vente'));
                 }
 
-                #####____SI C'ETS VALIDEE ON PASSE A LA MODIFICATION VRAIE
+                #####____SI C'EST VALIDEE ON PASSE A LA MODIFICATION VRAIE
                 return view("ventes.updateVente", compact("vente", "clients", "products")); ##  redirect()->back()->with("error", "Vous avez déjà éffectuée cette requête! Vous ne pouvez la refaire à nouveau");
 
             } else {
@@ -1328,12 +1317,16 @@ class VenteController extends Controller
             "pu" => ["numeric"],
             "qteVendu" => ["numeric"],
             "produit" => ["numeric"],
+            "transport" => ["numeric"],
+            "montant" => ["numeric"],
         ]);
 
         ####____REFORMATTAGE DES DATAS
-        $pu = $request->pu ? $request->pu : $vente->pu; ## $vente->pu;
+        $pu = $request->pu; ## $vente->pu;
         $qteVendu = $request->qteVendu;
-        $venteMontant = $pu * $qteVendu;
+        // $transport = $request->transport;
+
+        // $venteMontant = $pu * $qteVendu;
         $produit_id = $request->produit ? $request->produit : $request->produit_id;
         $client = $request->client_id ? $request->client_id : $vente->client_id;
         $programmation_id = $request->programmation_id;
@@ -1353,9 +1346,12 @@ class VenteController extends Controller
         ####____
         $programmation = Programmation::findOrFail($programmation_id);
         $pr_totalVendus = $programmation->vendus->sum("qteVendu"); ###Total vendu sur cette programmation
+        // dd($programmation->vendus->sum("qteVendu"));
 
         ###___Stock actuel du camion
-        $current_stock = $programmation->qteprogrammer - $pr_totalVendus;
+        $current_stock = $programmation->qteprogrammer - ($pr_totalVendus - $qteVendu);
+        // dd($current_stock);
+
         if ($qteVendu > $current_stock) {
             return redirect()->back()->with("error", "La quantité entrée est supérieure au stock du camion choisi. Veuillez bien diminuer la quantité");
         }
@@ -1380,18 +1376,19 @@ class VenteController extends Controller
         ###_____MODIFICATION DE LA VENTE EN REEL
         $vente->update([
             "qteTotal" => $qteVendu,
-            "montant" => $venteMontant,
+            "montant" => $request->montant,
             "produit_id" => $produit_id,
             "pu" => $pu,
+            "transport" => $request->transport,
         ]);
 
         ###___MODIFICATION DE LA COMMANDE CLIENT (si la modification touche le client)
-        $vente->commandeclient->update(["client_id" => $client, "montant" => $venteMontant]);
+        $vente->commandeclient->update(["client_id" => $client, "montant" => $request->montant]);
 
-        ###___MODIFICATION DE LA PROGRAMMATION LIEE A CETTE VENTE
-        // $vendu->programmation->update([
-
-        // ]);
+        ###___MODIFICATION DU MONTANT DE REGLEMENT DE LA VENTE
+        if($vente->reglements->first()){
+            $vente->reglements->first()->update(["montant"=>$request->montant]);
+        }
 
         ####____ON BLOQUE A NOUVEAU L'ACCES
         $venteUpdateDemande = UpdateVente::where(["vente" => $vente->id, "demandeur" => auth()->user()->id])->get()->last();

@@ -68,36 +68,63 @@
                                 <input type="hidden" name="vente" value="{{$vente->id}}">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label for="">P.U</label>
-                                            <input type="text" class="form-control" value="{{$vente->pu}}" name="pu">
-
-                                            @error('pu')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
+                                        <div class="">
+                                            <div class="form-group">
+                                                <label>Qté Vendu<span class="text-danger">*</span></label>
+                                                <input type="number" onkeyup="calculMontant()" id="qteTotal" class="form-control form-control-sm  @error('qteTotal') is-invalid @enderror" name="qteVendu"  value="{{$vente->qteTotal}}" min="1"  autocomplete="off" autofocus required>
+                                                @error('qteTotal')
+                                                <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
                                         </div>
-
-                                        <div class="form-group mb-3">
-                                            <label for="">Qte Vendue: </label>
-                                            <input type="text" value="{{$vente->vendus->sum('qteVendu')}}" name="qteVendu" class="form-control">
-                                            @error('qteVendu')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror
+                                        <div class="">
+                                            <div class="form-group">
+                                                <label>PU TTC<span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <input onkeyup="calculMontant()" type="number" id="pu" class="form-control form-control-sm  @error('pu') is-invalid @enderror" name="pu"  value="{{$vente->pu}}"  autofocus required>
+                                                </div>
+                                                @error('pu')
+                                                <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- if ($vente->transport)                                         -->
+                                        <div class="" id="tt1">
+                                            <div class="form-group">
+                                                <label>Prix transport / Tonne</label>
+                                                <div class="input-group">
+                                                    <input type="number" id="tt" onkeyup="calculMontant()" class="form-control form-control-sm @error('transport') is-invalid @enderror" value="{{$vente->transport?$vente->transport:0}}" name="transport" min="0"  autocomplete="off" autofocus >
+                                                </div>
+                                                @error('transport')
+                                                <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <!-- endif -->
+                                        <div class="">
+                                            <div class="form-group">
+                                                <label>Remise</label>
+                                                <div class="input-group">
+                                                    <input onkeyup="calculMontant()" type="number"  id="remise" class="form-control form-control-sm  @error('remise') is-invalid @enderror" name="remise"  value="{{$vente->remise?$vente->remise:0}}"  autofocus>
+                                                </div>
+                                                @error('remise')
+                                                <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="">
+                                            <div class="form-group">
+                                                <div id="">
+                                                <label>Montant<span class="text-danger"></span></label>
+                                                    <input type="text" name="montant" id="montant"  style="height: 30px" class="form-control" value="{{$vente->montant}}" readonly required>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
 
                                         <div class="form-group mb-3">
                                             <label for="">Produit </label>
-                                            <!-- <select class="form-control form-control-sm select2" disabled id="" name="produit">
-                                                <option class="text-center" value="{{$vente->produit?$vente->produit->id:''}}" selected>{{$vente->produit?$vente->produit->libelle:""}}</option>
-                                                @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('produit')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror -->
 
                                             <select class="form-control form-control-sm select2   @error('produit_id') is-invalid @enderror" onchange="selectDefaultDriver('{{old('programmation_id')}}')" id="produit" name="produit" style="width: 100%;">
                                                 <option selected>**Choisissez un produit**</option>
@@ -117,16 +144,6 @@
                                         </div>
 
                                         <div class="form-group mb-3">
-                                            <!-- <label for="">Camion </label>
-                                            <select class="form-control form-control-sm select2" id="" name="produit">
-                                                <option class="text-center" value="{{$vente->produit?$vente->produit->id:''}}" selected>{{$vente->produit?$vente->produit->libelle:""}}</option>
-                                                @foreach($products as $product)
-                                                <option value="{{$product->id}}">{{ $product->libelle }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('produit')
-                                            <span class="text-danger">{{$message}} </span>
-                                            @enderror -->
 
                                             <div class="form-group">
                                                 <div hidden id="loader" class="text-center  text-info" style="font-style: italic; margin-top: 2em; font-size: 14px">
@@ -451,7 +468,6 @@
 
         function suppressionVendus(id){
             let url = '{{env('APP_WEB_URL')}}';
-            console.log(url);
             $('#form-suppression').attr('action','{{env('APP_WEB_URL')}}ventes/vendus/destroy/'+id);
         }
        

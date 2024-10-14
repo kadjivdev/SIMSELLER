@@ -115,12 +115,14 @@
 
                                 <tbody>
                                     @if ($programmations->count() > 0)
-                                    <?php $compteur = 1; ?>
+                                        <?php $compteur = 1; ?>
                                         @foreach($programmations as $programmation)
-                                            @if($programmation->bl)
-                                                @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0))
+                                            @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0)
+                                                @if($programmation->bl)
                                                 <tr>
-                                                    <td>{{ $compteur++ }}</td>
+                                                    <td>
+                                                        {{ $compteur++ }}
+                                                    </td>
                                                     <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
                                                     <td>{{ $programmation->code }}</td>
                                                     <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
@@ -195,98 +197,95 @@
                                                             @if($programmation->qteprogrammer>$programmation->vendus->sum('qteVendu'))
                                                             <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
                                                             @endif
+                                                            @endif
+                                                    </td>
+                                                    @endif
+                                                </tr>   
+                                                @else
+                                                <tr>
+                                                    <td><span class="text-danger"></span>
+                                                        {{ $compteur++ }}
+                                                    </td>
+                                                    <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
+                                                    <td>{{ $programmation->code }}</td>
+
+                                                    <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
+                                                    <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
+                                                    <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
+                                                    <td>{{ $programmation->camion->immatriculationTracteur }} ({{ $programmation->camion->marque->libelle }})</td>
+                                                    <td>{{ $programmation->chauffeur->nom }} {{ $programmation->chauffeur->prenom }} ({{ $programmation->chauffeur->telephone }})</td>
+                                                    <td>{{ $programmation->zone->libelle }} ({{ $programmation->zone->departement->libelle }})</td>
+
+                                                    <td class="text-right">{{ number_format($programmation->qteprogrammer,2,","," ") }}</td>
+                                                    <td class="text-right">{{ number_format($programmation->qtelivrer,2,","," ") }}</td>
+                                                    <td class="text-right">{{ number_format($programmation->vendus->sum('qteVendu'),2,","," ") }}</td>
+                                                    
+                                                    <td class="text-right text-danger font-weight-bolder">{{number_format(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu')),2,","," ")}}</td>
+
+                                                    <td class="text-center"><b>{{ $programmation->datelivrer?date_format(date_create($programmation->datelivrer), 'd/m/Y'):'' }}</b></td>
+                                                    <td><b>{{ $programmation->bl ? $programmation->bl : $programmation->bl_gest }}</b> @if ($programmation->document)<a class="btn btn-success text-white btn-xs float-right" href="{{ $programmation->document?asset('storage/'.$programmation->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>@endif</td>
+
+                                                    <td class="text-center">
+                                                        @if ($programmation->statut == 'Valider')
+                                                        <span class="badge badge-danger">Non Livré</span>
+                                                        @elseif (($programmation->statut == 'Livrer') && ($programmation->qteprogrammer == $programmation->qtelivrer))
+                                                        @if($programmation->transfert)
+                                                        <span class="badge badge-info">Transferer</span>
+                                                        @else
+                                                        <span class="badge badge-success">Livré</span>
                                                         @endif
+                                                        @elseif (($programmation->statut == 'Livrer') && ($programmation->qteprogrammer != $programmation->qtelivrer))
+                                                        @if($programmation->transfert)
+                                                        <span class="badge badge-info">Transferer</span>
+                                                        @else
+                                                        <span class="badge badge-warning">Partiellement</span>
+                                                        @endif
+                                                        @endif
+                                                    </td>
+                                                    @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()==true || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()==true)
+                                                    <td class="text-center p-2">
+
+                                                        @if($programmation->transfert || $programmation->cloture == false)
+                                                        @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()==false)
+                                                        <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                                        <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
+                                                        @elseif ($programmation->statut == 'Valider')
+                                                        <!-- <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a> -->
+
+                                                        @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0)
+                                                        <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
+                                                        @endif
+
+                                                        @endif
+                                                        @else
+                                                        <!-- @if ($programmation->bl) -->
+                                                        @if(count($programmation->vendus) == 0)
+                                                        <a href="{{ route('livraisons.annulation', ['programmation'=>$programmation->id]) }}" title="Annulation de livraison" class="btn btn-primary  btn-xs"><i class="fa-solid fa-eject"></i></a>
+                                                        @endif
+                                                        @if(($programmation->vendus->sum('qteVendu')) == 0 )
+                                                        @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
+                                                        <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
+                                                        @endif
+                                                        @endif
+                                                        <!-- @else
+                                                                            <a target="_blank" class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
+                                                                        @endif -->
+                                                        @endif
+
+
+                                                        @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() && count($programmation->vendus) <> 0)
+                                                            @if(!$programmation->cloture)
+                                                            <a class="badge badge-dark p-2" title="Clôturer une livraison" href="{{ route('livraisons.cloturer', ['programmation'=>$programmation->id]) }}">cloturer</a>
+                                                            @endif
+
+                                                            @if($programmation->qteprogrammer>$programmation->vendus->sum('qteVendu'))
+                                                            <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
+                                                            @endif
+                                                            @endif
                                                     </td>
                                                     @endif
                                                 </tr>
                                                 @endif
-                                            @else
-                                            <tr>
-                                                <td><span class="text-danger"></span> {{ $compteur++ }}</td>
-                                                <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
-                                                <td>{{ $programmation->code }}</td>
-
-                                                <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
-                                                <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
-                                                <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
-                                                <td>{{ $programmation->camion->immatriculationTracteur }} ({{ $programmation->camion->marque->libelle }})</td>
-                                                <td>{{ $programmation->chauffeur->nom }} {{ $programmation->chauffeur->prenom }} ({{ $programmation->chauffeur->telephone }})</td>
-                                                <td>{{ $programmation->zone->libelle }} ({{ $programmation->zone->departement->libelle }})</td>
-
-                                                <td class="text-right">{{ number_format($programmation->qteprogrammer,2,","," ") }}</td>
-                                                <td class="text-right">{{ number_format($programmation->qtelivrer,2,","," ") }}</td>
-                                                <td class="text-right">{{ number_format($programmation->vendus->sum('qteVendu'),2,","," ") }}</td>
-
-                                                <!-- <td class="text-right text-danger font-weight-bolder">{{number_format(($programmation->qteprogrammer-$programmation->qtelivrer),2,","," ")}}</td> -->
-                                                <td class="text-right text-danger font-weight-bolder">{{number_format(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu')),2,","," ")}}</td>
-
-                                                <td class="text-center"><b>{{ $programmation->datelivrer?date_format(date_create($programmation->datelivrer), 'd/m/Y'):'' }}</b></td>
-                                                <td><b>{{ $programmation->bl ? $programmation->bl : $programmation->bl_gest }}</b> @if ($programmation->document)<a class="btn btn-success text-white btn-xs float-right" href="{{ $programmation->document?asset('storage/'.$programmation->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>@endif</td>
-
-                                                <td class="text-center">
-                                                    @if ($programmation->statut == 'Valider')
-                                                    <span class="badge badge-danger">Non Livré</span>
-                                                    @elseif (($programmation->statut == 'Livrer') && ($programmation->qteprogrammer == $programmation->qtelivrer))
-                                                    
-                                                    @if($programmation->transfert)
-                                                    <span class="badge badge-info">Transferer</span>
-                                                    @else
-                                                    <span class="badge badge-success">Livré</span>
-                                                    @endif
-                                                    
-                                                    @elseif (($programmation->statut == 'Livrer') && ($programmation->qteprogrammer != $programmation->qtelivrer))
-                                                    
-                                                    @if($programmation->transfert)
-                                                    <span class="badge badge-info">Transferer</span>
-                                                    @else
-                                                    <span class="badge badge-warning">Partiellement</span>
-                                                    @endif
-                                                    
-                                                    @endif
-                                                </td>
-                                                @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()==true || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()==true)
-                                                <td class="text-center p-2">
-
-                                                    @if($programmation->transfert || $programmation->cloture == false)
-                                                    @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()==false)
-                                                    <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
-                                                    <a href="#" data-toggle="modal" data-target="#modal-detail" title="Détail transfert" class="btn  btn-success  btn-xs"><i class="fa-solid fa-list" onclick="loadDetailTransfert({{$programmation->id}})"></i></a>
-                                                    @elseif ($programmation->statut == 'Valider')
-                                                    <!-- <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a> -->
-
-                                                    @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0)
-                                                    <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
-                                                    @endif
-
-                                                    @endif
-                                                    @else
-                                                    <!-- @if ($programmation->bl) -->
-                                                    @if(count($programmation->vendus) == 0)
-                                                    <a href="{{ route('livraisons.annulation', ['programmation'=>$programmation->id]) }}" title="Annulation de livraison" class="btn btn-primary  btn-xs"><i class="fa-solid fa-eject"></i></a>
-                                                    @endif
-                                                    @if(($programmation->vendus->sum('qteVendu')) == 0 )
-                                                    @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
-                                                    <!-- <a href="#" data-toggle="modal" data-target="#modal-default" title="Transfert la livraison" class="btn  btn-warning  btn-xs"><i class="fa-solid fa-long-arrow-right" onclick="loadProgrammation({{$programmation->id}})"></i></a> -->
-                                                    @endif
-                                                    @endif
-                                                    <!-- @else
-                                                                        <a target="_blank" class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
-                                                                    @endif -->
-                                                    @endif
-
-
-                                                    @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() && count($programmation->vendus) <> 0)
-                                                        @if(!$programmation->cloture)
-                                                        <a class="badge badge-dark p-2" title="Clôturer une livraison" href="{{ route('livraisons.cloturer', ['programmation'=>$programmation->id]) }}">cloturer</a>
-                                                        @endif
-
-                                                        @if($programmation->qteprogrammer>$programmation->vendus->sum('qteVendu'))
-                                                        <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
-                                                        @endif
-                                                    @endif
-                                                </td>
-                                                @endif
-                                            </tr>
                                             @endif
                                         @endforeach
                                     @endif

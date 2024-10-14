@@ -34,10 +34,12 @@ class ReglementController extends Controller
     {
         $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
     }
+
     public function index(Vente $vente)
     {
         return view('reglements.index', compact('vente'));
     }
+
     public function create(Vente $vente)
     {
         $comptes = Compte::all();
@@ -45,11 +47,8 @@ class ReglementController extends Controller
         return view('reglements.create', compact('vente', 'comptes', 'typedetailrecus'));
     }
 
-
-
     public function store(Request $request, Vente $vente)
     {
-        // dd($request->all());
         try {
             $reglmt = $vente->reglements()->pluck('id');
 
@@ -59,14 +58,12 @@ class ReglementController extends Controller
                     Session()->flash('error', 'Ce client n\'a pas de compte actif');
                     return redirect()->route('reglements.index', ['vente' => $vente->id]);
                 }
-
                 if ($request->document == NULL) {
                     $validator = Validator::make($request->all(), [
                         'date' => ['required', 'before_or_equal:now'],
                         //   'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
                         'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
                     ]);
-
 
                     if ($validator->fails()) {
                         return redirect()->route('reglements.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
@@ -122,7 +119,7 @@ class ReglementController extends Controller
                             'reglement_id' => $reglement->id,
                             'destroy' => true
                         ]);
-                        
+
                         if ($mouvement) {
                             $compte = $mouvement->compteClient;
                             $compte->solde = $compte->solde - $request->montant;

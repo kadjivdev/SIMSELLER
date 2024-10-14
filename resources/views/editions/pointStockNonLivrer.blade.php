@@ -131,6 +131,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Camion</th>
+                                                <th>Bl/Bl_gest</th>
                                                 <th>Chauffeur</th>
                                                 <th>Code Cde</th>
                                                 <th>Date</th>
@@ -151,6 +152,13 @@
 
                                                 <td>{{$cpt}}</td>
                                                 <td>{{$prog->camion->immatriculationTracteur}}</td>
+                                                <td>
+                                                    @if($prog->bl || $prog->bl_gest)
+                                                    <span class="badge bg-warning">{{$prog->bl}}/{{$prog->bl_gest}} </span>
+                                                    @else
+                                                    <span class="badge bg-warning">---</span>
+                                                    @endif
+                                                </td>
                                                 <td>{{$prog->chauffeur->nom}} {{$prog->chauffeur->prenom}} ({{$prog->telephone}})</td>
                                                 <td>{{$prog->detailboncommande->boncommande->code}}</td>
                                                 <td>{{$prog->detailboncommande->boncommande->dateBon}}</td>
@@ -163,7 +171,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="8">Total</td>
+                                                <td colspan="9">Total</td>
                                                 <td class="text-right font-weight-bold">{{number_format($stock,2,',',' ')}}</td>
                                             </tr>
                                         </tfoot>

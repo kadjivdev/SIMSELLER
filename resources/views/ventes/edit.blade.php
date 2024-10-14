@@ -237,11 +237,8 @@
                                             <div class="col-sm-6">
                                                 <div class="form-group">
                                                     <label>Zones<span class="text-danger">*</span></label>
-                                                    <select
-                                                        class="select2 form-control form-control-sm @error('zone_id') is-invalid @enderror"
-                                                        name="zone_id" style="width: 100%;">
-                                                        <option class="text-center" selected disabled>** choisissez une
-                                                            zone **</option>
+                                                    <select class="select2 form-control form-control-sm @error('zone_id') is-invalid @enderror" name="zone_id" style="width: 100%;">
+                                                        <option class="text-center" selected disabled>** choisissez une zone **</option>
                                                         @foreach ($zones as $zone)
                                                             <option value="{{ $zone->id }}"
                                                                 @if ($vente) @if (old('zone_id')) {{ old('zone_id') == $zone->id ? 'selected' : '' }}  @else {{ $vente->commandeclient->zone_id == $zone->id ? 'selected' : '' }} @endif
@@ -282,7 +279,6 @@
                     </div>
                     <div class="col-md-1"></div>
                 </div>
-
             </div>
         </section>
     </div>
@@ -331,8 +327,6 @@
                 $('#champ1').removeAttr('hidden')
                 $('#champ').removeAttr('hidden')
             })
-
-           
         }
         else {
             $('#chauffeur_0').attr('selected', 'true');
@@ -358,9 +352,7 @@
                 $('#loader1').attr('hidden', 'hidden');
                 $('#champ').removeAttr('hidden')
                 $('#champ1').removeAttr('hidden')
-
             }).catch(()=>{
-
                 $('#loader').attr('hidden', 'hidden');
                 $('#loader1').attr('hidden', 'hidden');
                 $('#champ1').removeAttr('hidden')
@@ -368,7 +360,6 @@
             })
         }else{
             $("#clt_payeur").empty();
-
         }
     }
     </script>
@@ -377,7 +368,6 @@
         function editClient(oldClient) {
             if ($('#client_id').val() != oldClient) {
                 $('#confirmation_msg').removeAttr('hidden');
-                //$('#confirmation').attr('required','required');
             } else {
                 $('#confirmation_msg').attr('hidden', 'hidden');
                 $('#confirmation').removeAttr('required');

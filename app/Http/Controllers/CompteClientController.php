@@ -35,8 +35,9 @@ class CompteClientController extends Controller
     {
         $compteClient = $client->compteClients;
         $compteClient = count($compteClient) > 0 ? $compteClient[0] : CompteTools::addCompte($client->id, auth()->user()->id);
-        $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->paginate()->toArray();
-        $mouvements = collect($mouvements)->sortByDesc('id')->all();
+        $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->orderBy("id","desc")->get();
+        // dd($mouvements);
+        // $mouvements = collect($mouvements)->sortByDesc('id')->all();
         return view('compteClients.show', compact('compteClient', 'mouvements', 'client'));
     }
 

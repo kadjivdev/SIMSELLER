@@ -31,6 +31,7 @@
                             {{ $message }}
                         </div>
                         @endif
+
                         @if($message = session('error'))
                         <div class="alert alert-danger alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -38,6 +39,7 @@
                             {{ $message }}
                         </div>
                         @endif
+                        
                         <div class="card-header">
                             <h3 class="card-title"></h3>
                             @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)

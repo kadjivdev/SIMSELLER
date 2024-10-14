@@ -178,7 +178,6 @@ class clientsController extends Controller
 
     public function show(Client $client)
     {
-
         $Porteuilles = Porteuille::join('clients', 'portefeuilles.client_id', '=', 'clients.id')
             ->join('agents', 'portefeuilles.agent_id', '=', 'agents.id')
             ->select(
@@ -292,17 +291,16 @@ class clientsController extends Controller
 
     public function edit(Client $client)
     {
-
         $typeclients = TypeClient::all();
         $departements = Departement::all();
         $filleulFisc = Client::where('ifu', 0)->get();
 
-        // dd( $valeurFisc);
         return view('client.edit', compact('client', 'typeclients', 'departements', 'filleulFisc'));
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         try {
 
             $validator = Validator::make($request->all(), [
@@ -326,6 +324,7 @@ class clientsController extends Controller
 
                 return redirect()->route('newclient.create')->withErrors($validator->errors())->withInput();
             }
+            
             if ($request->agent_id != null) {
                 $validator1 = Validator::make($request->all(), [
                     'datedebut' => ['required', 'date'],

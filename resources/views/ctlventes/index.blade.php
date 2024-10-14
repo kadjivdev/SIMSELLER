@@ -55,7 +55,13 @@
                                         <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
                                         <td class="text-right">{{number_format($reglement->montant,0,',',' ')}}</td>
                                         <td>{{$reglement->reference}}</td>
-                                        <td>{{$reglement->vente?$reglement->vente->commandeclient->client->nom:"-"}} {{$reglement->vente?$reglement->vente->commandeclient->client->prenom:"-"}}</td>
+                                        <td>
+                                            @if($reglement->vente && $reglement->vente->commandeclient)
+                                            {{$reglement->vente->commandeclient->client->nom}} {{$reglement->vente->commandeclient->client->prenom}}
+                                            @else
+                                            --
+                                            @endif
+                                        </td>
                                         <td>
                                             @if ($reglement->document)
                                             <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document?asset('storage/'.$reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>

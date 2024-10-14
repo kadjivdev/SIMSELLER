@@ -11,9 +11,7 @@
             <div class="row mb-2">
 
                 <div class="col-sm-6">
-
                     <h1>BON DE COMMANDES</h1>
-
                 </div>
 
                 <div class="col-sm-6">
@@ -56,6 +54,7 @@
                         </div>
                         @endif
                         <div class="card-header">
+
                             <form id="statutsForm" action="" method="get">
                                 <h3 class="card-title"></h3>
                                 <div class="row">
@@ -146,7 +145,7 @@
                                         <td class="pl-2">{{ $boncommande->fournisseur->sigle }}</td>
                                         <td class="pl-2 qte">{{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}}</td>
                                         <td class="text-right pr-3">{{ isset($boncommande->detailboncommandes[0]->pu) ? $boncommande->detailboncommandes[0]->pu:0}}</td>
-                                        <td class="text-right pr-3 montant">{{ number_format($boncommande->montant,2,","," ") }}</td>
+                                        <td class="text-right pr-3 montant">{{$boncommande->montant }}</td>
                                         <td class="pl-2">{{ $boncommande->typecommande->libelle }}</td>
                                         @if ($boncommande->statut == 'Valider')
                                         <td class="text-center"><span class="badge badge-success">{{ $boncommande->statut }}</span></td>
@@ -190,9 +189,8 @@
                                             <!-- <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a> -->
 
                                         </td>
-                                        
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
 
+                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <td class="text-center">
                                             <div class="dropdown">
                                                 <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown" @if(count($boncommande->detailboncommandes) == 0 ) disabled @endif>
@@ -215,7 +213,6 @@
                                                 </div>
                                             </div>
                                         </td>
-
                                         @endif
                                     </tr>
                                     @endforeach
@@ -235,7 +232,6 @@
                                         <th>Actualisation</th>
                                         @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <th>Action</th>
-
                                         @endif
                                     </tr>
                                 </tfoot>
@@ -277,491 +273,481 @@
 @section('script')
 
 <script>
-    $('body').on('change', function() {
-        const tableBody = document.querySelector('.table-body');
-        let sumQte = 0;
-        tableBody.querySelectorAll('tr').forEach(row => {
-            const puCells = row.querySelectorAll('.qte');
-            let puSum = 0;
-            puCells.forEach(puCell => {
-                puSum = puSum + parseFloat(puCell.textContent);
-            });
-            sumQte = sumQte + puSum;
-        });
-        $('#qte').text(sumQte + ' Tonnes')
+    $("#example1").DataTable({
 
-        let sumMontant = 0;
-        tableBody.querySelectorAll('tr').forEach(row => {
-            const puCells = row.querySelectorAll('.montant');
-            let puSum = 0;
-            puCells.forEach(puCell => {
-                puSum = puSum + parseFloat((puCell.textContent.replace(/ /g, "")));
-            });
-            sumMontant = sumMontant + puSum;
-            $('#montant').text(sumMontant + ' FCFA')
-        });
-    });
+        "responsive": true,
+        "lengthChange": false,
+        "autoWidth": false,
 
+        "buttons": ["pdf", "print"],
 
-    $(function() {
+        "order": [
+            [0, 'asc']
+        ],
 
-        $("#example1").DataTable({
+        "pageLength": 15,
 
-            "responsive": true,
-            "lengthChange": false,
-            "autoWidth": false,
+        "columnDefs": [
 
-            "buttons": ["pdf", "print"],
+            {
 
-            "order": [
-                [0, 'asc']
-            ],
+                "targets": 7,
 
-            "pageLength": 15,
+                "orderable": false
 
-            "columnDefs": [
+            },
 
-                {
+            {
 
-                    "targets": 7,
+                "targets": 8,
 
-                    "orderable": false
+                "orderable": false
 
-                },
+            }
 
-                {
+        ],
 
-                    "targets": 8,
+        language: {
 
-                    "orderable": false
+            "emptyTable": "Aucune donnée disponible dans le tableau",
 
-                }
+            "lengthMenu": "Afficher _MENU_ éléments",
 
-            ],
+            "loadingRecords": "Chargement...",
 
-            language: {
+            "processing": "Traitement...",
 
-                "emptyTable": "Aucune donnée disponible dans le tableau",
+            "zeroRecords": "Aucun élément correspondant trouvé",
 
-                "lengthMenu": "Afficher _MENU_ éléments",
+            "paginate": {
 
-                "loadingRecords": "Chargement...",
+                "first": "Premier",
 
-                "processing": "Traitement...",
+                "last": "Dernier",
 
-                "zeroRecords": "Aucun élément correspondant trouvé",
+                "previous": "Précédent",
 
-                "paginate": {
+                "next": "Suiv"
 
-                    "first": "Premier",
+            },
 
-                    "last": "Dernier",
+            "aria": {
 
-                    "previous": "Précédent",
+                "sortAscending": ": activer pour trier la colonne par ordre croissant",
 
-                    "next": "Suiv"
+                "sortDescending": ": activer pour trier la colonne par ordre décroissant"
+
+            },
+
+            "select": {
+
+                "rows": {
+
+                    "_": "%d lignes sélectionnées",
+
+                    "1": "1 ligne sélectionnée"
 
                 },
 
-                "aria": {
+                "cells": {
 
-                    "sortAscending": ": activer pour trier la colonne par ordre croissant",
+                    "1": "1 cellule sélectionnée",
 
-                    "sortDescending": ": activer pour trier la colonne par ordre décroissant"
-
-                },
-
-                "select": {
-
-                    "rows": {
-
-                        "_": "%d lignes sélectionnées",
-
-                        "1": "1 ligne sélectionnée"
-
-                    },
-
-                    "cells": {
-
-                        "1": "1 cellule sélectionnée",
-
-                        "_": "%d cellules sélectionnées"
-
-                    },
-
-                    "columns": {
-
-                        "1": "1 colonne sélectionnée",
-
-                        "_": "%d colonnes sélectionnées"
-
-                    }
+                    "_": "%d cellules sélectionnées"
 
                 },
 
-                "autoFill": {
+                "columns": {
 
-                    "cancel": "Annuler",
+                    "1": "1 colonne sélectionnée",
 
-                    "fill": "Remplir toutes les cellules avec <i>%d<\/i>",
-
-                    "fillHorizontal": "Remplir les cellules horizontalement",
-
-                    "fillVertical": "Remplir les cellules verticalement"
-
-                },
-
-                "searchBuilder": {
-
-                    "conditions": {
-
-                        "date": {
-
-                            "after": "Après le",
-
-                            "before": "Avant le",
-
-                            "between": "Entre",
-
-                            "empty": "Vide",
-
-                            "equals": "Egal à",
-
-                            "not": "Différent de",
-
-                            "notBetween": "Pas entre",
-
-                            "notEmpty": "Non vide"
-
-                        },
-
-                        "number": {
-
-                            "between": "Entre",
-
-                            "empty": "Vide",
-
-                            "equals": "Egal à",
-
-                            "gt": "Supérieur à",
-
-                            "gte": "Supérieur ou égal à",
-
-                            "lt": "Inférieur à",
-
-                            "lte": "Inférieur ou égal à",
-
-                            "not": "Différent de",
-
-                            "notBetween": "Pas entre",
-
-                            "notEmpty": "Non vide"
-
-                        },
-
-                        "string": {
-
-                            "contains": "Contient",
-
-                            "empty": "Vide",
-
-                            "endsWith": "Se termine par",
-
-                            "equals": "Egal à",
-
-                            "not": "Différent de",
-
-                            "notEmpty": "Non vide",
-
-                            "startsWith": "Commence par"
-
-                        },
-
-                        "array": {
-
-                            "equals": "Egal à",
-
-                            "empty": "Vide",
-
-                            "contains": "Contient",
-
-                            "not": "Différent de",
-
-                            "notEmpty": "Non vide",
-
-                            "without": "Sans"
-
-                        }
-
-                    },
-
-                    "add": "Ajouter une condition",
-
-                    "button": {
-
-                        "0": "Recherche avancée",
-
-                        "_": "Recherche avancée (%d)"
-
-                    },
-
-                    "clearAll": "Effacer tout",
-
-                    "condition": "Condition",
-
-                    "data": "Donnée",
-
-                    "deleteTitle": "Supprimer la règle de filtrage",
-
-                    "logicAnd": "Et",
-
-                    "logicOr": "Ou",
-
-                    "title": {
-
-                        "0": "Recherche avancée",
-
-                        "_": "Recherche avancée (%d)"
-
-                    },
-
-                    "value": "Valeur"
-
-                },
-
-                "searchPanes": {
-
-                    "clearMessage": "Effacer tout",
-
-                    "count": "{total}",
-
-                    "title": "Filtres actifs - %d",
-
-                    "collapse": {
-
-                        "0": "Volet de recherche",
-
-                        "_": "Volet de recherche (%d)"
-
-                    },
-
-                    "countFiltered": "{shown} ({total})",
-
-                    "emptyPanes": "Pas de volet de recherche",
-
-                    "loadMessage": "Chargement du volet de recherche..."
-
-                },
-
-                "buttons": {
-
-                    "copyKeys": "Appuyer sur ctrl ou u2318 + C pour copier les données du tableau dans votre presse-papier.",
-
-                    "collection": "Collection",
-
-                    "colvis": "Visibilité colonnes",
-
-                    "colvisRestore": "Rétablir visibilité",
-
-                    "copy": "Copier",
-
-                    "copySuccess": {
-
-                        "1": "1 ligne copiée dans le presse-papier",
-
-                        "_": "%ds lignes copiées dans le presse-papier"
-
-                    },
-
-                    "copyTitle": "Copier dans le presse-papier",
-
-                    "csv": "CSV",
-
-                    "excel": "Excel",
-
-                    "pageLength": {
-
-                        "-1": "Afficher toutes les lignes",
-
-                        "_": "Afficher %d lignes"
-
-                    },
-
-                    "pdf": "PDF",
-
-                    "print": "Imprimer"
-
-                },
-
-                "decimal": ",",
-
-                "info": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-
-                "infoEmpty": "Affichage de 0 à 0 sur 0 éléments",
-
-                "infoThousands": ".",
-
-                "search": "Rechercher:",
-
-                "thousands": ".",
-
-                "infoFiltered": "(filtrés depuis un total de _MAX_ éléments)",
-
-                "datetime": {
-
-                    "previous": "Précédent",
-
-                    "next": "Suivant",
-
-                    "hours": "Heures",
-
-                    "minutes": "Minutes",
-
-                    "seconds": "Secondes",
-
-                    "unknown": "-",
-
-                    "amPm": [
-
-                        "am",
-
-                        "pm"
-
-                    ],
-
-                    "months": [
-
-                        "Janvier",
-
-                        "Fevrier",
-
-                        "Mars",
-
-                        "Avril",
-
-                        "Mai",
-
-                        "Juin",
-
-                        "Juillet",
-
-                        "Aout",
-
-                        "Septembre",
-
-                        "Octobre",
-
-                        "Novembre",
-
-                        "Decembre"
-
-                    ],
-
-                    "weekdays": [
-
-                        "Dim",
-
-                        "Lun",
-
-                        "Mar",
-
-                        "Mer",
-
-                        "Jeu",
-
-                        "Ven",
-
-                        "Sam"
-
-                    ]
-
-                },
-
-                "editor": {
-
-                    "close": "Fermer",
-
-                    "create": {
-
-                        "button": "Nouveaux",
-
-                        "title": "Créer une nouvelle entrée",
-
-                        "submit": "Envoyer"
-
-                    },
-
-                    "edit": {
-
-                        "button": "Editer",
-
-                        "title": "Editer Entrée",
-
-                        "submit": "Modifier"
-
-                    },
-
-                    "remove": {
-
-                        "button": "Supprimer",
-
-                        "title": "Supprimer",
-
-                        "submit": "Supprimer",
-
-                        "confirm": {
-
-                            "1": "etes-vous sure de vouloir supprimer 1 ligne?",
-
-                            "_": "etes-vous sure de vouloir supprimer %d lignes?"
-
-                        }
-
-                    },
-
-                    "error": {
-
-                        "system": "Une erreur système s'est produite"
-
-                    },
-
-                    "multi": {
-
-                        "title": "Valeurs Multiples",
-
-                        "restore": "Rétablir Modification",
-
-                        "noMulti": "Ce champ peut être édité individuellement, mais ne fait pas partie d'un groupe. ",
-
-                        "info": "Les éléments sélectionnés contiennent différentes valeurs pour ce champ. Pour  modifier et "
-
-                    }
+                    "_": "%d colonnes sélectionnées"
 
                 }
 
             },
 
-        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+            "autoFill": {
 
-        $('#example2').DataTable({
+                "cancel": "Annuler",
 
-            "paging": true,
+                "fill": "Remplir toutes les cellules avec <i>%d<\/i>",
 
-            "lengthChange": false,
+                "fillHorizontal": "Remplir les cellules horizontalement",
 
-            "searching": false,
+                "fillVertical": "Remplir les cellules verticalement"
 
-            "ordering": true,
+            },
 
-            "info": true,
+            "searchBuilder": {
 
-            "autoWidth": false,
+                "conditions": {
 
-            "responsive": true,
+                    "date": {
 
-        });
+                        "after": "Après le",
+
+                        "before": "Avant le",
+
+                        "between": "Entre",
+
+                        "empty": "Vide",
+
+                        "equals": "Egal à",
+
+                        "not": "Différent de",
+
+                        "notBetween": "Pas entre",
+
+                        "notEmpty": "Non vide"
+
+                    },
+
+                    "number": {
+
+                        "between": "Entre",
+
+                        "empty": "Vide",
+
+                        "equals": "Egal à",
+
+                        "gt": "Supérieur à",
+
+                        "gte": "Supérieur ou égal à",
+
+                        "lt": "Inférieur à",
+
+                        "lte": "Inférieur ou égal à",
+
+                        "not": "Différent de",
+
+                        "notBetween": "Pas entre",
+
+                        "notEmpty": "Non vide"
+
+                    },
+
+                    "string": {
+
+                        "contains": "Contient",
+
+                        "empty": "Vide",
+
+                        "endsWith": "Se termine par",
+
+                        "equals": "Egal à",
+
+                        "not": "Différent de",
+
+                        "notEmpty": "Non vide",
+
+                        "startsWith": "Commence par"
+
+                    },
+
+                    "array": {
+
+                        "equals": "Egal à",
+
+                        "empty": "Vide",
+
+                        "contains": "Contient",
+
+                        "not": "Différent de",
+
+                        "notEmpty": "Non vide",
+
+                        "without": "Sans"
+
+                    }
+
+                },
+
+                "add": "Ajouter une condition",
+
+                "button": {
+
+                    "0": "Recherche avancée",
+
+                    "_": "Recherche avancée (%d)"
+
+                },
+
+                "clearAll": "Effacer tout",
+
+                "condition": "Condition",
+
+                "data": "Donnée",
+
+                "deleteTitle": "Supprimer la règle de filtrage",
+
+                "logicAnd": "Et",
+
+                "logicOr": "Ou",
+
+                "title": {
+
+                    "0": "Recherche avancée",
+
+                    "_": "Recherche avancée (%d)"
+
+                },
+
+                "value": "Valeur"
+
+            },
+
+            "searchPanes": {
+
+                "clearMessage": "Effacer tout",
+
+                "count": "{total}",
+
+                "title": "Filtres actifs - %d",
+
+                "collapse": {
+
+                    "0": "Volet de recherche",
+
+                    "_": "Volet de recherche (%d)"
+
+                },
+
+                "countFiltered": "{shown} ({total})",
+
+                "emptyPanes": "Pas de volet de recherche",
+
+                "loadMessage": "Chargement du volet de recherche..."
+
+            },
+
+            "buttons": {
+
+                "copyKeys": "Appuyer sur ctrl ou u2318 + C pour copier les données du tableau dans votre presse-papier.",
+
+                "collection": "Collection",
+
+                "colvis": "Visibilité colonnes",
+
+                "colvisRestore": "Rétablir visibilité",
+
+                "copy": "Copier",
+
+                "copySuccess": {
+
+                    "1": "1 ligne copiée dans le presse-papier",
+
+                    "_": "%ds lignes copiées dans le presse-papier"
+
+                },
+
+                "copyTitle": "Copier dans le presse-papier",
+
+                "csv": "CSV",
+
+                "excel": "Excel",
+
+                "pageLength": {
+
+                    "-1": "Afficher toutes les lignes",
+
+                    "_": "Afficher %d lignes"
+
+                },
+
+                "pdf": "PDF",
+
+                "print": "Imprimer"
+
+            },
+
+            "decimal": ",",
+
+            "info": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+
+            "infoEmpty": "Affichage de 0 à 0 sur 0 éléments",
+
+            "infoThousands": ".",
+
+            "search": "Rechercher:",
+
+            "thousands": ".",
+
+            "infoFiltered": "(filtrés depuis un total de _MAX_ éléments)",
+
+            "datetime": {
+
+                "previous": "Précédent",
+
+                "next": "Suivant",
+
+                "hours": "Heures",
+
+                "minutes": "Minutes",
+
+                "seconds": "Secondes",
+
+                "unknown": "-",
+
+                "amPm": [
+
+                    "am",
+
+                    "pm"
+
+                ],
+
+                "months": [
+
+                    "Janvier",
+
+                    "Fevrier",
+
+                    "Mars",
+
+                    "Avril",
+
+                    "Mai",
+
+                    "Juin",
+
+                    "Juillet",
+
+                    "Aout",
+
+                    "Septembre",
+
+                    "Octobre",
+
+                    "Novembre",
+
+                    "Decembre"
+
+                ],
+
+                "weekdays": [
+
+                    "Dim",
+
+                    "Lun",
+
+                    "Mar",
+
+                    "Mer",
+
+                    "Jeu",
+
+                    "Ven",
+
+                    "Sam"
+
+                ]
+
+            },
+
+            "editor": {
+
+                "close": "Fermer",
+
+                "create": {
+
+                    "button": "Nouveaux",
+
+                    "title": "Créer une nouvelle entrée",
+
+                    "submit": "Envoyer"
+
+                },
+
+                "edit": {
+
+                    "button": "Editer",
+
+                    "title": "Editer Entrée",
+
+                    "submit": "Modifier"
+
+                },
+
+                "remove": {
+
+                    "button": "Supprimer",
+
+                    "title": "Supprimer",
+
+                    "submit": "Supprimer",
+
+                    "confirm": {
+
+                        "1": "etes-vous sure de vouloir supprimer 1 ligne?",
+
+                        "_": "etes-vous sure de vouloir supprimer %d lignes?"
+
+                    }
+
+                },
+
+                "error": {
+
+                    "system": "Une erreur système s'est produite"
+
+                },
+
+                "multi": {
+
+                    "title": "Valeurs Multiples",
+
+                    "restore": "Rétablir Modification",
+
+                    "noMulti": "Ce champ peut être édité individuellement, mais ne fait pas partie d'un groupe. ",
+
+                    "info": "Les éléments sélectionnés contiennent différentes valeurs pour ce champ. Pour  modifier et "
+
+                }
+
+            }
+
+        },
+
+    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+
+
+    $("body").on('change', function() {
+        var table = $('#example1').DataTable();
+
+        const newQte = new DataTable('#example1').column(3, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+        
+        const montant = new DataTable('#example1').column(5, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+        
+        $("#qte").html(newQte + " Tonnes ")
+        $("#montant").html(montant + " FCFA ")
+    })
+
+    $('#example2').DataTable({
+
+        "paging": true,
+
+        "lengthChange": false,
+
+        "searching": false,
+
+        "ordering": true,
+
+        "info": true,
+
+        "autoWidth": false,
+
+        "responsive": true,
 
     });
+
+    console.log(table.page.info().recordsDisplay);
 </script>
 
 <script>

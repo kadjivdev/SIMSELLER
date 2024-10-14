@@ -91,8 +91,8 @@
                                     <div class="info-box">
                                         <span class="info-box-icon bg-warning"><i class="fas fa-hand-holding-usd"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">RESTE A PAYER VENTE</span>
-                                            <span class="info-box-number" id='reste'>{{($sommeVentes - $reglements)?($sommeVentes - $reglements):0}}</span>
+                                            <span class="info-box-text">RESTE VENTE A PAYER</span>
+                                            <span class="info-box-number" id='reste'>{{($sommeVentes - $reglements)?number_format(($sommeVentes - $reglements), '0', '', ' '):0}}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -203,7 +203,7 @@
                                                 <th>Code</th>
                                                 <th>Bl</th>
                                                 <th>date</th>
-                                                <th>Client/Destination</th>
+                                                <th>Chauffeur/Destination</th>
                                                 <th>Type</th>
                                                 <th>Zones</th>
                                                 <th>Quantite</th>
@@ -235,11 +235,13 @@
                                                 <td>{{ date_format(date_create($item->date), 'd/m/Y') }}
                                                 </td>
                                                 <td>
-                                                    {{ $item->raisonSociale }} ({{ $item->telephone }})
-                                                    @if (substr($item->code, 0, 2) == 'VI')
-                                                    {{ $item->commandeclient->code }}
+                                                    @if(count($item->vendus)>0)
+                                                    @foreach ($item->vendus as $vendu )
+                                                    {{ $vendu->programmation->chauffeur->nom}} {{ $vendu->programmation->chauffeur->prenom}} / {{ $item->destination }}
+                                                    @endforeach
+                                                    @else
+                                                    ---
                                                     @endif
-                                                    /{{ $item->destination }}
                                                 </td>
                                                 <td>{{ $item->typeVente->libelle }}</td>
                                                 <td>{{ $item->Zlibelle }}</td>
@@ -332,7 +334,8 @@
                                                     <th>Statut</th>
                                                     <th>Date de suppression</th>
                                                     <th>Montant</th>
-                                                    <th>Restituée</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -351,9 +354,18 @@
                                                     <td class="text-center">{{ number_format($vente->montant,0,'',' ') }}</td>
                                                     <td class="texte-center">
                                                         @if($vente->restituted)
-                                                        <span class="badge bg-success">Oui</span>
+                                                        <span class="badge bg-success">Restituée</span>
                                                         @else
-                                                        <span class="badge bg-danger">Non</span>
+                                                        <span class="badge bg-danger">Non restituée</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center font-weight-bold">
+                                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists()==true)
+                                                        @if(!$vente->restituted)
+                                                        <a href="{{route('edition.RestoreVenteDeleted',['vente'=>$vente->id,'client'=>session('resultat')['client']])}}" class="btn btn-sm btn-light"> <span> Restituer </span></a>
+                                                        @else
+                                                        <span class="badge bg-light">---</span>
+                                                        @endif
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -361,21 +373,12 @@
                                             </tbody>
                                             <tfoot class="text-white bg-dark">
                                                 <tr>
-                                                    <td colspan="8" class="font-weight-bold">Total </td>
+                                                    <td colspan="10" class="font-weight-bold">Total </td>
 
-                                                    <td colspan="2" class="text-left font-weight-bold">
+                                                    <td colspan="3" class="text-left font-weight-bold">
                                                         {{ number_format(session('resultat')['ventesDleted']->sum("montant"),0,'',' ' )  }} FCFA
                                                     </td>
-                                                    <td colspan="2" class="text-center font-weight-bold">
 
-                                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists()==true || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()==true || Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists()==true)
-                                                        @if(count(session('resultat')['ventesDleted']->where("restituted", false))>0)
-                                                        <a href="{{route('edition.RestoreVenteDeleted',session('resultat')['client'])}}" class="btn btn-sm btn-light" style="cursor: pointer!important;z-index:100!important;"><i class="bi bi-cash-coin"></i> Restituer</a>
-                                                        @else
-                                                        <span class="badge bg-light">Déjà restitué</span>
-                                                        @endif
-                                                        @endif
-                                                    </td>
                                                     <input type="hidden" id="montant_regle" value="{{$montant - $regle}}">
                                                 </tr>
                                             </tfoot>

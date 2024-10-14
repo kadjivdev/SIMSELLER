@@ -34,9 +34,9 @@ class BonCommandeController extends Controller
 
     public function __construct(TypeCommande $typecommandes, Fournisseur $fournisseurs, Produit $produits)
     {
-        $this->middleware('superviseur')->only(['valider','invalider','retournerCommande']);
-        $this->middleware('gest')->only(['create','delete','envoyerCommande']);
-        
+        $this->middleware('superviseur')->only(['valider', 'invalider', 'retournerCommande']);
+        $this->middleware('gest')->only(['create', 'delete', 'envoyerCommande']);
+
         $this->typecommandes = $typecommandes;
         $this->fournisseurs = $fournisseurs;
         $this->produits = $produits;
@@ -44,72 +44,81 @@ class BonCommandeController extends Controller
 
     public function index(Request $request)
     {
-        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true) { 
-            if($request->statuts){
-                if($request->statuts == 1){ 
+        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true) {
+            if ($request->statuts) {
+                if ($request->statuts == 1) {
 
-                    if($request->debut && $request->fin){
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();         
+                    if ($request->debut && $request->fin) {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
                         $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes','req'));                      
-                    }else{
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->get();         
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }
 
-                }elseif($request->statuts == 2){
-                    if($request->debut && $request->fin ){                        
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->whereBetween('dateBon', [$request->debut, $request->fin])->where('statut', 'Livrer')->get();         
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }else{
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->get();         
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }
+                        $TotamlAmont = 0;
+                        $TotQte = 0;
 
-                }elseif($request->statuts == 3){   
-                    if($request->debut && $request->fin){
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->whereBetween('dateBon', [$request->debut, $request->fin])->get();         
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }else {                    
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->get();         
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }
-                }elseif($request->statuts == 4){
-                    if($request->debut && $request->fin){
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->whereBetween('dateBon', [$request->debut, $request->fin])->get();         
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }else{
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->get();         
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }
+                        foreach ($boncommandes as $bc) {
+                            $TotQte += $bc->detailboncommandes->first()->qteCommander;
+                            $TotamlAmont += $bc->montant;
+                        }
+                        // dd($TotQte, $TotamlAmont);
 
-                }elseif($request->statuts == 5){
-                    if($request->debut && $request->fin){
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->whereBetween('dateBon', [$request->debut, $request->fin])->get();         
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes','req'));
-                    }else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->get();         
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    } else {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->get();
                         $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes','req'));
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    }
+                } elseif ($request->statuts == 2) {
+                    if ($request->debut && $request->fin) {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->whereBetween('dateBon', [$request->debut, $request->fin])->where('statut', 'Livrer')->get();
+                        $req = $request->all();
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    } else {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->get();
+                        $req = $request->statuts;
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    }
+                } elseif ($request->statuts == 3) {
+                    if ($request->debut && $request->fin) {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
+                        $req = $request->all();
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    } else {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->get();
+                        $req = $request->statuts;
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    }
+                } elseif ($request->statuts == 4) {
+                    if ($request->debut && $request->fin) {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
+                        $req = $request->all();
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    } else {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->get();
+                        $req = $request->statuts;
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    }
+                } elseif ($request->statuts == 5) {
+                    if ($request->debut && $request->fin) {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
+                        $req = $request->all();
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
+                    } else {
+                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->get();
+                        $req = $request->statuts;
+                        return view('boncommandes.index', compact('boncommandes', 'req'));
                     }
                 }
-            }else{ 
-                if($request->debut && $request->fin){
-                    $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();         
+            } else {
+                if ($request->debut && $request->fin) {
+                    $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
                     $req = $request->all();
-                    return view('boncommandes.index', compact('boncommandes','req'));
-                }else {
+                    return view('boncommandes.index', compact('boncommandes', 'req'));
+                } else {
+
                     $boncommandes = BonCommande::orderBy('code', 'desc')->get();
                     $req = $request->statuts;
-                    return view('boncommandes.index', compact('boncommandes','req'));
+
+                    return view('boncommandes.index', compact('boncommandes', 'req'));
                 }
             }
         }
@@ -117,12 +126,11 @@ class BonCommandeController extends Controller
         if (Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists() == true) {
             if ($request->debut && $request->fin) {
                 $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')
-                ->whereBetween('dateBon', [$request->debut, $request->fin])
-                ->get();
+                    ->whereBetween('dateBon', [$request->debut, $request->fin])
+                    ->get();
                 $req = $request->all();
                 return view('boncommandes.index', compact('boncommandes', 'req'));
-
-            }else {
+            } else {
                 $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->get();
                 return view('boncommandes.index', compact('boncommandes'));
             }
@@ -130,11 +138,11 @@ class BonCommandeController extends Controller
 
         if (Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists() == true) {
             if ($request->debut && $request->fin) {
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut','<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->whereBetween('dateBon', [$request->debut, $request->fin])->get();
+                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->whereBetween('dateBon', [$request->debut, $request->fin])->get();
                 $req = $request->all();
                 return view('boncommandes.index', compact('boncommandes', 'req'));
-            }else {   
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut','<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->get();
+            } else {
+                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->get();
                 $req = $request->all();
                 return view('boncommandes.index', compact('boncommandes'));
             }
@@ -143,9 +151,9 @@ class BonCommandeController extends Controller
         if ($request->debut && $request->fin) {
             $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
             $req = $request->all();
-            return view('boncommandes.index', compact('boncommandes','req'));
-        }      
-      
+            return view('boncommandes.index', compact('boncommandes', 'req'));
+        }
+
         $boncommandes = BonCommande::orderBy('code', 'desc')->get();
         return view('boncommandes.index', compact('boncommandes'));
     }
@@ -266,7 +274,7 @@ class BonCommandeController extends Controller
     {
         if (Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists()) {
             $boncommandes = $boncommande;
-            $recus = Recu::all()->where('bon_commande_id' , $boncommande->id);
+            $recus = Recu::all()->where('bon_commande_id', $boncommande->id);
             return view('boncommandes.valider', compact('boncommandes'));
         } else {
 
@@ -316,7 +324,7 @@ class BonCommandeController extends Controller
     {
         try {
             if ($boncommande->statut == 'Valider') {
-              
+
                 $timestamp = strtotime($boncommande->created_at);
                 $now = time();
                 $difference = $now - $timestamp;
@@ -325,7 +333,6 @@ class BonCommandeController extends Controller
                     Session()->flash('message', 'Vous ne pouvez pas effectuer des opération sur cette commande!');
                     return redirect()->route('boncommandes.index');
                 }
-
             } else {
 
                 if ($request->statut == 'Valider') {
@@ -334,40 +341,40 @@ class BonCommandeController extends Controller
                     if (($recu == null) && ($boncommande->type_commande_id == 1)) {
                         Session()->flash('error', 'Vous ne pouvez pas valider cette commande. Rattacher d\'abord un reçu');
                         return redirect()->route('boncommandes.index');
-                    }else{
+                    } else {
 
                         $sommeMontant = 0;
                         foreach ($recu as $item) {
                             $sommeMontant += $item['montant'];
                         }
 
-                        if($sommeMontant != $boncommande->montant){
+                        if ($sommeMontant != $boncommande->montant) {
                             Session()->flash('error', 'Vous ne pouvez pas valider cette commande. le montant des versements ne correspond pas au montant de la commande');
-                            return redirect()->route('boncommandes.index');  
-                        }                        
+                            return redirect()->route('boncommandes.index');
+                        }
                         // $sommeMontant contiendra la somme totale des montants dans le tableau $recu
-                         
+
                     }
-                    
+
                     $boncommande->statut = $request->statut;
                     $boncommandes = $boncommande;
                     if ($boncommande->update()) {
                         $validateur = User::find(env('GESTIONNAIRE_ID'));
                         $destinataire = [
-                            'nom'=>$validateur->name,
-                            'email'=>$validateur->email
+                            'nom' => $validateur->name,
+                            'email' => $validateur->email
                         ];
                         $subject = 'CONFIRMATION DE VALIDATION DE COMMANDE';
                         $message_html = "Votre demande validation de la commande ci-dessous a été prise en compte. Vous pouvez passer à la programmation.<br>
                             <ul>
                             <li>Commande N° $boncommandes->code</li>
-                            <li>Date : ".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</li>
-                            <li>Date : ".number_format($boncommandes->montant,2,',',' ')."</li>
+                            <li>Date : " . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</li>
+                            <li>Date : " . number_format($boncommandes->montant, 2, ',', ' ') . "</li>
                             </ul>
-                            <p><b> Valider par : </b> ".Auth::user()->name." le <b> ".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</b></p>
+                            <p><b> Valider par : </b> " . Auth::user()->name . " le <b> " . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</b></p>
                         ";
                         $lienAction = route('programmations.index');
-                        $mail = new CommandeMail($destinataire,$subject,$message_html,[],$lienAction);
+                        $mail = new CommandeMail($destinataire, $subject, $message_html, [], $lienAction);
                         Mail::send($mail);
                         Session()->flash('message', 'Bon de commande validé avec succès!');
                         return redirect()->route('boncommandes.index');
@@ -392,19 +399,20 @@ class BonCommandeController extends Controller
         }
     }
 
-    public function etat(){
-       // Une commande à crédit est une commande qui n'a pas encore reçu de versemment qu'elle soit au comptant ou credit 
+    public function etat()
+    {
+        // Une commande à crédit est une commande qui n'a pas encore reçu de versemment qu'elle soit au comptant ou credit 
         $commandeCredit = DB::table('bon_commandes')
-                        ->leftJoin('recus','recus.bon_commande_id','=','bon_commandes.id')
-                        ->where('recus.bon_commande_id',null)->select('bon_commandes.*')->get();
- 
+            ->leftJoin('recus', 'recus.bon_commande_id', '=', 'bon_commandes.id')
+            ->where('recus.bon_commande_id', null)->select('bon_commandes.*')->get();
+
         $commandeReglementEnCour =  DB::table('bon_commandes')
-                        ->join('recus', 'bon_commandes.id', '=', 'recus.bon_commande_id')
-                        ->groupBy('bon_commandes.id')
-                        ->havingRaw('SUM(recus.montant) < bon_commandes.montant')
-                        ->select('bon_commandes.*',DB::raw('SUM(recus.montant) AS montant_payer'))->get();
-       
-                        dd($commandeReglementEnCour);
+            ->join('recus', 'bon_commandes.id', '=', 'recus.bon_commande_id')
+            ->groupBy('bon_commandes.id')
+            ->havingRaw('SUM(recus.montant) < bon_commandes.montant')
+            ->select('bon_commandes.*', DB::raw('SUM(recus.montant) AS montant_payer'))->get();
+
+        dd($commandeReglementEnCour);
     }
 
     public function delete(BonCommande $boncommande)
@@ -415,7 +423,7 @@ class BonCommandeController extends Controller
 
     public function destroy(BonCommande $boncommande)
     {
-        ControlesTools::generateLog($boncommande,'BonCommande','Suppression ligne');
+        ControlesTools::generateLog($boncommande, 'BonCommande', 'Suppression ligne');
         $boncommande->accusedocuments()->delete();
         foreach ($boncommande->recus as $recu) {
             $recu->detailrecus()->delete();
@@ -429,82 +437,80 @@ class BonCommandeController extends Controller
         return redirect()->route('boncommandes.index');
     }
 
-    public function envoyerCommande(BonCommande $boncommandes){
-        return view('boncommandes.envoyer',compact('boncommandes'));
+    public function envoyerCommande(BonCommande $boncommandes)
+    {
+        return view('boncommandes.envoyer', compact('boncommandes'));
     }
-    public function postEnvoyerCommande(BonCommande $boncommandes){
-        if($boncommandes->statut == 'Préparation'){
+
+    public function postEnvoyerCommande(BonCommande $boncommandes)
+    {
+        if ($boncommandes->statut == 'Préparation') {
             $validateur = User::find(env('VALIDATEUR_ID'));
             $destinataire = [
-                'nom'=>$validateur->name,
-                'email'=>$validateur->email
+                'nom' => $validateur->name,
+                'email' => $validateur->email
             ];
             $subject = 'DEMANDE DE VALIDATION COMMANDE';
             $message_html = "Vous avez une nouvelle commande en attente de validation. <br>
                 <ul>
                 <li>Commande N° $boncommandes->code</li>
-                <li>Date : ".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</li>
-                <li>Date : ".number_format($boncommandes->montant,2,',',' ')."</li>
+                <li>Date : " . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</li>
+                <li>Date : " . number_format($boncommandes->montant, 2, ',', ' ') . "</li>
                 </ul>
-                <p><b>Validation demandée par :</b> $boncommandes->users le <b>".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</b></p>
+                <p><b>Validation demandée par :</b> $boncommandes->users le <b>" . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</b></p>
                 ";
             $lienAction = route('boncommandes.index');
-            $mail = new CommandeMail($destinataire,$subject,$message_html,[],$lienAction);
+            $mail = new CommandeMail($destinataire, $subject, $message_html, [], $lienAction);
             $boncommandes->statut = 'Envoyé';
-            if($boncommandes->update()){
+            if ($boncommandes->update()) {
                 Mail::send($mail);
                 Session()->flash('message', 'Bon de commande envoyé avec succès!');
                 return redirect()->route('boncommandes.index');
-            }
-            else{
+            } else {
                 Session()->flash('error', 'Une erreur est survenue. Merci de reprendre ou contactez l\'administrateur si cela persiste.');
                 return redirect()->route('boncommandes.index');
             }
-        }
-        else{
+        } else {
             abort('403');
         }
     }
 
-    public function retournerCommande(BonCommande $boncommandes){
-        return view('boncommandes.retourner',compact('boncommandes'));
+    public function retournerCommande(BonCommande $boncommandes)
+    {
+        return view('boncommandes.retourner', compact('boncommandes'));
     }
-    public function postRetournerCommande(BonCommande $boncommandes){
-        if($boncommandes->statut == 'Envoyé'){
-            $user = User::where('name',$boncommandes->users)->first();
+
+    public function postRetournerCommande(BonCommande $boncommandes)
+    {
+        if ($boncommandes->statut == 'Envoyé') {
+            $user = User::where('name', $boncommandes->users)->first();
             $validateur = User::find($user->id);
             $destinataire = [
-                'nom'=>$validateur->name,
-                'email'=>$validateur->email
+                'nom' => $validateur->name,
+                'email' => $validateur->email
             ];
             $subject = 'DEMANDE DE VALIDATION COMMANDE';
             $message_html = "<b style='color: red'>La validationd de votre nouvelle commande a été rejeter.</b> <br>
                 <ul>
                 <li>Commande N° $boncommandes->code</li>
-                <li>Date : ".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</li>
-                <li>Date : ".number_format($boncommandes->montant,2,',',' ')."</li>
+                <li>Date : " . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</li>
+                <li>Date : " . number_format($boncommandes->montant, 2, ',', ' ') . "</li>
                 </ul>
-                <p><b>Validation demandée par :</b> $boncommandes->users le <b>".date_format(date_create($boncommandes->dateBon), 'd/m/Y')."</b></p>
+                <p><b>Validation demandée par :</b> $boncommandes->users le <b>" . date_format(date_create($boncommandes->dateBon), 'd/m/Y') . "</b></p>
                 ";
             $lienAction = route('boncommandes.index');
-            $mail = new CommandeMail($destinataire,$subject,$message_html,[],$lienAction);
+            $mail = new CommandeMail($destinataire, $subject, $message_html, [], $lienAction);
             $boncommandes->statut = 'Préparation';
-            if($boncommandes->update()){
+            if ($boncommandes->update()) {
                 Mail::send($mail);
                 Session()->flash('message', 'Bon de commande Retourner avec succès!');
                 return redirect()->route('boncommandes.index');
-            }
-            else{
+            } else {
                 Session()->flash('error', 'Une erreur est survenue. Merci de reprendre ou contactez l\'administrateur si cela persiste.');
                 return redirect()->route('boncommandes.index');
             }
-        }
-        else{
+        } else {
             abort('403');
         }
-
-       
     }
-
-
 }

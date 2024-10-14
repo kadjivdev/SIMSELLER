@@ -38,6 +38,8 @@
 <script src="{{asset('plugins/datatables-buttons/js/buttons.print.min.js')}}"></script>
 <script src="{{asset('plugins/datatables-buttons/js/buttons.colVis.min.js')}}"></script>
 
+<!-- API DE GESTION DES SUM DES COLUMS DES DATATABLES -->
+<script src="https://cdn.datatables.net/plug-ins/2.1.8/api/sum().js"></script>
 
 <!-- SweetAlert2 -->
 <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
