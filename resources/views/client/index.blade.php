@@ -43,6 +43,7 @@
                             {{ $message }}
                         </div>
                         @endif
+
                         @if ($message = session('error'))
                         <div class="alert alert-danger alert-dismissible">
                             <button type="button" class="close" data-dismiss="alert"
@@ -51,7 +52,8 @@
                             {{ $message }}
                         </div>
                         @endif
-                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
+
+                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists())
                         <div class="card-header">
                             <a href="{{ route('newclient.create') }}" class="btn btn-success btn-sm">
                                 <i class="fas fa-solid fa-plus"></i>
@@ -90,9 +92,7 @@
                                         </div>
                                     </form>
                                 </div>
-                                <!-- /.modal-content -->
                             </div>
-                            <!-- /.modal-dialog -->
                         </div>
 
                         <form action="" method="get">
@@ -185,20 +185,20 @@
                                                             class="nav-icon fas fa-solid fa-basket-shopping"></i>
                                                         Commande</a>
 
+                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists())
                                                     <a class="dropdown-item"
                                                         href="{{ route('compteClient.show', ['client' => $client->id]) }}"><i
                                                             class="nav-icon fa-solid fa-money-check-dollar"></i>
                                                         Compte</a>
 
                                                     <!-- if(!Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) -->
-                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                                                     <a class="dropdown-item" target="_blank"
                                                         href="{{ route('newclient.reglement', ['client' => $client->id]) }}"><i
                                                             class="nav-icon fa-solid fa-money-check-dollar"></i>
                                                         Règler dette</a>
-                                                    @endif
 
                                                     <button class="btn btn-sm btn-warning" target="_blank" data-bs-toggle="modal" data-bs-target="#affect_to_zone" onclick="affectToZone({{$client->id}})"><i class="bi bi-link"></i> Affecter à une zone</button>
+                                                    @endif
 
                                                 </div>
                                             </div>

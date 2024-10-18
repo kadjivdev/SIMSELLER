@@ -53,13 +53,13 @@
                             {{ $message }}
                         </div>
                         @endif
-                        <div class="card-header">
 
+                        <div class="card-header">
                             <form id="statutsForm" action="" method="get">
                                 <h3 class="card-title"></h3>
                                 <div class="row">
                                     <div class="col-sm-3">
-                                        @if(Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists())
                                         <a class="btn btn-success btn-sm" href="{{route('boncommandes.create')}}">
                                             <i class="fas fa-solid fa-plus"></i>
                                             Créer
@@ -67,17 +67,7 @@
                                         @endif
                                     </div>
                                     <div class="col-sm-9 ">
-                                        @if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true)
-                                        <div class="form-group float-md-right">
-                                            <select class="custom-select form-control" id="statuts" name="statuts" onchange="submitStatuts()">
-                                                <option value="1" {{ $req == 1 ? 'selected':'' }}>Tout</option>
-                                                <option value="2" {{ $req == 2 ? 'selected':'' }}>Livrer</option>
-                                                <option value="3" {{ $req == 3 ? 'selected':'' }}>Valider</option>
-                                                <option value="4" {{ $req == 4 ? 'selected':'' }}>Programmer</option>
-                                                <option value="5" {{ $req == 5 ? 'selected':'' }}>Preparation</option>
-                                            </select>
-                                        </div>
-                                        @endif
+                                        
                                     </div>
                                 </div>
                                 <div class="row">
@@ -105,9 +95,8 @@
                                     </div>
                                 </div>
                             </form>
-
-
                         </div>
+                        
                         <!-- /.card-header -->
                         <div class="card-body">
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
@@ -122,8 +111,8 @@
                                         <th>Type</th>
                                         <th>Statut</th>
                                         <th>Utilisateur</th>
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists())
                                         <th>Actualisation</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <th>Action</th>
                                         @endif
                                     </tr>
@@ -161,6 +150,8 @@
                                         <td class="text-center"><span class="badge badge-dark">{{ $boncommande->statut }}</span></td>
                                         @endif
                                         <td>{{ $boncommande->users }}</td>
+                                        
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists())
                                         <td class="text-center">
                                             @if(count($boncommande->detailboncommandes) > 0)
                                             <a class="btn btn-primary btn-sm" href="{{ route('boncommandes.show', ['boncommande'=>$boncommande->id]) }}" title="Voir détail et imprimer"><i class="fa-regular fa-eye"></i></a>
@@ -189,8 +180,6 @@
                                             <!-- <a class="btn btn-danger btn-sm" href="{{ route('boncommandes.delete', ['boncommande'=>$boncommande->id]) }}"><i class="fa-solid fa-trash-can"></i></a> -->
 
                                         </td>
-
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <td class="text-center">
                                             <div class="dropdown">
                                                 <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown" @if(count($boncommande->detailboncommandes) == 0 ) disabled @endif>
@@ -229,8 +218,8 @@
                                         <th>Type</th>
                                         <th>Statut</th>
                                         <th>Utilisateur</th>
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists())
                                         <th>Actualisation</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false)
                                         <th>Action</th>
                                         @endif
                                     </tr>
@@ -719,12 +708,12 @@
             page: 'all',
             search: 'applied'
         }).data().sum()
-        
+
         const montant = new DataTable('#example1').column(5, {
             page: 'all',
             search: 'applied'
         }).data().sum()
-        
+
         $("#qte").html(newQte + " Tonnes ")
         $("#montant").html(montant + " FCFA ")
     })

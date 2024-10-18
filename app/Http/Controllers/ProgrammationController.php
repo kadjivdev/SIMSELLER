@@ -42,6 +42,7 @@ class ProgrammationController extends Controller
 
     public function index(Request $request)
     {
+
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -104,7 +105,6 @@ class ProgrammationController extends Controller
                 }
             } elseif ($request->statuts == 5) {
                 if ($request->debut && $request->fin) {
-
                     $boncommandesV = BonCommande::where('statut', 'Livrer')->whereBetween('dateBon', [$request->debut, $request->fin])->pluck('id');
                     $programmations = Programmation::pluck('detail_bon_commande_id');
                     $detailboncommandes = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)
@@ -134,6 +134,10 @@ class ProgrammationController extends Controller
                 //$programmations = $detailboncommandes->programmations()->where('statut', 'Valider')->get();
             }
         }
+
+        $programmation = Programmation::findOrFail(3843);
+
+        dd($programmation->vendus);
         $req = $request->statuts;
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }
@@ -149,13 +153,12 @@ class ProgrammationController extends Controller
         $programmations = $detailboncommande->programmations()->orderByDesc('id')->get();
         $totalValider = $detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
 
-        $total = collect($totalValider)->sum('qteprogrammer');# number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
+        $total = collect($totalValider)->sum('qteprogrammer'); # number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
         return view('programmations.create', compact('detailboncommande', 'boncommandes', 'zones', 'avaliseurs', 'camions', 'chauffeurs', 'programmations', 'programmation', 'total'));
     }
 
     public function store(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
-        dd($request->all());
         try {
             if ($programmation) {
                 $validator = Validator::make($request->all(), [
@@ -329,7 +332,8 @@ class ProgrammationController extends Controller
             $zone = $programmation->zone;
             if ($programmation->update()) {
 
-                $programme = DB::select("
+                $programme = DB::select(
+                    "
                     SELECT
                         programmations.id,   
                         dateprogrammer,
@@ -350,14 +354,15 @@ class ProgrammationController extends Controller
                     INNER JOIN avaliseurs ON programmations.avaliseur_id = avaliseurs.id
                     INNER JOIN zones ON programmations.zone_id = zones.id
                     WHERE programmations.id = ?
-                    ", [$programmation->id,]
+                    ",
+                    [$programmation->id,]
                 );
 
                 $destinataire = [
                     'nom' => $zone->representant->nom . ' ' . $zone->representant->prenom,
                     'email' => $zone->representant->email
                 ];
-                
+
                 $subject = 'ANNULATION PROGRAMMATION N° ' . $programmation->code . ' DU ' . date_format(date_create($programmation->dateprogrammer), 'd/m/Y');
                 $message_html = "<p style='color: red'>Nous vous informons que la programmation ci-dessous a été annulée pour votre zone. merci de ne pas prendre ça en compte.</p>";
                 $lienAction = route('programmations.index');
@@ -376,12 +381,10 @@ class ProgrammationController extends Controller
         }
     }
 
-    public function delete(DetailBonCommande $detailboncommande, Programmation $programmation)
-    {
-    }
+    public function delete(DetailBonCommande $detailboncommande, Programmation $programmation) {}
 
     ####_____REDIRECTION VERS LA PAGE DE TRANSFERT
-    public function getProgrammationById_redirect(Request $request,$programmation)
+    public function getProgrammationById_redirect(Request $request, $programmation)
     {
         $programmation = Programmation::find($programmation);
         $zones = Zone::where('id', '<>', $programmation->zone_id)->get();
@@ -390,6 +393,11 @@ class ProgrammationController extends Controller
 
     public function destroy(DetailBonCommande $detailboncommande, Programmation $programmation)
     {
+        ####___VERIFIONS S'IL Y A UNE VENTE SUR CETTE PROGRAMMATION
+        if ($programmation->vendus) {
+            return back()->with("error", "Il y a des ventes attachées à cette programmations!");
+        }
+        
         ControlesTools::generateLog($programmation, 'Programmation', 'Suppression ligne');
         $programmation = $programmation->delete();
         if ($programmation) {

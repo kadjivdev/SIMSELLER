@@ -214,7 +214,6 @@ class EditionController extends Controller
         $reglement_amonts = [];
         $SommeCompte = 0;
 
-        // dd($client);
         ###___
         if ($client) {
             foreach ($client->commandeclients as $key => $commande) {
@@ -301,10 +300,7 @@ class EditionController extends Controller
             $_regle = $regle + $item->reglements()->sum('montant');
         }
 
-
-        // dd($ventes,$_montant,$_regle);
         #####____
-        // "_reglements" => $_reglements, 
         return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
     }
 
@@ -1009,14 +1005,15 @@ class EditionController extends Controller
         $compteClient = $client->compteClients->first();
         $venteAmount =  $vente->montant;
 
-        $compteClient->solde = $compteClient->solde + $venteAmount;
-        $compteClient->save();
-        ###____
-
         $client = $compteClient->client;
         $client->credit = $client->credit + $venteAmount;
         $client->debit = $client->debit - $venteAmount;
         $client->save();
+
+        ###___
+        $compteClient->solde = $client->credit + $client->debit;
+        $compteClient->save();
+        ###____
 
         ###___
         $vente->restituted = true;

@@ -35,6 +35,7 @@
                             @csrf
                             <div class="card-body">
                                 <div class="row">
+                                    
                                     @if ($programmation)
                                     <input type="hidden" class="form-control form-control-sm text-center" name="statut" value="{{ $programmation->statut }}" style="text-transform: uppercase" autofocus>
                                     <div class="col-sm-3">
@@ -44,6 +45,7 @@
                                         </div>
                                     </div>
                                     @endif
+
                                     <div @if ($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
                                         <div class="form-group">
                                             <label>Date<span class="text-danger">*</span></label>
@@ -56,6 +58,7 @@
                                     <div @if ($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
                                         <div class="form-group">
                                             <label>Avaliseurs<span class="text-danger">*</span></label>
+                                            
                                             <select id="avaliseur" class="select2 form-control form-control-sm @error('camion_id') is-invalid @enderror" name="avaliseur_id" style="width: 100%;">
                                                 <option value="{{ null }}" selected>** choisissez un avaliseur
                                                     **</option>
@@ -106,6 +109,7 @@
                                                     </option>
                                                     @endforeach
                                                 </select>
+
                                                 @error('chauffeur_id')
                                                 <span class="text-danger">{{ $message }}</span>
                                                 @enderror
@@ -269,6 +273,7 @@
                                                         <a class="btn btn-danger btn-sm" href="{{ route('programmations.destroy', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id]) }}">
                                                             <i class="fa-solid fa-trash-can"></i></a>
                                                         @endif
+                                                        
                                                         @endif
 
                                                         @if(($programmation->statut != 'Livrer') && ($programmation->statut != 'Annuler') && ($programmation->imprimer) && ($programmation->bl_gest == Null))

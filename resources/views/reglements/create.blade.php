@@ -84,8 +84,7 @@
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                                 <label>Type<span class="text-danger">*</span></label>
-                                                <select id="type" class="select2 form-control form-control-sm @error('typedetailrecu_id') is-invalid @enderror" name="typedetailrecu_id" style="width: 100%;">
-                                                    <option selected>** choisir type detail reçu **</option>
+                                                <select id="type" required class="select2 form-control form-control-sm @error('typedetailrecu_id') is-invalid @enderror" name="typedetailrecu_id" style="width: 100%;">
                                                     @foreach($typedetailrecus as $typedetailrecu)
                                                         <option value="{{ $typedetailrecu->id }}" {{ old('typedetailrecu_id') == $typedetailrecu->id ? 'selected' : '' }}>{{ $typedetailrecu->libelle }}</option>
                                                     @endforeach

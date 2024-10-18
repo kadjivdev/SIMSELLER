@@ -30,7 +30,7 @@ class ProgrammeController extends Controller
         $zones = $user->representant->zones->pluck('id')->toArray();
         $detailboncommandes = DetailBonCommande::where('produit_id', $produit->id)->pluck('id');
         // $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->whereIn('zone_id', $zones)->with('camion')->get();
-        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->with('camion')->get();
+        $programmations = Programmation::where('statut', 'Livrer')->whereIn('detail_bon_commande_id', $detailboncommandes)->where('zone_id', $user->zone_id)->with('camion')->get();
         $newProgrammation = [];
         foreach ($programmations as $programmation) {
             $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');

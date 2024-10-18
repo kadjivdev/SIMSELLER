@@ -386,7 +386,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::post('/commanders/store/{commandeclient}/{commander?}', 'store')->where(['commandeclient' => '[0-9]+'])->name('commanders.store');
 
-
             Route::get('/commanders/show/{id}', 'show')->name('commanders.show');
 
             Route::get('/commanders/create', 'create')->name('commanders.create');
@@ -399,7 +398,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
         });
     });
-
 
     //Detail bon de commande
     Route::prefix('boncommandes')->group(function () {
@@ -520,9 +518,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         });
     });
 
-
     // Camion router
-
     Route::prefix('fichiers')->group(function () {
 
         Route::controller(CamionController::class)->group(function () {

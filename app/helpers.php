@@ -227,13 +227,13 @@ function GetVenteDeletedClient($venteDeleted)
 function IsClientHasADebt($clientId)
 {
     $client = Client::find($clientId);
-    // dd($client);
     if (!$client->debit_old || $client->debit_old == 0) {
         return false;
     }
 
     return true;
 }
+
 
 ###___RECUPERATION DU RESTE A SOLDER D'UN CLIENT DE L'ANCIEN SYSTEME
 function ClientDebtReste($clientOld)

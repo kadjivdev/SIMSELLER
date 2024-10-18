@@ -161,6 +161,7 @@ class clientsController extends Controller
         return view("client.reglements.reglementDetail", compact("client"));
     }
 
+
     public function data()
     {
         $clients = Client::orderBy('raisonsociale')->get();
@@ -324,7 +325,7 @@ class clientsController extends Controller
 
                 return redirect()->route('newclient.create')->withErrors($validator->errors())->withInput();
             }
-            
+
             if ($request->agent_id != null) {
                 $validator1 = Validator::make($request->all(), [
                     'datedebut' => ['required', 'date'],

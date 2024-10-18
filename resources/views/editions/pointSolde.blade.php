@@ -62,7 +62,6 @@
                                                 </option>
                                                 @endforeach
                                             </select>
-
                                         </div>
                                     </div>
                                     <div class="col-4">
@@ -104,11 +103,8 @@
                                             <span class="info-box-text">CREDIT</span>
                                             <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['credit'], '0', '', ' '):  number_format($credit, '0', '', ' ') }}</span>
                                         </div>
-
                                     </div>
-
                                 </div>
-
                             </div>
 
                             <hr>
@@ -161,9 +157,6 @@
                                     <div class="info-box">
                                         <div class="info-box-content text-white bg-black">
                                             <strong class="info-box-text">Il nous doit au total: </strong>
-                                            <!--<strong>Vendu: {{session('resultat')['_montant'] ? session('resultat')['_montant']:""}}  </strong>-->
-                                            <!--<strong>Vendu: {{session('resultat')['_regle'] ? session('resultat')['_regle']:""}}  </strong>-->
-                                            <!-- @php($reste = (session('resultat')['_montant'] ? session('resultat')['_montant']:0)-(session('resultat')['_regle'] ? session('resultat')['_regle']:0)) -->
                                             <input type="hidden" id="debit_old" value="{{-session('resultat')['client']['debit_old']}}">
                                             <span class="info-box-number" style="font-size: large" id="totalDu"></span>
                                         </div>
@@ -180,21 +173,23 @@
                                         Point du solde de {{ session('resultat')['client']->raisonSociale }}
                                         @else
                                         Point du solde de la zone : {{ session('resultat')['zone']->libelle }}
-
                                         @endif
-
                                     </h4>
+
                                     @php($cpt = 0)
                                     @php($qte = 0)
                                     @php($montant = 0)
                                     @php($regle = 0)
 
                                     <!--  -->
+                                    @if(count(session('resultat')['ventesDleted']) > 0)
                                     <div class="text-center">
                                         <button type="button" class="btn btn-sm btn-warning my-1 text-center text-uppercase" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                             <i class="bi bi-eye"></i> Ventes supprimées
                                         </button>
                                     </div>
+                                    @endif
+
                                     <!--  -->
                                     <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 11px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
@@ -211,7 +206,6 @@
                                                 <th>Réglé</th>
                                                 <th>Reste</th>
                                                 <th>Echéance</th>
-                                                <!-- <th>Ancienne dette du client</th> -->
                                             </tr>
                                         </thead>
                                         <tbody class="table-body">
@@ -320,6 +314,7 @@
                                         <!-- VENTES SUPPRIMEES POUR CE CLIENT -->
                                         <!-- <div class="card-body"> -->
                                         @if (count(session('resultat')['ventesDleted']) > 0)
+
                                         <table class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                             <thead class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>
@@ -334,7 +329,7 @@
                                                     <th>Statut</th>
                                                     <th>Date de suppression</th>
                                                     <th>Montant</th>
-                                                    <th>Status</th>
+                                                    <th>Reglement</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -353,10 +348,14 @@
                                                     <td class="text-center">{{ date_format(date_create($vente->created_at),'d/m/Y') }}</td>
                                                     <td class="text-center">{{ number_format($vente->montant,0,'',' ') }}</td>
                                                     <td class="texte-center">
-                                                        @if($vente->restituted)
-                                                        <span class="badge bg-success">Restituée</span>
+                                                        @if($vente->reglement)
+                                                            @if($vente->reglement!=0)
+                                                            <span class="badge bg-success">Reglé</span>
+                                                            @else
+                                                            <span class="badge bg-danger">Non reglé</span>
+                                                            @endif
                                                         @else
-                                                        <span class="badge bg-danger">Non restituée</span>
+                                                        <span class="badge bg-light">---</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-center font-weight-bold">
@@ -379,7 +378,6 @@
                                                         {{ number_format(session('resultat')['ventesDleted']->sum("montant"),0,'',' ' )  }} FCFA
                                                     </td>
 
-                                                    <input type="hidden" id="montant_regle" value="{{$montant - $regle}}">
                                                 </tr>
                                             </tfoot>
                                         </table>

@@ -222,11 +222,12 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
+                                                <?php $compteur=1; ?>
+                                                @php($MontantTotal = 0)
+                                                @php($MontantRegler = 0)
+                                                @php($MontantReste = 0)
                                                 @if ($achatComptantSolde->count() > 0)
-                                                    <?php $compteur=1; ?>
-                                                    @php($MontantTotal = 0)
-                                                    @php($MontantRegler = 0)
-                                                    @php($MontantReste = 0)
+
                                                     @foreach($achatComptantSolde as $achatClient)
                                                         @if($achatClient->statut_reglement == 0)
                                                             @php($MontantTotal += $achatClient->montant)

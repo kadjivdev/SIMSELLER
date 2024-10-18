@@ -54,7 +54,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <ul class="">
-                                        <li class="nav-item"> <b> <var>Client: </var></b> {{$vente->payeur->nom}} {{$vente->payeur->prenom}} {{$vente->payeur->sigle}} </li>
+                                        <li class="nav-item"> <b> <var>Client: </var></b> 
+                                        @if($vente->payeur) {{$vente->payeur->nom}} {{$vente->payeur->prenom}} {{$vente->payeur->sigle}} @endif
+                                    </li>
                                         <li class="nav-item"> <b> <var>Reponsable de la vente: </var></b> {{$vente->user->name}} </li>
                                         <li class="nav-item"> <b> <var>Produit: </var></b> {{$vente->produit->libelle}} </li>
                                         <li class="nav-item"> <b> <var>Vente Type: </var></b> {{$vente->typeVente->libelle}} </li>

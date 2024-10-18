@@ -297,7 +297,6 @@ class LivraisonController extends Controller
 
     public function store(Request $request, Programmation $programmation)
     {
-        // dd($programmation->statut);
         $bordereauLivraison = $programmation->bl;
         $historiques = $programmation->historiques;
         if (count($historiques) > 0) {

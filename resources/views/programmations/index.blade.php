@@ -25,14 +25,14 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <div class="row">
-                                <div class="col-sm-3">
-                                    @if(!Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
-                                    <a href="{{route('programmations.edition')}}" class="btn btn-primary">Imprimer un programme</a>
-                                    @endif
-                                </div>
-                                <div class="col-sm-9 ">
-                                    <form id="statutsForm" action="" method="get">
+                            <form id="statutsForm" action="" method="get">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DES PROGRAMMATIONS'])->exists())
+                                        <a href="{{route('programmations.edition')}}" class="btn btn-primary">Imprimer un programme</a>
+                                        @endif
+                                    </div>
+                                    <div class="col-sm-9 ">
                                         <div class="form-group float-md-right">
                                             <select class="custom-select form-control" id="statuts" name="statuts" onchange="submitStatuts()">
                                                 <option value="1" {{ $req == 1 ? 'selected':'' }}>Tout</option>
@@ -42,33 +42,32 @@
                                                 <option value="5" {{ $req == 5 ? 'selected':'' }}>Livré</option>
                                             </select>
                                         </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-2"></div>
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label for="">Date début</label>
-                                        <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
                                     </div>
-                                    @error('debut')
-                                    <span class="text-danger">{{$message}}</span>
-                                    @enderror
                                 </div>
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <label for="">Date Fin</label>
-                                        <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
+                                <div class="row">
+                                    <div class="col-2"></div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label for="">Date début</label>
+                                            <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
+                                        </div>
+                                        @error('debut')
+                                        <span class="text-danger">{{$message}}</span>
+                                        @enderror
                                     </div>
-                                    @error('fin')
-                                    <span class="text-danger">{{$message}}</span>
-                                    @enderror
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <label for="">Date Fin</label>
+                                            <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
+                                        </div>
+                                        @error('fin')
+                                        <span class="text-danger">{{$message}}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-2">
+                                        <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
+                                    </div>
                                 </div>
-                                <div class="col-2">
-                                    <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
-                                </div>
-
-                            </div>
                             </form>
                         </div>
                         <!-- /.card-header -->
@@ -86,10 +85,8 @@
                                         <th>Qté Reste</th>
                                         <th>Statut</th>
                                         <th>Pourcentage</th>
-                                        @if(!Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false|| Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DES PROGRAMMATIONS'])->exists())
                                         <th>Action</th>
-                                        @endif
                                         @endif
                                     </tr>
                                 </thead>
@@ -97,7 +94,7 @@
                                 <tbody class="table-body">
                                     @if ($detailboncommandes->count() > 0)
                                     <?php $compteur = 1; ?>
-                                    
+
                                     @foreach($detailboncommandes as $detailboncommande)
                                     <tr>
                                         <td>{{ $compteur++ }}</td>
@@ -122,8 +119,8 @@
                                         </td>
 
                                         <td class="text-right text-lg"><b>{{ number_format((intval(collect($detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer'])->get())->sum('qteprogrammer'))*100)/intval($detailboncommande->qteCommander),2,',',' ') }}%</b></td>
-                                        @if(!Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
+
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DES PROGRAMMATIONS'])->exists())
                                         <td class="text-center">
                                             <div class="row">
                                                 <div class="col-sm-12 ">
@@ -131,7 +128,6 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        @endif
                                         @endif
                                     </tr>
                                     @endforeach
@@ -149,10 +145,8 @@
                                         <th>Qté Reste</th>
                                         <th>Statut</th>
                                         <th>Pourcentage</th>
-                                        @if(!Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
-                                        @if(Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists()== false || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists())
+                                        @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR DES PROGRAMMATIONS'])->exists())
                                         <th>Action</th>
-                                        @endif
                                         @endif
                                     </tr>
                                 </tfoot>

@@ -509,6 +509,7 @@ class VenteController extends Controller
         if (!$vente) {
             return redirect()->back()->with("error", "Cette vente n'existe plus!");
         };
+
         ###___ENREGISTREMENT DE LA VENTE A SUPPRIMER 
         $data = [
             "code" => $vente->code,
@@ -539,8 +540,10 @@ class VenteController extends Controller
             "validated_date" => $vente->validated_date,
             "traited_date" => $vente->traited_date,
             "restitutor" => auth()->user()->id,
-            "restituted" => true,
+            // "restituted" => true,
+            "reglement" => $vente->reglements->sum("montant"),
         ];
+
         $venteDeleted = DeletedVente::create($data);
 
         ###___
@@ -566,11 +569,16 @@ class VenteController extends Controller
                     $client->save();
 
                     ###___
-                    // $compteClient->solde = $client->credit + $client->debit;
-                    // $compteClient->save();
+                    $compteClient->solde = $client->credit + $client->debit;
+                    $compteClient->save();
 
                     ####____Suppression du Mouvement
                     $mvt->delete();
+
+                    ####___DESPORMAINS LA RETITUTION SE FAIT SEULEMENT QUAND IL Y A DE REGLEMENT SUR LA VENTE
+                    #####____ DATE DE MISE EN PLACE : 15 Octobre 2024
+                    $venteDeleted->restituted = true;
+                    $venteDeleted->save();
                 }
 
                 ####____SUPPRESSION DU REGLEMENT
@@ -1386,8 +1394,8 @@ class VenteController extends Controller
         $vente->commandeclient->update(["client_id" => $client, "montant" => $request->montant]);
 
         ###___MODIFICATION DU MONTANT DE REGLEMENT DE LA VENTE
-        if($vente->reglements->first()){
-            $vente->reglements->first()->update(["montant"=>$request->montant]);
+        if ($vente->reglements->first()) {
+            $vente->reglements->first()->update(["montant" => $request->montant]);
         }
 
         ####____ON BLOQUE A NOUVEAU L'ACCES

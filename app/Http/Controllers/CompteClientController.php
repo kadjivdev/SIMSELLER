@@ -23,7 +23,6 @@ class CompteClientController extends Controller
 {
     public function __construct()
     {
-
         /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
         ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['RECOUVREUR', 'SUPERVISEUR'])->exists();
     
@@ -31,12 +30,12 @@ class CompteClientController extends Controller
             $this->middleware(['recouvreur', 'superviseur'])->except('show');
         } */
     }
+
     public function show(Client $client)
     {
         $compteClient = $client->compteClients;
         $compteClient = count($compteClient) > 0 ? $compteClient[0] : CompteTools::addCompte($client->id, auth()->user()->id);
-        $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->orderBy("id","desc")->get();
-        // dd($mouvements);
+        $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->orderBy("id", "desc")->get();
         // $mouvements = collect($mouvements)->sortByDesc('id')->all();
         return view('compteClients.show', compact('compteClient', 'mouvements', 'client'));
     }
@@ -51,292 +50,95 @@ class CompteClientController extends Controller
     public function postAppro(Request $request, Client $client)
     {
         try {
-            if ($request->compte_id == NULL) {
-                if ($request->document == NULL) {
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required', 'before_or_equal:now'],
-                        'montant' => ['required'],
-                        'typedetailrecu_id' => ['required'],
-                        'document' => ['required', 'file', 'mimes:pdf,png,jpeg,jpg'],
-                    ]);
+            #########_____________________________________________##############
+            ######### L'approvisionnement commence à partir d'ici ##############
+            #########_____________________________________________##############
 
-                    if ($validator->fails()) {
-                        return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
-                    }
+            $validator = Validator::make($request->all(), [
+                'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
+                'date' => ['required', 'before_or_equal:now'],
+                'montant' => ['required'],
+                'document' => ['required', 'file', 'mimes:pdf,docx,doc,jpg,jpeg'],
+                'compte_id' => ['required'],
+                'typedetailrecu_id' => ['required'],
+            ]);
 
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
+            if ($validator->fails()) {
+                return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
+            }
 
-                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
-                    $_rg_existe = Reglement::where("reference", strtoupper($request->reference))->first();
-                    if ($_rg_existe) {
-                        return back()->with("error", "Cette reference existe déjà");
-                    }
+            /* Uploader les documents dans la base de données */
+            $filename = time() . '.' . $request->document->extension();
 
-                    #####___
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'recu_id' => $client->id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
+            $file = $request->file('document')->storeAs(
+                'documents',
+                $filename,
+                'public'
+            );
+
+            $format = env('FORMAT_REGLEMENT');
+            $parametre = Parametre::where('id', env('REGLEMENT'))->first();
+            $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
+
+            ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
+            $_rg_existe = Reglement::where("reference", strtoupper($request->reference))->first();
+            if ($_rg_existe) {
+                return back()->with("error", "Cette reference existe déjà");
+            }
+
+            $reglement = Reglement::create([
+                'code' => $code,
+                'reference' => strtoupper($request->reference),
+                'date' => $request->date,
+                'montant' => $request->montant,
+                'document' => $file,
+                'vente_id' => null,
+                'compte_id' => $request->compte_id,
+                'type_detail_recu_id' => $request->typedetailrecu_id,
+                'user_id' => auth()->user()->id
+            ]);
+
+            if ($reglement) {
+
+                $valeur = $parametre->valeur;
+
+                $valeur = $valeur + 1;
+
+                $parametres = Parametre::find(env('REGLEMENT'));
+
+                $parametre = $parametres->update([
+                    'valeur' => $valeur,
+                ]);
+
+                if ($parametre) {
+                    $mouvement = Mouvement::create([
+                        'libelleMvt' => $request->libelleMvt,
+                        'dateMvt' => $request->date,
+                        'montantMvt' => $request->montant,
+                        'compteClient_id' => $client->compteClients[0]->id,
+                        'reglement_id' => $reglement->id,
+                        'sens' => 0,
                         'user_id' => auth()->user()->id
                     ]);
+                    if ($mouvement) {
+                        $compte = $mouvement->compteClient;
+                        /* $compte->solde = $compte->solde + $request->montant;
+                                $compte->update(); */
 
-
-                    if ($reglement) {
-                        $valeur = $parametre->valeur;
-
-                        $valeur = $valeur + 1;
-
-                        $parametres = Parametre::find(env('REGLEMENT'));
-
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
+                        $client = $compte->client;
                         $client->credit = $client->credit + $request->montant;
                         $client->update();
 
-                        $compteClient = CompteClient::find($client->id);
+                        // $compte->solde = $compte->solde + $request->montant;
+                        // $compte->update();
 
-                        $compteClient->solde = $client->credit + $client->debit;
-                        $compteClient->update();
-
-                        if ($parametre) {
-                            Session()->flash('message', 'Approvisionnement effectué avec succès');
-                            return redirect()->route('compteClient.show', ['client' => $client->id]);
-                        }
-                    }
-                } else {
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required'],
-                        'montant' => ['required'],
-                        'document' => ['required', 'file', 'mimes:pdf,docx,doc'],
-                        'typedetailrecu_id' => ['required'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
+                        $compte->solde = $client->credit + $client->debit;
+                        $compte->update();
                     }
 
-                    /* Uploader les documents dans la base de données */
-                    $filename = time() . '.' . $request->document->extension();
-
-                    $file = $request->file('document')->storeAs(
-                        'documents',
-                        $filename,
-                        'public'
-                    );
-
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 4, "0", STR_PAD_LEFT);
-
-                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
-                    $_rg_existe = Reglement::where("reference", strtoupper($request->reference))->first();
-                    if ($_rg_existe) {
-                        return back()->with("error", "Cette reference existe déjà");
-                    }
-
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'document' => $file,
-                        'vente_id' => $client->id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
-                        'user_id' => auth()->user()->id
-                    ]);
-
-
-                    if ($reglement) {
-
-                        $valeur = $parametre->valeur;
-
-                        $valeur = $valeur + 1;
-
-                        $parametres = Parametre::find(env('REGLEMENT'));
-
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
-                        $client->credit = $client->credit + $request->montant;
-                        $client->update();
-
-                        $compteClient = CompteClient::find($client->id);
-                        $compteClient->solde = $client->credit + $client->debit;
-                        $compteClient->update();
-                        if ($parametre) {
-                            Session()->flash('message', 'Approvisionnement effectué avec succès');
-                            return redirect()->route('compteClient.show', ['client' => $client->id]);
-                        }
-                    }
-                }
-            } else {
-                if ($request->document == NULL) {
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required', 'before_or_equal:now'],
-                        'montant' => ['required'],
-                        'compte_id' => ['required'],
-                        'typedetailrecu_id' => ['required'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
-                    }
-
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-
-                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
-                    $_rg_existe = Reglement::where("reference",strtoupper($request->reference))->first();
-                    if ($_rg_existe) {
-                        return back()->with("error","Cette reference existe déjà");
-                    }
-
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'vente_id' => null,
-                        'compte_id' => $request->compte_id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
-                        'user_id' => auth()->user()->id
-                    ]);
-
-
-                    if ($reglement) {
-
-                        $valeur = $parametre->valeur;
-
-                        $valeur = $valeur + 1;
-
-                        $parametres = Parametre::find(env('REGLEMENT'));
-
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
-                        if ($parametre) {
-                            $mouvement = Mouvement::create([
-                                'libelleMvt' => $request->libelleMvt,
-                                'dateMvt' => $request->date,
-                                'montantMvt' => $request->montant,
-                                'compteClient_id' => $client->compteClients[0]->id,
-                                'user_id' => auth()->user()->id,
-                                'sens' => 1,
-                                'reglement_id' => $reglement->id
-                            ]);
-                            if ($mouvement) {
-                                $compte = $mouvement->compteClient;
-                                /*  $compte->solde = $compte->solde + $request->montant;
-                                $compte->update(); */
-
-                                $client = $compte->client;
-                                $client->credit = $client->credit + $request->montant;
-                                $client->update();
-
-                                $compte->solde = $client->credit + $client->debit;
-                                $compte->update();
-                            }
-                            Session()->flash('message', 'Compte approvisionné avec succès');
-                            return redirect()->route('compteClient.show', ['client' => $client->id]);
-                        }
-                    }
-                } else {
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required', 'before_or_equal:now'],
-                        'montant' => ['required'],
-                        'document' => ['required', 'file', 'mimes:pdf,docx,doc,jpg,jpeg'],
-                        'compte_id' => ['required'],
-                        'typedetailrecu_id' => ['required'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
-                    }
-
-                    /* Uploader les documents dans la base de données */
-                    $filename = time() . '.' . $request->document->extension();
-
-                    $file = $request->file('document')->storeAs(
-                        'documents',
-                        $filename,
-                        'public'
-                    );
-
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-
-                    ####____VERIFIONS SI CE REGLEMENT EXISTAIT DEJA
-                    $_rg_existe = Reglement::where("reference",strtoupper($request->reference))->first();
-                    if ($_rg_existe) {
-                        return back()->with("error","Cette reference existe déjà");
-                    }
-
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'document' => $file,
-                        'vente_id' => null,
-                        'compte_id' => $request->compte_id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
-                        'user_id' => auth()->user()->id
-                    ]);
-
-
-                    if ($reglement) {
-
-                        $valeur = $parametre->valeur;
-
-                        $valeur = $valeur + 1;
-
-                        $parametres = Parametre::find(env('REGLEMENT'));
-
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
-                        if ($parametre) {
-                            $mouvement = Mouvement::create([
-                                'libelleMvt' => $request->libelleMvt,
-                                'dateMvt' => $request->date,
-                                'montantMvt' => $request->montant,
-                                'compteClient_id' => $client->compteClients[0]->id,
-                                'reglement_id' => $reglement->id,
-                                'sens' => 0,
-                                'user_id' => auth()->user()->id
-                            ]);
-                            if ($mouvement) {
-                                $compte = $mouvement->compteClient;
-                                /* $compte->solde = $compte->solde + $request->montant;
-                                $compte->update(); */
-
-                                $client = $compte->client;
-                                $client->credit = $client->credit + $request->montant;
-                                $client->update();
-
-                                $compte->solde = $client->credit + $client->debit;
-                                $compte->update();
-                            }
-                            Session()->flash('message', 'Compte approvisionné avec succès');
-                            return redirect()->route('compteClient.show', ['client' => $client->id]);
-                        }
-                    }
+                    #####______
+                    Session()->flash('message', 'Compte approvisionné avec succès');
+                    return redirect()->route('compteClient.show', ['client' => $client->id]);
                 }
             }
         } catch (\Exception $e) {
@@ -348,6 +150,7 @@ class CompteClientController extends Controller
             }
         }
     }
+
     public function delete(Mouvement $mouvement, Client $client)
     {
         return view('compteClients.delete', compact('mouvement', 'client'));

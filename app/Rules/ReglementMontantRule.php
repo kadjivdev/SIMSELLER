@@ -34,7 +34,6 @@ class ReglementMontantRule implements Rule
     {
         $reglements = $this->vente->reglements()->get();
       
-       
         if(count($reglements) == 0){
             if(floatval($value) > floatval($this->vente->montant))
                 return false;
@@ -44,6 +43,7 @@ class ReglementMontantRule implements Rule
 
             if($this->reglement == NULL){
                 $somme = (collect($reglements)->sum('montant') + $value);
+                
                 if(floatval($somme)  > floatval($this->vente->montant))
                     return false;
                 else{

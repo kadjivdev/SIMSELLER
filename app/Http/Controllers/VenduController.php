@@ -78,6 +78,7 @@ class VenduController extends Controller
     {
         try {
             $ver = Vente::where('id', $vente->id)->where('code', 'LIKE', 'VD%')->first();
+            
             if ($vendu) {
                 if ($request->remise == NULL) {
                     $validator = Validator::make($request->all(), [
@@ -152,9 +153,7 @@ class VenduController extends Controller
                                 'users' => Auth::user()->id,
                             ]);
 
-
                             if ($commanders) {
-
                                 $commanders = $commander->where('commande_client_id', $vente->commande_client_id)->get();
                                 $montants = null;
                                 $somme = 0;
@@ -179,7 +178,6 @@ class VenduController extends Controller
                     }
                 }
             } else {
-                // dd("gogo");
                 if ($request->remise == NULL) {
                     $validator = Validator::make($request->all(), [
                         'produit_id' => ['required'],
@@ -255,7 +253,6 @@ class VenduController extends Controller
                         $montants = ($vendu->qteVendu * $vendu->pu) - $vendu->remise;
                         $somme += $montants;
                     }
-
 
                     $programmation = Programmation::find($request->programmation_id);
                     $vente->prix_Usine = $programmation->detailboncommande->pu;
