@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reglement extends Model
@@ -21,14 +22,16 @@ class Reglement extends Model
         'user_id',
         'observation_validation',
         'user_validateur_id',
-        'statut'
+        'statut',
+        'client_id',
+        "for_dette",
+        "old_solde"
     ];
 
     public function vente()
     {
         return $this->belongsTo(Vente::class, 'vente_id', 'id');
     }
-
 
     public function compte()
     {
@@ -47,5 +50,10 @@ class Reglement extends Model
     public function _mouvements(): HasMany
     {
         return $this->hasMany(Mouvement::class, "reglement_id");
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, "client_id");
     }
 }

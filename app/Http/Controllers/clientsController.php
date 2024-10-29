@@ -112,7 +112,7 @@ class clientsController extends Controller
 
         ###__VERIFICATION DU MONTANT
         if ($request->get("montant") > - ($client->debit_old)) {
-            return redirect()->back()->withInput()->with("error", "Le montant saisi depasse le montant à rembourser!");
+            return redirect()->back()->withInput()->with("error", "Le montant saisi depasse le montant à regler!");
         }
 
         // TRAITEMENT DU DOCUMENT
@@ -124,15 +124,6 @@ class clientsController extends Controller
 
         $data = array_merge($request->all(), ["operator" => request()->user()->id, "document" => $document, "client" => $client->id]);
 
-
-        #####____ANNULATION DU CREDIT SI LA CREDITATION AVAIT ETE FAITE POUR COMPENSSER LA DETTE ANCIENNE
-
-        if (($client->debit_old == - ($client->credit))) {
-            if ($client->credit == - ($client->debit)) {
-                $client->debit = 0;
-            }
-            $client->credit = 0;
-        }
 
         ###___ACTUALISATION DU DEBIT DU CLIENT
         $client->debit_old = $client->debit_old + $request->montant;
@@ -160,7 +151,6 @@ class clientsController extends Controller
         }
         return view("client.reglements.reglementDetail", compact("client"));
     }
-
 
     public function data()
     {

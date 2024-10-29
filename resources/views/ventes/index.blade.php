@@ -165,7 +165,7 @@
                                             <a class="btn btn-danger btn-sm" href="{{ route('ventes.destroy', ['vente'=>$vente->id]) }}"><i class="fa-solid fa-trash-can"></i></a>
                                             @endif
                                             @endif
-                                            @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
+                                            @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
                                                 @if ($vente->statut == 'Vendue')
                                                 <a class="btn btn-primary btn-sm" href="{{ route('ventes.show', ['vente'=>$vente->id]) }}"><i class="fa fa-print"></i></a>
                                                 @if(false)

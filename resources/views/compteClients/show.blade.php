@@ -51,19 +51,18 @@
                                     </ul>
 
                                     <div class="row">
-                                        <div class=" col-1"></div>
-                                        <div class="col-md-5 col-sm-6 col-12">
+                                        <div class="col-md-4 col-sm-6 col-12">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                                                 <div class="info-box-content">
-                                                    <span class="info-box-text">AVOIR EN COMPTE</span>
-                                                    <span class="info-box-number">{{ number_format($compteClient->solde , 0, ',', ' ')  }}</span>
+                                                    <span class="info-box-text">CREDIT</span>
+                                                    <span class="info-box-number">{{ number_format($client->credit, 0, ',', ' ')  }}</span>
                                                 </div>
 
                                             </div>
 
                                         </div>
-                                        <!-- <div class="col-md-4 col-sm-6 col-12">
+                                        <div class="col-md-4 col-sm-6 col-12">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-danger"><i class="fas fa-hand-holding-usd"></i></span>
                                                 <div class="info-box-content">
@@ -73,24 +72,17 @@
 
                                             </div>
 
-                                        </div> -->
-                                        <div class="col-md-5 col-sm-6 col-12">
+                                        </div>
+                                        <div class="col-md-4 col-sm-6 col-12">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                                 <div class="info-box-content">
-                                                    <span class="info-box-text">CREDIT</span>
-                                                    <span class="info-box-number">{{number_format($client->credit, 0, ',', ' ')  }}</span>
+                                                    <span class="info-box-text">SOLDE</span>
+                                                    <span class="info-box-number">{{number_format($client->credit-$client->debit, 0, ',', ' ')  }}</span>
                                                 </div>
-
                                             </div>
-
                                         </div>
-                                        <div class=" col-1"></div>
-
-
                                     </div>
-
-
 
                                     <a href="{{ route('newclient.index' )}}" class="btn btn-sm btn-primary float-md-right">
                                         <i class="fa-solid fa-circle-left mr-1"></i>
@@ -121,7 +113,7 @@
                             <div class="row">
                                 <div class="col-sm-12 text-center">
                                     <h2>
-                                        SOLDE : {{number_format($compteClient->solde,0,',',' ')}}
+                                        SOLDE : {{number_format($client->credit-$client->debit,0,',',' ')}}
                                     </h2>
                                     @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists())
                                     <a href="{{route('compteClient.appro',['client'=>$client->id])}}" class="float-right btn btn-primary">Approvisionner</a>

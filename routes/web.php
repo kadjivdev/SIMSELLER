@@ -49,7 +49,14 @@ use App\Http\Controllers\CommandeClientController;
 use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
+use App\Models\Client;
+use App\Models\ClientOld;
+use App\Models\DetteReglement;
+use App\Models\Mouvement;
+use App\Models\Parametre;
+use App\Models\Reglement;
 use App\Models\User;
+use App\Models\Vente;
 use Database\Factories\AgentFactory;
 
 /*
@@ -63,6 +70,113 @@ use Database\Factories\AgentFactory;
 |
 */
 
+Route::get('/regulation', function () {
+
+    $clients = Client::all();
+
+    ######======= REGULATION DES CREDITS DES CLIENTS
+    // foreach ($clients as $clt) {
+    //     ####____LE CREDIT DU CLIENT REVIENT A LA SOMME DES APPROVISIONNEMENTS (reglements sans vente_id) EFFECTUES SUR SON COMPTE
+    //     $clt->credit = $clt->reglements->whereNull("vente_id")->sum("montant");
+    //     $clt->save();
+    // }
+
+    // #######======== REGULATION DES DEBITS DES CLIENTS
+    // foreach ($clients as $clt) {
+    //     // LE DEBIT DU CLIENT REVIENT A LA SOMME DES REGLEMENTS EFFECTUES SUR SON COMPTE
+    //     $clt->debit = $clt->reglements->whereNotNull("vente_id")->sum("montant");
+    //     $clt->save();
+    // }
+
+    #####===== ATTACHEMENT DE CHAQUE REGLEMENT A SON CLIENT
+    // $mouvements = Mouvement::all();
+    // $no_clients_mvt = [];
+    // $no_reglements = [];
+
+    // foreach ($mouvements as $mvt) {
+    //     $reglement = $mvt->_Reglement;
+
+    //     if ($reglement) {
+    //         if (!$mvt->compteClient->client) {
+    //             $no_clients_mvt[] = $mvt;
+    //         } else {
+    //             $reglement->client_id = $mvt->compteClient->client->id;
+    //             $reglement->save();
+    //         }
+    //     } else {
+    //         $no_reglements[] = $mvt;
+    //     }
+    // }
+
+    ####____REPORT DES ANCIENNES DETTES DES CLIENTS
+    // $oldClients = ClientOld::all();
+    // foreach ($oldClients as $oldClient) {
+    //     $client = Client::where(["raisonSociale" => $oldClient->nomUP])->first();
+    //     if ($client) {
+    //         $client->credit_old = $oldClient->creditUP;
+    //         $client->debit_old = $oldClient->debitUP;
+    //         $client->save();
+    //     }
+    // }
+
+    ####______APPROVISIONNEMENT SUR COMPTE DES CLIENTS POUR REMBOURSEMENT DES DETTES ANCIENNES
+    // $reglements = DetteReglement::all();
+   
+    // foreach ($reglements as $key => $reglement) {
+    //     $format = env('FORMAT_REGLEMENT');
+    //     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
+    //     $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
+
+    //     // DEBUT APPROVISIONNEMENT
+    //     $__reglement = Reglement::create([
+    //         'code' => $code,
+    //         'reference' => strtoupper($reglement->reference)."_". $key,
+    //         'date' => $reglement->date,
+    //         'montant' => $reglement->montant,
+    //         'document' => $reglement->document,
+    //         'vente_id' => null,
+    //         'compte_id' => $reglement->compte,
+    //         'type_detail_recu_id' => $reglement->type_detail_recu,
+    //         'user_id' => $reglement->operator,
+    //         'client_id' => $reglement->_Client->id,
+    //         'for_dette' => true,
+    //     ]);
+
+    //     if ($__reglement) {
+
+    //         $valeur = $parametre->valeur;
+
+    //         $valeur = $valeur + 1;
+
+    //         $parametres = Parametre::find(env('REGLEMENT'));
+
+    //         $parametre = $parametres->update([
+    //             'valeur' => $valeur,
+    //         ]);
+
+    //         if ($parametre) {
+    //             $mouvement = Mouvement::create([
+    //                 'libelleMvt' => "Approvisionnement pour remboursement de dette",
+    //                 'dateMvt' => $reglement->date,
+    //                 'montantMvt' => $reglement->montant,
+    //                 'compteClient_id' => $reglement->_Client->id,
+    //                 'reglement_id' => $__reglement->id,
+    //                 'sens' => 0,
+    //                 'user_id' => $reglement->operator
+    //             ]);
+    //         }
+    //     }
+
+    //     // ACTUALISATION DU DEBIT & DU CREDIT DU CLIENT
+    //     $reglement->_Client->credit += $reglement->montant;
+    //     $reglement->_Client->debit_old += $reglement->montant;
+    //     $reglement->_Client->save();
+    // }
+
+    return "Opération effectuée avec succès!";
+});
+
+#######================#######
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -467,8 +581,8 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/etat-camion-programmation-periode', 'etatCaProgPeriode')->name('edition.etatCaProgPeriode');
             Route::post('/etat-camion-programmation-periode', 'postEtatCaProgPeriode')->name('edition.postEtatCaProgPeriode');
 
-            Route::get('/etat-reglement-periode', 'etatReglementPeriode')->name('edition.etatReglementperiode');
-            Route::post('/etat-reglement-periode', 'postEtatReglementPeriode')->name('edition.postEtatReglementPeriode');
+            Route::match(["GET", "POST"], '/etat-reglement-periode', 'etatReglementPeriode')->name('edition.etatReglementperiode');
+            // Route::post('/etat-reglement-periode', 'postEtatReglementPeriode')->name('edition.postEtatReglementPeriode');
 
             Route::get('/etat-reglement-periode-Rep', 'etatReglementPeriodeRep')->name('edition.etatReglementperiodeRep');
             Route::post('/etat-reglement-periode-Rep', 'postEtatReglementPeriodeRep')->name('edition.postEtatReglementPeriodeRep');
@@ -740,9 +854,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     });
 
 
-
     // Banque router
-
     Route::prefix('fichiers')->group(function () {
 
         Route::controller(BanqueController::class)->group(function () {
@@ -864,8 +976,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/typeclients/destroy/{typeclient}', 'destroy')->name('typeclients.destroy');
         });
     });
-
-
 
     // Type Detail Recu router
     Route::prefix('configurations')->group(function () {
@@ -1172,6 +1282,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/users/delete/{user}', 'delete')->name('users.delete');
 
             Route::get('/users/destroy/{user}', 'destroy')->name('users.destroy');
+
+            #####___USER'S ACTIONS
+            Route::get('/users/actions', 'actions')->name('users.actions');
         });
     });
 
@@ -1279,7 +1392,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     //Route::resource('/agent', AgentController::class);
     Route::controller(AgentController::class)->group(function () {
 
-
         Route::get('/agent/index', 'index')->name('agent.index');
 
         Route::get('/agent/show', 'show')->name('agent.show');
@@ -1297,7 +1409,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         Route::get('/agent/destroy/{agent}', 'destroy')->name('agent.destroy');
         Route::get('/agent/client_Affecter/{agent}', 'client_Affecter')->name('agent.affecter');
     });
-    
+
     //});
     Route::controller(clientsController::class)->group(function () {
         Route::get('newclient/index/', 'index')->name('newclient.index');
@@ -1307,7 +1419,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         Route::post('affect-to-zone/', 'AffectToZone')->name('newclient.AffectToZone');
 
         ####___REGLEMENT DES DETTES ANCIENNES
-        Route::match(["GET","POST"],'newclient/reglement/{client?}', 'reglement')->name('newclient.reglement');
+        Route::match(["GET", "POST"], 'newclient/reglement/{client?}', 'reglement')->name('newclient.reglement');
         Route::get('newclient/reglement/{client}/detail', 'reglementDetail')->name('newclient.reglementDetail');
 
         Route::get('newclient/data', 'data')->name('newclient.data');

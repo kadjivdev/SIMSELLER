@@ -66,7 +66,7 @@ class VenteController extends Controller
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
             $user = Auth::user();
             if ($user->id == 11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("id", $user->id)->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
             } else {
                 $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
             }
@@ -146,8 +146,6 @@ class VenteController extends Controller
         } else {
             $clients = Client::where("zone_id", [$user->zone_id])->get();
         }
-
-        // $clients = Client::all();
 
         if ($request->statuts) {
             if ($request->statuts == 1) {
@@ -368,6 +366,7 @@ class VenteController extends Controller
      * @param  \App\Models\Vente  $vente
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
+
     public function show(Vente $vente)
     {
         return view('ventes.show');
@@ -379,6 +378,7 @@ class VenteController extends Controller
      * @param  \App\Models\Vente  $vente
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory
      */
+    
     public function edit(Request $request, Vente $vente)
     {
         $user = User::find(Auth::user()->id);
@@ -559,18 +559,12 @@ class VenteController extends Controller
 
                 foreach ($mvts as $mvt) {
                     $compteClient = $mvt->compteClient;
-                    $compteClient->solde = $compteClient->solde + $regle->montant;
-                    $compteClient->save();
-
+                   
                     ###____
                     $client = $compteClient->client;
-                    $client->credit = $client->credit + $regle->montant;
+                    // $client->credit = $client->credit + $regle->montant;
                     $client->debit = $client->debit - $regle->montant;
                     $client->save();
-
-                    ###___
-                    $compteClient->solde = $client->credit + $client->debit;
-                    $compteClient->save();
 
                     ####____Suppression du Mouvement
                     $mvt->delete();
@@ -863,6 +857,9 @@ class VenteController extends Controller
 
         session(['debut_compta' => $request->debut]);
         session(['fin_compta' => $request->fin]);
+
+
+        // dd(count($AComptabilisers),count($AComptabilisersAdjeOla));
 
         return redirect()->route('ventes.venteAComptabiliser')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
     }

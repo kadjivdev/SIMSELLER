@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpParser\Node\Stmt\TryCatch;
 
-class VenteController extends Controller
+class _VenteController extends Controller
 {
     public function index()
     {

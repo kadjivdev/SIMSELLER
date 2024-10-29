@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class ControleVenteContreller extends Controller
 {
     public function index(){
-        $reglements = Reglement::where('statut',2)->where('document','<>',NULL)->get();
-        // dd($reglements[0]->vente->commandeclient->client);
+        $reglements = Reglement::where('statut',2)->whereNotNull("vente_id")->where('document','<>',NULL)->get();
         return view('ctlventes.index',compact('reglements'));
     }
 
@@ -39,15 +38,16 @@ class ControleVenteContreller extends Controller
 
         // Mise à jour compte client
        
-        $client = $vente->commandeclient->client;
-        $client->debit = $client->debit + $reglement->montant;      
-        $client->update();
+        // $client = $vente->commandeclient->client;
+        // $client->debit = $client->debit + $reglement->montant;      
+        // $client->update();
 
         if($reglement->vente->montant == $vente->reglements->sum('montant')){
             $vente->statut = "Contrôller";
             $vente->update(); 
         }
-        /* 
+
+        /*
             $vente = Vente::find($reglement->vente_id);
             $vente->statut = 'controller'; 
         */
@@ -73,8 +73,8 @@ class ControleVenteContreller extends Controller
         
       
          </p>";
-        $mail = new NotificationRejetReglement(['email'=>$desMail->email,'nom'=>$desMail->name],'Reglement n° '.$reglement->code.' du '.date_format(date_create($reglement->date),'d/m/Y'),$message,$vente,[$copieMail->email,env('GESTIONNAIRE_DIRECTION')]);
-        Mail::send($mail);
+        // $mail = new NotificationRejetReglement(['email'=>$desMail->email,'nom'=>$desMail->name],'Reglement n° '.$reglement->code.' du '.date_format(date_create($reglement->date),'d/m/Y'),$message,$vente,[$copieMail->email,env('GESTIONNAIRE_DIRECTION')]);
+        // Mail::send($mail);
         return redirect()->route('ctlventes.index')->with('message', 'Règlement rejeté');
         ;
 

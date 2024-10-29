@@ -11,56 +11,27 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('welcome') }}">Accueil</a></li>
-                        <li class="breadcrumb-item active">Etat des reglements </li>
+                        <li class="breadcrumb-item active">Etat des Général</li>
                     </ol>
                 </div>
             </div>
         </div>
     </section>
+
     <section class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-secondary">
                         <div class="card-body">
-                            <form method="post" id="form_bc" action="{{route('edition.postEtatReglementPeriode')}}">
+                            <form method="post" id="form_bc" action="{{route('edition.etatReglementperiode')}}">
                                 @csrf
-
-                                <div class="row no-print">
-                                    <div class="col-1"></div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <label for="">Zones</label>
-                                            <select id="zone" class="form-control form-control-sm select2" name="zone">
-                                                <option class="" value="" selected>Tous</option>
-                                                @foreach($zones as $zone)
-                                                <option value="{{$zone->id}}" {{old('zone')==$zone->id?'selected':''}}>{{$zone->libelle}} ({{$zone->representant->nom}} {{$zone->representant->prenom}})</option>
-                                                @endforeach
-                                            </select>
-
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div class="form-group">
-                                            <label for="">Banques</label>
-                                            <select id="banque" class="form-control form-control-sm select2" name="banque">
-                                                <option class="" value="" selected>Tous</option>
-                                                @foreach($banques as $banque)
-                                                <option value="{{$banque->id}}" {{old('banque')==$banque->id?'selected':''}}>{{$banque->sigle}}</option>
-                                                @endforeach
-                                            </select>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="col-1"></div>
-                                </div>
                                 <div class="row no-print">
                                     <div class="col-1"></div>
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Date début</label>
-                                            <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
+                                            <input type="date" required class="form-control" name="debut" value="{{old('debut')}}">
                                         </div>
                                         @error('debut')
                                         <span class="text-danger">{{$message}}</span>
@@ -68,8 +39,8 @@
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group">
-                                            <label for="">Date Fin</label>
-                                            <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
+                                            <label for="">Date début</label>
+                                            <input type="date" required class="form-control" name="fin" value="{{old('fin')}}">
                                         </div>
                                         @error('fin')
                                         <span class="text-danger">{{$message}}</span>
@@ -83,138 +54,95 @@
                             </form>
 
                             <div class="row">
-                                @if(session('resultat'))
-                                @if(count(session('resultat')['reglements']) > 0)
 
                                 <div class="col-md-12">
+                                    @if(session('result'))
                                     <h4 class="col-12 text-center border border-info p-2 mb-2">
-                                        Point des Règlements de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
+                                        Point des règlements de compte de la période du {{date_format(date_create($startDate),'d/m/Y')}} au {{date_format(date_create($endDate),'d/m/Y')}}
                                     </h4>
-                                    <!--  -->
-                                    <table id="example1" class="table table-bordered table-striped table-sm mt-2" style="font-size: 12px">
-                                        <thead class="text-white text-center bg-gradient-gray-dark">
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Dates</th>
-                                                <th class="text-center" style="width:20%">Clients</th>
-                                                <th>Zones</th>
-                                                <th>Code Vente</th>
-                                                <th>Montant Vente</th>
-                                                <th class="text-center">Banque</th>
-                                                <th>Code Règlement</th>
-                                                <th>Ref Règlement</th>
-                                                <th>Montant Règlement</th>
-                                                <th>Reste</th>
-                                                <th>Constat</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php($montant = 0)
-                                            @php($montantTotal = 0)
-                                            @php($cpte = 0)
-                                            @php($regle = 0)
-                                            @php($regleTotal = 0)
-                                            @php($venteId = 0)
-                                            @foreach(session('resultat')['reglements'] as $key=>$item)
-                                            @php($cpte++)
-                                            @if ($venteId == 0)
-                                            @php( $montantTotal = $item->montant_vente)
-                                            @php( $regleTotal = $regleTotal+ $regle)
+                                    @endif
 
-                                            @endif
-                                            @if(($venteId == $item->id_vente)||($venteId == 0))
-                                            <tr>
-                                                <td>{{++$key}}</td>
-                                                <td>{{$item->date}}</td>
-                                                <td class="text-center">{{$item->raisonSociale}} <br> ({{$item->telephone}})</td>
-                                                <td><b>{{$item->zone}}</b></td>
-                                                <td>{{ $item->code_vente}}</td>
-                                                <td class="text-right">{{ $item->montant_vente}}</td>
-                                                <td class="text-center">{{ $item->banque}} <br>({{ $item->numero}})</td>
-                                                <td>{{ $item->code_reglement}}</td>
-                                                <td>{{ $item->reference}}</td>
-                                                <td class="text-right">{{ $item->montant_reglement}}</td>
-                                                <td class="font-weight-bold text-danger" >{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <td></td>
-                                            </tr>
-                                            @php($venteId = $item->id_vente)
-                                            @php($montant = $item->montant_vente)
-                                            @php($regle = $regle + ($item->montant_reglement))
-                                            @php( $regleTotal = $regleTotal+ ($item->montant_reglement))
+                                    <div class="card-body">
+                                        <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
+                                            <thead class="text-white text-center bg-gradient-gray-dark">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Reference</th>
+                                                    <th>Client</th>
+                                                    <th>Date</th>
+                                                    <th>Montant</th>
+                                                    <th>Par</th>
+                                                    <th>Code</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php($total = 0)
 
-                                            @else
-                                            @php( $montantTotal = $montantTotal+$item->montant_vente)
-                                            @php( $regleTotal = $regleTotal+ ($item->montant_reglement))
-                                            <!-- <tr>
-                                                <td colspan="5" class="font-weight-bold">Total</td>
-                                                <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"></td>
-                                                <td></td>
-                                                <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
-                                                <td class="text-right @if (number_format(($montant - $regle),0,',',' ')>0) text-danger @else @endif font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"></td>
-                                            </tr> -->
-                                            <tr>
-                                                <td>{{++$key}}</td>
-                                                <td>{{$item->date}}</td>
-                                                <td class="text-center">{{$item->raisonSociale}} <br> ({{$item->telephone}})</td>
-                                                <td><b>{{$item->zone}}</b></td>
-                                                <td>{{ $item->code_vente}}</td>
-                                                <td class="text-right">{{ $item->montant_vente}}</td>
-                                                <td class="text-center">{{ $item->banque}} ({{ $item->numero}})</td>
-                                                <td>{{ $item->code_reglement}}</td>
-                                                <td>{{ $item->reference}}</td>
-                                                <td class="text-right">{{ $item->montant_reglement}}</td>
-                                                <td class="font-weight-bold text-danger">{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <td>{{ $item->recouvreur}}</td>
-                                                <!-- <td></td> -->
-                                            </tr>
-                                            @php($venteId = $item->id_vente)
-                                            @php($montant = $item->montant_vente)
-                                            @php($regle = 0)
-                                            @php($regle = $regle + ($item->montant_reglement))
-                                            @if ($key == session('resultat')['nbre'])
-                                            <!-- <tr>
-                                                <td colspan="5" class="font-weight-bold">Total</td>
-                                                <td class="text-right font-weight-bold">{{number_format($montant,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"></td>
-                                                <td colspan="2" class="text-right font-weight-bold">{{number_format($regle,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format(($montant - $regle),0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"></td>
-                                            </tr> -->
-                                            @endif
+                                                @foreach($reglements as $key=>$reglement)
+                                                @php($total += $reglement->montant)
+                                                <tr>
+                                                    <td class="text-center">{{$loop->index +1}}</td>
+                                                    <td class="text-center"><span class="badge bg-warning">{{$reglement->reference}} </span></td>
+                                                    
+                                                    <td class="text-center">
+                                                        <b>
+                                                            @if($reglement->_mouvements)
+                                                            {{$reglement->_mouvements->first()?$reglement->_mouvements->first()->compteClient->client->raisonSociale:'---'}}
+                                                            @else
+                                                            ---
+                                                            @endif
+                                                        </b>
+                                                    </td>
+                                                    <td class="text-center">{{date_format(date_create($reglement->created_at),'d/m/Y H:i')}}</td>
+                                                    <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}} </span> </td>
+                                                    <td class="text-center"> <span class="badge bg-danger">{{$reglement->utilisateur?$reglement->utilisateur->name:"---"}} </span> </td>
+                                                    <td class="text-center">
+                                                        @if($reglement->vente)
+                                                        <span class="badge bg-warning">{{$reglement->vente->code}} </span>
+                                                        @else
+                                                        ---
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot class="text-white text-center bg-gradient-gray-dark">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Reference</th>
+                                                    <th>Client</th>
+                                                    <th>Date</th>
+                                                    <th>Montant</th>
+                                                    <th>Par</th>
+                                                    <th>Code</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
 
-                                            @endif
-
-                                            @endforeach
-                                            <!-- <tr>
-                                                <td colspan="5" class="font-weight-bold text-success">Total</td>
-                                                <td class="text-right font-weight-bold text-success">{{number_format($montantTotal,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold text-success"></td>
-                                                <td colspan="2" class="text-right font-weight-bold text-success">{{number_format($regleTotal,0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold text-success">{{number_format(($montantTotal - $regleTotal),0,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold text-success"></td>
-                                            </tr> -->
-                                        </tbody>
-                                    </table>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <table class="table table-bordered table-sm">
+                                                    <tr>
+                                                        <br />
+                                                        <td class="" colspan="3"><b>Total approvisionné: </b></td>
+                                                        <td class="text-right"><b id="montant">{{ number_format($total,0,","," ")  }} </b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                @else
+
+                                @if(count($reglements)==0)
                                 <div class="col-12 text-center border border-info p-2">
-                                    Aucun information trouvée pour votre requête.
+                                    Aucune information trouvée pour votre requête.
                                 </div>
                                 @endif
+                            </div>
 
-                                @endif
-                            </div>
-                            <!-- if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())) -->
                             <div class="card-footer text-center no-print">
-                                @if(session('resultat'))
-                                @if(count(session('resultat')['reglements']) > 0)
                                 <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                                @endif
-                                @endif
                             </div>
-                            <!-- endif -->
                         </div>
                     </div>
                 </div>
@@ -223,7 +151,6 @@
     </section>
 </div>
 @endsection
-
 
 @section('script')
 <script>
@@ -234,26 +161,26 @@
             "autoWidth": false,
             "buttons": ["excel", "pdf", "print"],
             "order": [
-                [3, 'asc']
+                [0, 'asc']
             ],
             "pageLength": 15,
-            "columnDefs": [{
-                    "targets": 0,
-                    "orderable": false
-                },
-                {
-                    "targets": 1,
-                    "orderable": false
-                },
-                {
-                    "targets": 9,
-                    "orderable": false
-                },
-                {
-                    "targets": 10,
-                    "orderable": false
-                }
-            ],
+            // "columnDefs": [{
+            //         "targets": 0,
+            //         "orderable": false
+            //     },
+            //     {
+            //         "targets": 1,
+            //         "orderable": false
+            //     },
+            //     {
+            //         "targets": 9,
+            //         "orderable": false
+            //     },
+            //     {
+            //         "targets": 10,
+            //         "orderable": false
+            //     }
+            // ],
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
                 "lengthMenu": "Afficher _MENU_ éléments",
@@ -457,5 +384,15 @@
             },
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
     });
+
+    $("body").on('change', function() {
+        const amount = new DataTable('#example1').column(4, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+
+        __V = amount < 0 ? -amount : amount
+        $("#montant").html(__V.toLocaleString())
+    })
 </script>
 @endsection

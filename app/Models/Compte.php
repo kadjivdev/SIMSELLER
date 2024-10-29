@@ -17,7 +17,6 @@ class Compte extends Model
         return $this->belongsTo(Banque::class, 'banque_id', 'id');
     }
 
-
     public function detailrecus()
     {
         return $this->hasMany(DetailRecu::class, 'compte_id', 'id');

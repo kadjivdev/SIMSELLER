@@ -172,6 +172,25 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    @if($client->debit_old)
+                                    <div class="col-md-6">
+                                        <div class="btn-group" role="group">
+                                            <input name="for_dette" type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
+                                            <label class="btn btn-outline-primary" for="btncheck1">Pour rembourser une dette ?</label>
+                                        </div>
+                                    </div>
+                                    @endif
+                                    @if($client->credit_old)
+                                    <div class="col-md-6">
+                                        <div class="btn-group" role="group">
+                                            <input name="old_solde" type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
+                                            <label class="btn btn-outline-primary" for="btncheck1">Pour reverser le solde ancien ?</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                             <div class="card-footer">
                                 <div class="row justify-content-center">

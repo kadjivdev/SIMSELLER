@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Mail\MessagePasseword;
+use App\Models\LogUser;
 use App\Models\Representant;
 use App\Models\UpdateVente;
 use App\Models\User;
 use App\Models\Zone;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -174,5 +176,12 @@ class UserController extends Controller
             Session()->flash('message', 'Utilisateur supprimé avec succès!');
             return redirect()->route('users.index');
         }
+    }
+
+    ####___USER'S ACTIONS
+    function actions(Request $request,User $user) {
+        $actions = LogUser::orderBy("id","DESC")->get();
+        // dd($actions[0]->actor->name);
+        return view('users.actions', compact('actions'));
     }
 }

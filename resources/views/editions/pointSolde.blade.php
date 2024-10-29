@@ -85,8 +85,13 @@
 
                             <!--  -->
 
+                            @php($credit = session('resultat') ? session('resultat')['credit']: $credit)
+                            @php($debit = session('resultat') ? session('resultat')['debit']: $debit)
+                            @php($solde = $credit-$debit)
+
+
                             <div class="row">
-                                <div class="col-md-6 col-sm-6 col-12">
+                                <div class="col-md-3">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-warning"><i class="fas fa-hand-holding-usd"></i></span>
                                         <div class="info-box-content">
@@ -96,12 +101,32 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6 col-sm-6 col-12">
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-danger"><i class="bi bi-dash-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">DEBIT</span>
+                                            <span class="info-box-number">{{number_format($debit, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-secondary"><i class="bi bi-plus-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">CREDIT</span>
+                                            <span class="info-box-number">{{number_format($credit, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">CREDIT</span>
-                                            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['credit'], '0', '', ' '):  number_format($credit, '0', '', ' ') }}</span>
+                                            <span class="info-box-text">SOLDE</span>
+                                            <span class="info-box-number">{{number_format($solde, '0', '', ' ')}}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -126,10 +151,10 @@
                                                         <div class="info-box-content">
                                                             <span class="info-box-text">Il nous devait:</span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['debit_old'], '0', '', ' ')}}</span>
-                                                            @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists())
-                                                            @if(IsClientHasADebt(session('resultat')['client']['id']))
-                                                            <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success">Regler</a>
-                                                            @endif
+                                                            @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                                            <!-- if(IsClientHasADebt(session('resultat')['client']['id'])) -->
+                                                            <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success"><i class="bi bi-list-ul"></i> Reglements</a>
+                                                            <!-- endif -->
                                                             @endif
                                                         </div>
                                                     </div>
@@ -210,6 +235,7 @@
                                         </thead>
                                         <tbody class="table-body">
                                             @foreach (session('resultat')['ventes'] as $key => $item)
+
                                             @php($cpt++)
                                             @php($qte = $qte + $item->qteTotal)
                                             @php($montant = $montant + $item->montant)
@@ -273,6 +299,7 @@
                                                     @endif
                                                 </td> -->
                                             </tr>
+
                                             @endforeach
                                         </tbody>
                                         <tfoot>
@@ -349,11 +376,11 @@
                                                     <td class="text-center">{{ number_format($vente->montant,0,'',' ') }}</td>
                                                     <td class="texte-center">
                                                         @if($vente->reglement)
-                                                            @if($vente->reglement!=0)
-                                                            <span class="badge bg-success">Reglé</span>
-                                                            @else
-                                                            <span class="badge bg-danger">Non reglé</span>
-                                                            @endif
+                                                        @if($vente->reglement!=0)
+                                                        <span class="badge bg-success">Reglé</span>
+                                                        @else
+                                                        <span class="badge bg-danger">Non reglé</span>
+                                                        @endif
                                                         @else
                                                         <span class="badge bg-light">---</span>
                                                         @endif

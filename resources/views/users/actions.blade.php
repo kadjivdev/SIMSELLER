@@ -1,134 +1,117 @@
 @extends('layouts.app')
+
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>REGLEMENT A CONTROLLER</h1>
+                    <h1>ACTIONS DES UTILISATEURS</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Acceuil</a></li>
-                        <li class="breadcrumb-item active">Listes des règlement à contrôler</li>
+                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item active">Utilisateurs</li>
                     </ol>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        @if($message = session('message'))
-                        <div class="alert alert-success alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{ $message }}
+                        <div>
+                            @if (session('message'))
+                            <div class="alert alert-success alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert"
+                                    aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-check"></i> Alert!</h5>
+                                {{ session('message') }}
+                            </div>
+                            @endif
+                            @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert"
+                                    aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-check"></i> Alert!</h5>
+                                {{ session('error') }}
+                            </div><br>
+                            @endif
                         </div>
-                        @endif
-                        <!-- /.card-header -->
-                        <div class="card-body">
-
-                            <a class="btn btn-success btn-block btn-sm m-3 col-4" href="{{route('ctlventes.reglementSurCompte')}}">Contrôler Règlement Sur Compte Client</a>
-
-                            <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
-                                <thead class="text-white text-center bg-gradient-gray-dark">
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Date</th>
-                                        <th>Montant</th>
-                                        <th>Référence</th>
-                                        <th>Client</th>
-                                        <th>Document</th>
-                                        <th>Utilisateur</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($reglements as $reglement)
-                                    @if($reglement->vente)
-                                    <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-dark':''  }} ">
-                                        <td>{{$reglement->code}}</td>
-                                        <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
-                                        <td class="text-right">{{number_format($reglement->montant,0,',',' ')}}</td>
-                                        <td>{{$reglement->reference}}</td>
-                                        <td>
-                                            @if($reglement->vente && $reglement->vente->commandeclient)
-                                            {{$reglement->vente->commandeclient->client->nom}} {{$reglement->vente->commandeclient->client->prenom}}
-                                            @else
-                                            --
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($reglement->document)
-                                            <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document?asset('storage/'.$reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
-                                            @endif
-                                        </td>
-                                        <td>@if($reglement->utilisateur) {{$reglement->utilisateur->name}}@else Utilisateur manquant @endif</td>
-                                        <td width="20%">
-                                            @if($reglement->document && $reglement->compte_id)
-                                            <a class="btn btn-success btn-block btn-sm" href="{{route('ctlventes.create',$reglement->id)}}">Contrôler</a>
-                                            @elseif($reglement->utilisateur)
-                                            Document manquand: Contactez {{$reglement->utilisateur->name}}. Tel: {{$reglement->utilisateur->representant->telephone}}
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endif
-                                    @endforeach
-                                </tbody>
-                                <tfoot class="text-white text-center bg-gradient-gray-dark">
-                                    <tr>
-                                        <th>Code</th>
-                                        <th>Date</th>
-                                        <th>Montant</th>
-                                        <th>Référence</th>
-                                        <th>Client</th>
-                                        <th>Document</th>
-                                        <th>Utilisateur</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-
+                        <div>
+                            <div class="card-body">
+                                <table id="example1" class="table table-sm table-bordered table-striped table-sm"
+                                    style="font-size: 12px">
+                                    <thead class="text-white text-center bg-gradient-gray-dark">
+                                        <tr>
+                                            <th>N°</th>
+                                            <th>Details</th>
+                                            <th>Nature</th>
+                                            <th>Acteur</th>
+                                            <th>Table</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($actions as $action)
+                                        <tr>
+                                            <td class="text-center">{{ $loop->index +1 }}</td>
+                                            <td class="text-center">
+                                                <textarea class="bg-secondary" name="" class="form-control" rows="1" id="">{{$action->details}}</textarea>
+                                            </td>
+                                            <td class="text-center"><span class="badge bg-warning">{{ $action->nature_operation }} </span> </td>
+                                            <td class="text-center"> <span class="badge bg-success text-uppercase"> {{$action->actor?$action->actor->name:'---'}} </span> </td>
+                                            <td class="text-center"> <span class="badge bg-danger text-uppercase">{{ $action->table_name }} </span> </td>
+                                            <td class="text-center"> <strong class="bg-dark badge">{{date_format($action->created_at,"Y/m/d")  }} </strong> </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="text-white text-center bg-gradient-gray-dark">
+                                        <tr>
+                                            <th>N°</th>
+                                            <th>Details</th>
+                                            <th>Nature</th>
+                                            <th>Acteur</th>
+                                            <th>Table</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
-                <!-- /.col -->
             </div>
-            <!-- /.row -->
         </div>
-        <!-- /.container-fluid -->
     </section>
-    <!-- /.content -->
 </div>
+
 @endsection
+
 @section('script')
 <script>
+
     $(function() {
         $("#example1").DataTable({
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
-            "order": [
-                [0, 'asc']
-            ],
-            "pageLength": 15,
-            // "columnDefs": [
-            //     {
-            //         "targets": 7,
+            "buttons": ["excel", "pdf", "print"],
+            // "order": [
+            //     [0, 'desc']
+            // ],
+            // "pageLength": 15,
+            // "columnDefs": [{
+            //         "targets": 8,
             //         "orderable": false
             //     },
             //     {
-            //         "targets": 8,
+            //         "targets": 9,
             //         "orderable": false
             //     }
+
             // ],
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
@@ -331,8 +314,11 @@
                     }
                 }
             },
-        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
 
+
+
+        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
     });
 </script>
+
 @endsection

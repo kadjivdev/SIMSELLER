@@ -95,6 +95,7 @@
                                 <div class="col-8">
                                     @if($reglement->document)
                                     <img src="{{asset('storage/'.$reglement->document)}}" alt="" width="100%">
+                                    <!-- <img src="{{$reglement->document}}" alt="" width="100%"> -->
                                     @else
                                     Sans document
                                     @endif

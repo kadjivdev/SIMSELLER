@@ -24,7 +24,8 @@ class Gestionnaire
         if ($user) {
             return $next($request);
         }else{
-            abort(403);
+            Session()->flash('error', 'Vous ne pouvez pas accéder à cette option!');
+            return back();
         }
     }
 }

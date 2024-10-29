@@ -69,26 +69,33 @@
                                                     <th>#</th>
                                                     <th>Reference</th>
                                                     <th>Client</th>
-                                                    <th>Département</th>
                                                     <th>Date</th>
-                                                    <th>Libelle</th>
-                                                    <th>Crédit</th>
-                                                    <th>Débit</th>
+                                                    <th>Montant</th>
+                                                    <th>Preuve</th>
                                                     <th>Par</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($mouvements as $key=>$mouvement)
+                                                @php($total = 0)
+
+                                                @foreach($reglements as $key=>$reglement)
+                                                @php($total += $reglement->montant)
                                                 <tr>
-                                                    <td class="text-center">MVT-{{str_pad($key+1,6,'0',STR_PAD_LEFT)}}</td>
-                                                    <td class="text-center">{{$mouvement->_Reglement?$mouvement->_Reglement->reference:"---"}}</td>
-                                                    <td class="text-center">{{$mouvement->compteClient->client->nom}} {{$mouvement->compteClient->client->prenom}}</td>
-                                                    <td class="text-center"> <b> {{$mouvement->compteClient->client->departement?$mouvement->compteClient->client->departement->libelle:'---'}}</b> </td>
-                                                    <td class="text-center">{{date_format(date_create($mouvement['dateMvt']),'d/m/Y H:i')}}</td>
-                                                    <td>{{$mouvement['libelleMvt']}}</td>
-                                                    <td class="text-right">{{$mouvement['sens'] == 0 ? number_format($mouvement['montantMvt'],0,',',' '):''}}</td>
-                                                    <td class="text-right">{{$mouvement['sens'] == 2 ?  number_format(-$mouvement['montantMvt'],0,',',' ') : ''}}</td>
-                                                    <td class="text-center"> {{$mouvement->actor}} </td>
+                                                    <td class="text-center">{{$loop->index +1}}</td>
+                                                    <td class="text-center"><span class="badge bg-warning">{{$reglement->reference}} </span></td>
+                                                    <td class="text-center">
+                                                        <b>
+                                                            @if($reglement->_mouvements)
+                                                            {{$reglement->_mouvements->first()?$reglement->_mouvements->first()->compteClient->client->raisonSociale:'---'}}
+                                                            @else
+                                                            ---
+                                                            @endif
+                                                        </b>
+                                                    </td>
+                                                    <td class="text-center">{{date_format(date_create($reglement->created_at),'d/m/Y H:i')}}</td>
+                                                    <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}} </span> </td>
+                                                    <td class="text-center"> <a href="{{$reglement->document}}" class="btn btn-sm btn-success" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-pdf"></i></a> </td>
+                                                    <td class="text-center"> <span class="badge bg-danger">{{$reglement->utilisateur?$reglement->utilisateur->name:"---"}} </span> </td>
                                                 </tr>
                                                 @endforeach
                                             </tbody>
@@ -97,24 +104,35 @@
                                                     <th>#</th>
                                                     <th>Reference</th>
                                                     <th>Client</th>
-                                                    <th>Département</th>
                                                     <th>Date</th>
-                                                    <th>Libelle</th>
-                                                    <th>Crédit</th>
-                                                    <th>Débit</th>
+                                                    <th>Montant</th>
+                                                    <th>Preuve</th>
                                                     <th>Par</th>
                                                 </tr>
                                             </tfoot>
                                         </table>
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <table class="table table-bordered table-sm">
+                                                    <tr>
+                                                        <br />
+                                                        <td class="" colspan="3"><b>Total approvisionné: </b></td>
+                                                        <td class="text-right"><b id="montant">{{ number_format($total,0,","," ")  }} </b></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                @if(count($mouvements)==0)
+                                @if(count($reglements)==0)
                                 <div class="col-12 text-center border border-info p-2">
                                     Aucune information trouvée pour votre requête.
                                 </div>
                                 @endif
                             </div>
+
                             <div class="card-footer text-center no-print">
                                 <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
                             </div>
@@ -136,7 +154,7 @@
             "autoWidth": false,
             "buttons": ["excel", "pdf", "print"],
             "order": [
-                [3, 'asc']
+                [0, 'asc']
             ],
             "pageLength": 15,
             // "columnDefs": [{
@@ -359,5 +377,15 @@
             },
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
     });
+
+    $("body").on('change', function() {
+        const amount = new DataTable('#example1').column(4, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+
+        __V = amount < 0 ? -amount : amount
+        $("#montant").html(__V.toLocaleString())
+    })
 </script>
 @endsection

@@ -48,7 +48,7 @@
                 </li>
                 @endif
 
-                @if ((Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists()) || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists())
+                @if ((Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists()) || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
                 <li class="nav-item">
                     <a href="{{ route('boncommandes.index') }}" class="nav-link {{ (request()->is('boncommandes/*')) ? 'active' : '' }}">
                         <i class="nav-icon fas fa-solid fa-cart-shopping"></i>
@@ -256,6 +256,7 @@
 
                 @endif
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||
+                Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists()||
                 Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists()||
                 Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
                 <li class="nav-header">FICHIERS</li>
@@ -374,7 +375,7 @@
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()
                 ||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists()
                 ||Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists()
-                ||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists() 
+                ||Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists()
                 || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
                 <li class="nav-header">EDITION</li>
 
@@ -588,9 +589,9 @@
                     @endif
                     @endif
                 </li>
-
                 @endif
-                @if (Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                
+                @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                 <li class="nav-header">COMPTABILITE</li>
                 <li class="nav-item {{request()->route()->getPrefix() == '/comptabilite' ? 'menu-open':''}}">
                     <a href="#" class="nav-link {{request()->route()->getPrefix() == '/comptabilite' ? 'active':''}}">
@@ -658,6 +659,16 @@
                             <a href="{{ route('roles.index') }}" class="nav-link {{ (request()->is('admin/roles/*')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-solid fa-key  text-cyan"></i>
                                 <p>Rôles</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- LES ACTIONS DES UTILISATEURS -->
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('users.actions') }}" class="nav-link {{ (request()->is('admin/users/actions')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-user-gear  text-cyan"></i>
+                                <p>Actions des utilisateurs</p>
                             </a>
                         </li>
                     </ul>

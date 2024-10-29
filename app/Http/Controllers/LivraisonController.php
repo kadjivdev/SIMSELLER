@@ -332,7 +332,8 @@ class LivraisonController extends Controller
                 $programmations = $programmation->update([
                     'bl' => $request->bl,
                     'datelivrer' => $request->datelivrer,
-                    'qtelivrer' => $programmation->qtelivrer + $request->qtelivrer,
+                    // 'qtelivrer' => $programmation->qtelivrer + $request->qtelivrer,
+                    'qtelivrer' => $programmation->qteprogrammer,
                     'observation' => $request->observation,
                     'statut' => 'Livrer',
                     'document' => $request->remoovdoc ? null : $programmation->document,
@@ -380,7 +381,8 @@ class LivraisonController extends Controller
                 $programmations = $programmation->update([
                     'bl' => $request->bl,
                     'datelivrer' => $request->datelivrer,
-                    'qtelivrer' => $request->qtelivrer,
+                    // 'qtelivrer' => $request->qtelivrer,
+                    'qtelivrer' => $programmation->qteprogrammer,
                     'document' => $file,
                     'observation' => $request->observation,
                     'statut' => 'Livrer',
@@ -430,7 +432,8 @@ class LivraisonController extends Controller
             $programmations = $programmation->update([
                 'bl' => $request->bl,
                 'datelivrer' => $request->datelivrer,
-                'qtelivrer' => $programmation->qtelivrer + $request->qtelivrer,
+                // 'qtelivrer' => $programmation->qtelivrer + $request->qtelivrer,
+                'qtelivrer' => $programmation->qteprogrammer,
                 'document' => $file,
                 'observation' => $request->observation,
                 'statut' => 'Livrer',

@@ -200,7 +200,6 @@ class EditionController extends Controller
         $credit = $clients->sum('credit');
         $debit = $clients->sum('debit');
 
-        // dd($sommeVentes-$reglements);
         return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes'));
     }
 
@@ -213,6 +212,9 @@ class EditionController extends Controller
 
         $reglement_amonts = [];
         $SommeCompte = 0;
+
+        $client_commandIds = $client->commandeclients->pluck("id");
+        // $ventes = collect(Vente::whereIn("id",$client_commandIds)->where("valide",1)->get());
 
         ###___
         if ($client) {
@@ -236,16 +238,13 @@ class EditionController extends Controller
         $reglements = array_sum($reglement_amonts);
 
         $ventes = [];
-        // if (!$request->zone && !$request->client) {
-
-        // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
-        // }
-
+       
         if (!$request->zone && $request->client) {
             $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
                 ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
                 ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
                 ->where('clients.id', $client->id)
+
                 // SEULE LES VENTES VALIDE SONT RECUPERES
                 ->where('valide', true)
 
@@ -253,6 +252,7 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.code')
                 ->get();
             // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+
         }
 
         if ($request->zone && $request->client) {
@@ -598,13 +598,27 @@ class EditionController extends Controller
         return redirect()->route('edition.etatventeperiode')->withInput()->with('resultat', ['ventes' => $ventes, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
 
-
-    public function etatReglementPeriode()
+    public function etatReglementPeriode(Request $request)
     {
-        $banques = Banque::all();
-        $zones = Zone::all();
+        $reglements = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->get();
+        ## QUAND C'EST UNE REQUETE GET
 
-        return view('editions.etatreglementperiode', compact('banques', 'zones'));
+        if ($request->method() == "GET") {
+            session()->put('result', false);
+            return view('editions.etatreglementperiode', compact('reglements'));
+        }
+
+        ## QUAND C'EST UNE REQUETE POST
+
+        $startDate = $request->get('debut');
+        $endDate = $request->get('fin');
+        ##___
+
+        $reglements = $reglements->whereBetween('created_at', [$startDate, $endDate]);
+
+        session()->put('result', true);
+
+        return view('editions.etatreglementperiode', compact("reglements", 'startDate', 'endDate'));
     }
 
     public function etatReglementPeriodeRep()
@@ -697,7 +711,6 @@ class EditionController extends Controller
                 ->get();
             $nbre = count($reglements);
 
-            // dd($reglements);
             return redirect()->route('edition.etatReglementperiode')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'zone' => $zone, 'banque' => $banque, 'debut' => $request->debut, 'fin' => $request->fin]);
         }
 
@@ -769,6 +782,7 @@ class EditionController extends Controller
         }
 
         if (!$request->banque && !$request->zone) {
+
             $reglements = Reglement::join('type_detail_recus', 'type_detail_recus.id', '=', 'reglements.type_detail_recu_id')
                 ->join('comptes', 'comptes.id', '=', 'reglements.compte_id')
                 ->join('users', 'users.id', '=', 'reglements.user_id')
@@ -797,6 +811,8 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.id')
                 ->get();
             $nbre = count($reglements);
+
+            // dd($reglements[0]);
             return redirect()->route('edition.etatReglementperiode')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'zone' => $zone, 'banque' => $banque, 'debut' => $request->debut, 'fin' => $request->fin]);
         }
     }
@@ -823,7 +839,6 @@ class EditionController extends Controller
             ->get();
         return redirect()->route('edition.etatventeperiode')->withInput()->with('resultat', ['ventes' => $ventes, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
-
 
     public function etatCaProgPeriode()
     {
@@ -960,15 +975,10 @@ class EditionController extends Controller
     {
         ## QUAND C'EST UNE REQUETE GET
         if ($request->method() == "GET") {
-            $mouvements = Mouvement::orderBy('id', 'desc')->get(); # where('compteClient_id', $compteClient->id)->paginate()->toArray();
-
-            foreach ($mouvements as $key => $mvt) {
-                $actor = User::find($mvt->user_id);
-                $mvt["actor"] = $actor ? $actor->name : '---';
-            }
+            $reglements = Reglement::whereNull("vente_id")->whereNotNull("client_id")->orderBy('id', 'desc')->get();
 
             session()->put('result', false);
-            return view('editions.approvisionnementCompte', compact('mouvements'));
+            return view('editions.approvisionnementCompte', compact('reglements'));
         }
 
         ## QUAND C'EST UNE REQUETE POST
@@ -977,17 +987,10 @@ class EditionController extends Controller
         $endDate = $request->get('fin');
         ##___
 
-        $mouvements = Mouvement::orderBy('id', 'desc')->whereBetween('created_at', [$startDate, $endDate])->get(); # where('compteClient_id', $compteClient->id)->paginate()->toArray();
-
-        // Insertion de l'actionnaire dans les datas
-        foreach ($mouvements as $key => $mvt) {
-            $actor = User::find($mvt->user_id);
-            $mvt["actor"] = $actor ? $actor->name : '---';
-        }
-
+        $reglements = Reglement::whereNull("vente_id")->whereNotNull("client_id")->orderBy('id', 'desc')->whereBetween('created_at', [$startDate, $endDate])->get();
 
         session()->put('result', true);
-        return view('editions.approvisionnementCompte', compact('mouvements', 'startDate', 'endDate'));
+        return view('editions.approvisionnementCompte', compact('reglements', 'startDate', 'endDate'));
     }
 
     // RESTORER LES VENTES SUPPRIMEES AU SOLDE DU CLIENT

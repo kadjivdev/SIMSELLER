@@ -137,7 +137,6 @@ class ProgrammationController extends Controller
 
         $programmation = Programmation::findOrFail(3843);
 
-        dd($programmation->vendus);
         $req = $request->statuts;
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }

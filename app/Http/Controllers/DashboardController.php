@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\ClientOld;
 use App\Models\CommandeClient;
 use App\Models\Programmation;
+use App\Models\Reglement;
 use App\Models\User;
 use App\Models\Vendu;
 use App\Models\Vente;

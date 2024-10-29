@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -11,8 +12,6 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-
-
     
     protected $fillable = [
         'name',
@@ -20,20 +19,15 @@ class User extends Authenticatable
         'representent_id',
         'password',
     ];
-
-
     
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-
-    
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
 
     public function roles(){  
         return $this->belongsToMany(Role::class, 'avoirs', 'user_id', 'role_id');
@@ -51,6 +45,8 @@ class User extends Authenticatable
         return $this->hasMany(Prix::class,'users');
     }
 
-
-
+    ####____USER'S ACTIONS
+    public function actions() : HasMany {
+        return $this->hasMany(LogUser::class,"user_id");
+    }
 }

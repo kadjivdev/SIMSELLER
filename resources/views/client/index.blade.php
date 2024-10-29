@@ -125,13 +125,16 @@
                                         <th>IFU</th>
                                         <th>Telephone</th>
                                         <th>Crédit</th>
+                                        <th>Appro</th>
+                                        <th>Diff 1</th>
+                                        <th>Reglé</th>
+                                        <th>Diff 2</th>
                                         <th>MAJ</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @if ($clients->count() > 0)
-                                    <?php $compteur = 1; ?>
 
                                     @foreach ($clients as $client)
                                     <tr>
@@ -150,6 +153,18 @@
                                                 <span class="badge bg-secondary">Non Eligible</span>
                                                 @endif
                                             </a>
+                                        </td>
+
+                                        <td class="">{{$client->credit}} </td>
+                                        <td class="">
+                                            {{$client->credit==$client->reglements->whereNull("vente_id")->sum("montant")?'':"diff1"}}
+                                        </td>
+
+                                        <td class="">{{$client->debit}} </td>
+                                        <td class="">
+                                            @if(($client->credit<$client->debit) && $client->credit!=0 && $client->debit!=0 )
+                                            Diff2
+                                            @endif
                                         </td>
 
                                         <td class="text-center">
@@ -210,11 +225,15 @@
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
                                         <th>#</th>
-                                        <th>Raison Sociale</th>
+                                        <th>Nom/Raison Sociale</th>
                                         <th>Zone</th>
                                         <th>IFU</th>
                                         <th>Telephone</th>
                                         <th>Crédit</th>
+                                        <th>Appro</th>
+                                        <th>Diff 1</th>
+                                        <th>Reglé</th>
+                                        <th>Diff 2</th>
                                         <th>MAJ</th>
                                         <th>Action</th>
                                     </tr>

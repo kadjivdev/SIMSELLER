@@ -460,15 +460,18 @@
                 
                 axios.get('{{env('APP_BASE_URL')}}programmation/produits/' + $('#produit').val() + '/'+ user).then((response) => {
                     var programmation = response.data;
-                    console.log(programmation);
+                    // console.log(programmation);
                     $('#bl').append("<option selected disabled>Choisissez un BL</option>");
                     for (var i = 0; i < programmation.length; i++) {
                         var val = programmation[i].id;
                         var text = programmation[i].camion.immatriculationTracteur;
+                        var bl = " ("+ programmation[i].bl+")"
+                        var bl_gest = " / ("+ programmation[i].bl_gest+")"
+
                         if(old == val)
-                            $('#bl').append("<option selected value="+ val +">" + text + "</option>");
+                            $('#bl').append("<option selected value="+ val +">" + text + bl+ bl_gest+ "</option>");
                         else
-                            $('#bl').append("<option value="+ val +">" + text + "</option>");
+                            $('#bl').append("<option value="+ val +">" + text + text + bl+ bl_gest+ "</option>");
                     }
                     $('.select2').select2(); 
                     $('#loader').attr('hidden', 'hidden');

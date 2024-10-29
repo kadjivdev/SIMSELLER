@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\Compte;
 use App\Models\CompteClient;
+use App\Models\DetteReglement;
 use App\Models\Mouvement;
 use App\Models\Parametre;
 use App\Models\Reglement;
@@ -49,10 +50,22 @@ class CompteClientController extends Controller
 
     public function postAppro(Request $request, Client $client)
     {
+
+        ######____
+        if (!$client->compteClients) {
+            return back()->with("error", "Ce Client ne dispose pas de compte");
+        }
+
         try {
             #########_____________________________________________##############
             ######### L'approvisionnement commence à partir d'ici ##############
             #########_____________________________________________##############
+
+            ###___ ON DOIT CHOISIR SOIT UN REMBOURSEMENT OU UN REVERSEMENT
+            if ($request->old_solde && $request->for_dette) {
+                return back()->with("error", "Choisissez soit un remboursement de dette ou soit un reversement d'ancien solde")->withInput();
+            }
+
 
             $validator = Validator::make($request->all(), [
                 'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
@@ -65,6 +78,13 @@ class CompteClientController extends Controller
 
             if ($validator->fails()) {
                 return redirect()->route('compteClient.appro', ['client' => $client->id])->withErrors($validator->errors())->withInput();
+            }
+
+            #####===== VALIDATION EN CAS DE REGLEMENT DE DETTE ANCIENNE
+            if ($request->for_dette) {
+                $request->validate([
+                    "reference" => ["required", "unique:dette_reglements,reference"],
+                ]);
             }
 
             /* Uploader les documents dans la base de données */
@@ -95,7 +115,10 @@ class CompteClientController extends Controller
                 'vente_id' => null,
                 'compte_id' => $request->compte_id,
                 'type_detail_recu_id' => $request->typedetailrecu_id,
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
+                'client_id' => $client->id,
+                'for_dette' => $request->for_dette ? true : false,
+                'old_solde' => $request->old_solde ? true : false,
             ]);
 
             if ($reglement) {
@@ -128,12 +151,33 @@ class CompteClientController extends Controller
                         $client = $compte->client;
                         $client->credit = $client->credit + $request->montant;
                         $client->update();
+                    }
 
-                        // $compte->solde = $compte->solde + $request->montant;
-                        // $compte->update();
+                    #####===== REVERSEMENT DE L'ANCIEN SOLDE ======####
+                    if ($request->old_solde) {
+                        $client->credit_old = $client->credit_old - $request->montant;
+                        $client->save();
+                    }
 
-                        $compte->solde = $client->credit + $client->debit;
-                        $compte->update();
+
+                    #####===== REGLEMENT ANCIENNE DETTE ======####
+                    if ($request->for_dette) {
+                        $data = [
+                            'reference' => strtoupper($request->reference),
+                            'date' => $request->date,
+                            'montant' => $request->montant,
+                            'document' => $file,
+                            'compte' => $request->compte_id,
+                            'type_detail_recu' => $request->typedetailrecu_id,
+                            'operator' => auth()->user()->id,
+                            'client' => $client->id,
+                        ];
+
+                        DetteReglement::create($data);
+
+                        ###___ACTUALISATION DU DEBIT DU CLIENT
+                        $client->debit_old = $client->debit_old + $request->montant;
+                        $client->save();
                     }
 
                     #####______
@@ -170,6 +214,8 @@ class CompteClientController extends Controller
                 'destroy' => true
             ]);
 
+            $compteClient = CompteClient::find($mouvement->compteClient_id);
+            $Client = $compteClient->client;
             $mouvement->destroy = true;
             $mouvement->update();
 
@@ -179,16 +225,14 @@ class CompteClientController extends Controller
             $reglement->delete();
 
             if ($mouvementnew) {
-                $compte = $mouvementnew->compteClient;
-                $Client = $compte->client;
-                $Client->credit = $Client->credit - $mouvement->montantMvt;
-                $Client->update();
+                $client->debit = $client->debit + $mouvement->montantMvt;
+                $client->update();
 
-                $compte->solde = $client->credit + $client->debit;
-                $compte->update();
+                // $compte = $mouvementnew->compteClient;
+                // $compte->solde = $client->credit + $client->debit;
+                // $compte->update();
             }
         }
-
 
         if ($mouvement) {
             Session()->flash('message', 'Approvisionnement Modifier  avec succès');

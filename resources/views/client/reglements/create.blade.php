@@ -33,7 +33,8 @@
                         <div class="text-center alert alert-danger"> {{session()->get("error")}} </div>
                         @endif
                     </div>
-                    @if(IsClientHasADebt($client->id))
+                    
+                    <!-- @if(IsClientHasADebt($client->id))
                     <div class="card card-secondary">
                         <div class="card-header">
                             <h3 class="card-title">Nouveau Règlement </h3>
@@ -152,7 +153,7 @@
                             </div>
                         </form>
                     </div>
-                    @endif
+                    @endif -->
                 </div>
                 <div class="col-md-2"></div>
             </div>
