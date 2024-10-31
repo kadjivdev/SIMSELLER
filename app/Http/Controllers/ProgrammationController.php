@@ -153,6 +153,7 @@ class ProgrammationController extends Controller
         $totalValider = $detailboncommande->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
 
         $total = collect($totalValider)->sum('qteprogrammer'); # number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
+
         return view('programmations.create', compact('detailboncommande', 'boncommandes', 'zones', 'avaliseurs', 'camions', 'chauffeurs', 'programmations', 'programmation', 'total'));
     }
 
@@ -182,6 +183,7 @@ class ProgrammationController extends Controller
                     'user' => Auth::user()->id,
                     'date' => date('Y-m-d H:i')
                 ];
+
                 $historique = json_encode($historique);
                 $programmation = $programmation->update([
                     'code' => $request->code,

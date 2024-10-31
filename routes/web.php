@@ -50,14 +50,10 @@ use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
 use App\Models\Client;
-use App\Models\ClientOld;
-use App\Models\DetteReglement;
+use App\Models\CompteClient;
 use App\Models\Mouvement;
-use App\Models\Parametre;
 use App\Models\Reglement;
-use App\Models\User;
 use App\Models\Vente;
-use Database\Factories\AgentFactory;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,22 +67,41 @@ use Database\Factories\AgentFactory;
 */
 
 Route::get('/regulation', function () {
-
     $clients = Client::all();
 
-    ######======= REGULATION DES CREDITS DES CLIENTS
-    // foreach ($clients as $clt) {
-    //     ####____LE CREDIT DU CLIENT REVIENT A LA SOMME DES APPROVISIONNEMENTS (reglements sans vente_id) EFFECTUES SUR SON COMPTE
-    //     $clt->credit = $clt->reglements->whereNull("vente_id")->sum("montant");
-    //     $clt->save();
+    // #### SUPPRESSION DE TOUS LES REGLEMENTS
+    // $reglements = Reglement::all();
+    // foreach ($reglements as $reglement) {
+    //     $reglement->delete();
     // }
 
-    // #######======== REGULATION DES DEBITS DES CLIENTS
-    // foreach ($clients as $clt) {
-    //     // LE DEBIT DU CLIENT REVIENT A LA SOMME DES REGLEMENTS EFFECTUES SUR SON COMPTE
-    //     $clt->debit = $clt->reglements->whereNotNull("vente_id")->sum("montant");
-    //     $clt->save();
+    // #### SUPPRESSION DE TOUS LES MOUVEMENTS
+    // compte client count : 2644
+    // $mouvements = Mouvement::all();
+    // foreach ($mouvements as $mouvement) {
+    //     $mouvement->delete();
     // }
+
+    // ##### CHANGEMENT DES STATUS *Contrôller* DES VENTES EN STATUT *Vendue*
+    // $ventes = Vente::where("statut", "Contrôller")->get();#### count initial : 11
+    // foreach ($ventes as $vente) {
+    //     $vente->statut = "Vendue";
+    //     $vente->update();
+    // }
+
+    ######======= REGULATION DES CREDITS DES CLIENTS
+    foreach ($clients as $clt) {
+        ####____LE CREDIT DU CLIENT REVIENT A LA SOMME DES APPROVISIONNEMENTS (reglements sans vente_id && non pour remboursement de dette) EFFECTUES SUR SON COMPTE
+        $clt->credit = $clt->reglements->whereNull("for_dette")->whereNull("vente_id")->sum("montant");
+        $clt->save();
+    }
+
+    #######======== REGULATION DES DEBITS DES CLIENTS
+    foreach ($clients as $clt) {
+        // LE DEBIT DU CLIENT REVIENT A LA SOMME DES REGLEMENTS EFFECTUES SUR SON COMPTE
+        $clt->debit = $clt->reglements->whereNotNull("vente_id")->sum("montant");
+        $clt->save();
+    }
 
     #####===== ATTACHEMENT DE CHAQUE REGLEMENT A SON CLIENT
     // $mouvements = Mouvement::all();
@@ -121,7 +136,7 @@ Route::get('/regulation', function () {
 
     ####______APPROVISIONNEMENT SUR COMPTE DES CLIENTS POUR REMBOURSEMENT DES DETTES ANCIENNES
     // $reglements = DetteReglement::all();
-   
+
     // foreach ($reglements as $key => $reglement) {
     //     $format = env('FORMAT_REGLEMENT');
     //     $parametre = Parametre::where('id', env('REGLEMENT'))->first();
@@ -168,7 +183,7 @@ Route::get('/regulation', function () {
     //     }
 
     //     // ACTUALISATION DU DEBIT & DU CREDIT DU CLIENT
-    //     $reglement->_Client->credit += $reglement->montant;
+    //     // $reglement->_Client->credit += $reglement->montant;(une erreure qu'il ne fallait)
     //     $reglement->_Client->debit_old += $reglement->montant;
     //     $reglement->_Client->save();
     // }
@@ -1384,6 +1399,8 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('approvisionement-compte/destroy/{mouvement}/{client}', 'destroy')->name('compteClient.destroy');
 
             Route::post('approvisionement-compte/{client}', 'postAppro')->name('compteClient.postAppro');
+
+            Route::patch('approvisionement-compte/update', '_updateAppro')->name('compteClient.updateAppro');
         });
     });
 
@@ -1436,11 +1453,14 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     });
 
     Route::controller(ControleVenteContreller::class)->prefix('controle')->group(function () {
-        Route::get('reglement-en-attente', 'index')->name('ctlventes.index');
+        Route::match(["GET", "POST"], 'reglement-en-attente', 'index')->name('ctlventes.index');
         Route::get('reglement-en-attente/sur-compte', 'reglementSurCompte')->name('ctlventes.reglementSurCompte');
         Route::get('controler/{reglement}', 'controler')->name('ctlventes.create');
-        Route::post('controler/{reglement}', 'validerControle')->name('ctlventes.validerControle');
-        Route::post('controler/askUpdate/{reglement}', 'rejetReglement')->name('ctlventes.askUpdate');
+        // Route::post('controler/{reglement}', 'validerControle')->name('ctlventes.validerControle');
+        // Route::post('controler/askUpdate/{reglement}', 'rejetReglement')->name('ctlventes.askUpdate');
+
+        Route::post('controler/{reglement}', 'validerApprovisionnement')->name('ctlventes.validerApprovisionnement');
+        Route::post('controler/askUpdate/{reglement}', 'rejetApprovisionnement')->name('ctlventes.rejetApprovisionnement');
     });
     Route::get('test-mail', [VenteController::class, 'testMail']);
 });

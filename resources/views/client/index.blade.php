@@ -163,8 +163,8 @@
                                         <td class="">{{$client->debit}} </td>
                                         <td class="">
                                             @if(($client->credit<$client->debit) && $client->credit!=0 && $client->debit!=0 )
-                                            Diff2
-                                            @endif
+                                                Diff2
+                                                @endif
                                         </td>
 
                                         <td class="text-center">
@@ -191,20 +191,21 @@
                                                     @if ($client->sommeil == true) disabled @endif>
                                                     Actions<i class="dw dw-more"></i>
                                                 </button>
-                                                <div
-                                                    class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
+                                                <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
+                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists())
+
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('compteClient.show', ['client' => $client->id]) }}"><i
+                                                            class="nav-icon fa-solid fa-money-check-dollar"></i>
+                                                        Compte</a>
+
+                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                                                     <a class="dropdown-item" href="{{ route('newclient.achatClient', ['client' => $client->id]) }}"><i
                                                             class="nav-icon fa-solid fa-bag-shopping"></i>
                                                         Achat</a>
                                                     <a class="dropdown-item" href=""><i
                                                             class="nav-icon fas fa-solid fa-basket-shopping"></i>
                                                         Commande</a>
-
-                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists())
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('compteClient.show', ['client' => $client->id]) }}"><i
-                                                            class="nav-icon fa-solid fa-money-check-dollar"></i>
-                                                        Compte</a>
 
                                                     <!-- if(!Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) -->
                                                     <a class="dropdown-item" target="_blank"
@@ -213,6 +214,7 @@
                                                         Règler dette</a>
 
                                                     <button class="btn btn-sm btn-warning" target="_blank" data-bs-toggle="modal" data-bs-target="#affect_to_zone" onclick="affectToZone({{$client->id}})"><i class="bi bi-link"></i> Affecter à une zone</button>
+                                                    @endif
                                                     @endif
 
                                                 </div>

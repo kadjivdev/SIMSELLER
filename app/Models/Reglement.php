@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reglement extends Model
 {
@@ -25,7 +26,8 @@ class Reglement extends Model
         'statut',
         'client_id',
         "for_dette",
-        "old_solde"
+        "old_solde",
+        "clt"
     ];
 
     public function vente()
@@ -55,5 +57,15 @@ class Reglement extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class, "client_id");
+    }
+
+    public function _clt(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, "clt");
+    }
+
+    function _DetteReglement(): HasOne
+    {
+        return $this->hasOne(DetteReglement::class, "reglement_id");
     }
 }

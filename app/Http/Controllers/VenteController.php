@@ -201,8 +201,6 @@ class VenteController extends Controller
                     'echeance' => ['required', 'after:' . date('Y-m-d')],
                     'transport' => ['required'],
                     'ctl_payeur' => ['required'],
-                    //'nomPrenom'=>['required_if:clt_payeur,==,0'],
-                    //'telephone'=>['required_if:clt_payeur,==,0','integer']
                 ]);
             }
 

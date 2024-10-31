@@ -6,7 +6,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-6">
-                    <h1 class="pb-3">Approvisionnement de comptes</h1>
+                    <h1 class="pb-3">APPROVISIONNEMENTS LOGES DANS LE COMPTE DES CLIENTS</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -71,6 +71,8 @@
                                                     <th>Client</th>
                                                     <th>Date</th>
                                                     <th>Montant</th>
+                                                    <th>Dette</th>
+                                                    <th>Reversement</th>
                                                     <th>Preuve</th>
                                                     <th>Par</th>
                                                 </tr>
@@ -79,7 +81,8 @@
                                                 @php($total = 0)
 
                                                 @foreach($reglements as $key=>$reglement)
-                                                @php($total += $reglement->montant)
+                                                @php($total += !$reglement->for_dette?$reglement->montant:0)
+
                                                 <tr>
                                                     <td class="text-center">{{$loop->index +1}}</td>
                                                     <td class="text-center"><span class="badge bg-warning">{{$reglement->reference}} </span></td>
@@ -93,8 +96,16 @@
                                                         </b>
                                                     </td>
                                                     <td class="text-center">{{date_format(date_create($reglement->created_at),'d/m/Y H:i')}}</td>
-                                                    <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}} </span> </td>
-                                                    <td class="text-center"> <a href="{{$reglement->document}}" class="btn btn-sm btn-success" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-pdf"></i></a> </td>
+                                                    <td class="text-center"><span class="badge bg-success">{{!$reglement->for_dette? number_format($reglement->montant,0,',',' '):0}} </span> </td>
+                                                    <td class="text-center"><span class="badge bg-success">{{$reglement->for_dette? number_format(-$reglement->montant,0,',',' '):0}} </span> </td>
+                                                    <td class="text-center">
+                                                        @if($reglement->old_solde)
+                                                        <span class="badge bg-success">Oui</span>
+                                                        @else
+                                                        <span class="badge bg-danger">Non</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center"> <a href="/{{'storage/'.$reglement->document}}" class="btn btn-sm btn-success" target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-pdf"></i></a> </td>
                                                     <td class="text-center"> <span class="badge bg-danger">{{$reglement->utilisateur?$reglement->utilisateur->name:"---"}} </span> </td>
                                                 </tr>
                                                 @endforeach
@@ -106,6 +117,8 @@
                                                     <th>Client</th>
                                                     <th>Date</th>
                                                     <th>Montant</th>
+                                                    <th>Dette</th>
+                                                    <th>Reversement</th>
                                                     <th>Preuve</th>
                                                     <th>Par</th>
                                                 </tr>

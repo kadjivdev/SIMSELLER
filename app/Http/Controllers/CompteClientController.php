@@ -22,23 +22,34 @@ use Illuminate\Support\Facades\Validator;
 
 class CompteClientController extends Controller
 {
-    public function __construct()
-    {
-        /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
-        ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['RECOUVREUR', 'SUPERVISEUR'])->exists();
-    
-        if (!$possedeAuMoinsUnDroit) {
-            $this->middleware(['recouvreur', 'superviseur'])->except('show');
-        } */
-    }
+    // public function __construct()
+    // {
+    //     /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
+    //     ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['RECOUVREUR', 'SUPERVISEUR'])->exists();
+
+    //     if (!$possedeAuMoinsUnDroit) {
+    //         $this->middleware(['recouvreur', 'superviseur'])->except('show');
+    //     } */
+    // }
 
     public function show(Client $client)
     {
         $compteClient = $client->compteClients;
         $compteClient = count($compteClient) > 0 ? $compteClient[0] : CompteTools::addCompte($client->id, auth()->user()->id);
-        $mouvements = Mouvement::where('compteClient_id', $compteClient->id)->orderBy("id", "desc")->get();
-        // $mouvements = collect($mouvements)->sortByDesc('id')->all();
-        return view('compteClients.show', compact('compteClient', 'mouvements', 'client'));
+
+        // ON RECUPERE LES APPROVISIONNEMENTS DE CE CLIENT
+        $reglements = $client->reglements->whereNull("vente_id");
+        $mouvements = [];
+
+        // on recupere les mouvements associés à chaque approvisionnement
+        foreach ($reglements as $reglement) {
+            $mouvements[] = $reglement->_mouvements->first();
+        }
+        $mouvements = collect($mouvements);
+
+        // les approvisionnements rejetés
+        $rejet_reglements = Reglement::where("clt", $client->id)->where("observation_validation", "!=", "RAS")->get();
+        return view('compteClients.show', compact('compteClient', 'mouvements', 'client', 'rejet_reglements'));
     }
 
     public function createAppro(Request $request, Client $client)
@@ -50,7 +61,6 @@ class CompteClientController extends Controller
 
     public function postAppro(Request $request, Client $client)
     {
-
         ######____
         if (!$client->compteClients) {
             return back()->with("error", "Ce Client ne dispose pas de compte");
@@ -65,7 +75,6 @@ class CompteClientController extends Controller
             if ($request->old_solde && $request->for_dette) {
                 return back()->with("error", "Choisissez soit un remboursement de dette ou soit un reversement d'ancien solde")->withInput();
             }
-
 
             $validator = Validator::make($request->all(), [
                 'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
@@ -106,6 +115,10 @@ class CompteClientController extends Controller
                 return back()->with("error", "Cette reference existe déjà");
             }
 
+            // on ajoute pas directement l'approvisionnement sur le compte du client
+            // on l'ajoute d'abord au *clt* (qui n'est rien d'autre que le client mais masqué )
+            // c'est après validation de l'approvisionnement par le contrôlleur que c'est ajouté au compte du client
+
             $reglement = Reglement::create([
                 'code' => $code,
                 'reference' => strtoupper($request->reference),
@@ -116,7 +129,8 @@ class CompteClientController extends Controller
                 'compte_id' => $request->compte_id,
                 'type_detail_recu_id' => $request->typedetailrecu_id,
                 'user_id' => auth()->user()->id,
-                'client_id' => $client->id,
+                // 'client_id' => $client->id,
+                'clt' => $client->id,
                 'for_dette' => $request->for_dette ? true : false,
                 'old_solde' => $request->old_solde ? true : false,
             ]);
@@ -133,55 +147,24 @@ class CompteClientController extends Controller
                     'valeur' => $valeur,
                 ]);
 
+                // Ici aussi on fait la même chose. On ajoute pas directement
+                // le mouvement au compte du client
+                //  on le fait plutôt après validation de l'approvisionnement associé à ce mouvement
+
                 if ($parametre) {
                     $mouvement = Mouvement::create([
                         'libelleMvt' => $request->libelleMvt,
                         'dateMvt' => $request->date,
                         'montantMvt' => $request->montant,
-                        'compteClient_id' => $client->compteClients[0]->id,
+                        // 'compteClient_id' => $client->compteClients[0]->id,
+                        'compteClient_id' => null,
                         'reglement_id' => $reglement->id,
                         'sens' => 0,
                         'user_id' => auth()->user()->id
                     ]);
-                    if ($mouvement) {
-                        $compte = $mouvement->compteClient;
-                        /* $compte->solde = $compte->solde + $request->montant;
-                                $compte->update(); */
-
-                        $client = $compte->client;
-                        $client->credit = $client->credit + $request->montant;
-                        $client->update();
-                    }
-
-                    #####===== REVERSEMENT DE L'ANCIEN SOLDE ======####
-                    if ($request->old_solde) {
-                        $client->credit_old = $client->credit_old - $request->montant;
-                        $client->save();
-                    }
-
-
-                    #####===== REGLEMENT ANCIENNE DETTE ======####
-                    if ($request->for_dette) {
-                        $data = [
-                            'reference' => strtoupper($request->reference),
-                            'date' => $request->date,
-                            'montant' => $request->montant,
-                            'document' => $file,
-                            'compte' => $request->compte_id,
-                            'type_detail_recu' => $request->typedetailrecu_id,
-                            'operator' => auth()->user()->id,
-                            'client' => $client->id,
-                        ];
-
-                        DetteReglement::create($data);
-
-                        ###___ACTUALISATION DU DEBIT DU CLIENT
-                        $client->debit_old = $client->debit_old + $request->montant;
-                        $client->save();
-                    }
 
                     #####______
-                    Session()->flash('message', 'Compte approvisionné avec succès');
+                    Session()->flash('message', 'Compte approvisionné avec succès, mais en attente de validation');
                     return redirect()->route('compteClient.show', ['client' => $client->id]);
                 }
             }
@@ -193,6 +176,41 @@ class CompteClientController extends Controller
                 return redirect()->route('compteClient.show', ['client' => $client->id]);
             }
         }
+    }
+
+    public function _updateAppro(Request $request)
+    {
+        $appro = Reglement::findOrFail($request->approId);
+
+        if ($request->document) {
+            /* Uploader les documents dans la base de données */
+            $filename = time() . '.' . $request->document->extension();
+
+            $file = $request->file('document')->storeAs(
+                'documents',
+                $filename,
+                'public'
+            );
+        }
+
+        $data = [
+            "reference" => $request->reference,
+            "date" => $request->date,
+            "montant" => $request->montant,
+            "document" => $request->document ? $file : $appro->document,
+            'for_dette' => $request->for_dette ? true : false,
+            'old_solde' => $request->old_solde ? true : false,
+            'observation_validation' => null
+        ];
+
+        // update de l'approvisionnement
+        $appro->update($data);
+
+        // update du mouvement attaché à cet approvisionnement
+        $appro->_mouvements[0]->montantMvt = $request->montant;
+        $appro->_mouvements[0]->update();
+
+        return back()->with("message", "Approvisionnement ($request->reference) modifié avec succès! Attendez sa validation.");
     }
 
     public function delete(Mouvement $mouvement, Client $client)
@@ -214,24 +232,31 @@ class CompteClientController extends Controller
                 'destroy' => true
             ]);
 
-            $compteClient = CompteClient::find($mouvement->compteClient_id);
-            $Client = $compteClient->client;
             $mouvement->destroy = true;
             $mouvement->update();
 
             $reglement = Reglement::find($mouvement->reglement_id);
+
             ControlesTools::generateLog($reglement, 'reglement', 'Suppression règlement');
 
-            $reglement->delete();
-
-            if ($mouvementnew) {
-                $client->debit = $client->debit + $mouvement->montantMvt;
-                $client->update();
-
-                // $compte = $mouvementnew->compteClient;
-                // $compte->solde = $client->credit + $client->debit;
-                // $compte->update();
+            // on diminue le credit du client seulement quand le reglement n'a pas été fait 
+            // pour regler une ancienne dette(parce que dans ce cas, le montant n'avait pas été ajouté au credit du client)
+            if (!$reglement->for_dette) {
+                $client->credit = $client->credit - $mouvement->montantMvt;
+            } else {
+                // on ramène la dette à sa place
+                $client->debit_old = $client->debit_old - $mouvement->montantMvt;
             }
+
+            ###____
+            $client->update();
+
+            if ($reglement->for_dette) {
+                ###____suppression du reglement de dette attaché
+                $reglement->_DetteReglement->delete();
+            }
+            ###____
+            $reglement->delete();
         }
 
         if ($mouvement) {

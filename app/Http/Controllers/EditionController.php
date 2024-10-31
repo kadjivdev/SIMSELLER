@@ -194,13 +194,13 @@ class EditionController extends Controller
     {
         $clients = Client::all();
         $zones = Zone::all();
-        $SommeCompte = CompteClient::all()->sum('solde');
+        // $SommeCompte = CompteClient::all()->sum('solde');
         $reglements = Reglement::all()->sum('montant');
         $sommeVentes = Vente::all()->sum('montant');
         $credit = $clients->sum('credit');
         $debit = $clients->sum('debit');
 
-        return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes'));
+        return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'sommeVentes'));
     }
 
     public function postPointSolde(Request $request)
@@ -210,32 +210,14 @@ class EditionController extends Controller
         $credit = 0;
         $debit = 0;
 
-        $reglement_amonts = [];
-        $SommeCompte = 0;
-
-        $client_commandIds = $client->commandeclients->pluck("id");
-        // $ventes = collect(Vente::whereIn("id",$client_commandIds)->where("valide",1)->get());
-
         ###___
-        if ($client) {
-            foreach ($client->commandeclients as $key => $commande) {
-                $rgls = $commande->vente->reglements;
-
-                if ($rgls) {
-                    foreach ($rgls as $key => $reglement) {
-                        array_push($reglement_amonts, $reglement->montant);
-                    }
-                }
-            }
-
-            $SommeCompte = (count($client->compteClients)  > 0) ? $client->compteClients[0]->solde : 0;
-            $credit = $client->credit;
-            $debit = $client->debit;
-        }
+        $credit = $client->credit;
+        $debit = $client->debit;
 
         $ventesDleted = $client->_deletedVentes;
+
         ####____
-        $reglements = array_sum($reglement_amonts);
+        $reglements = $client->reglements->sum("montant");
 
         $ventes = [];
        
@@ -252,7 +234,6 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.code')
                 ->get();
             // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
-
         }
 
         if ($request->zone && $request->client) {
@@ -301,7 +282,7 @@ class EditionController extends Controller
         }
 
         #####____
-        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
+        return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
     }
 
     public function etatCompte()
@@ -982,7 +963,6 @@ class EditionController extends Controller
         }
 
         ## QUAND C'EST UNE REQUETE POST
-
         $startDate = $request->get('debut');
         $endDate = $request->get('fin');
         ##___

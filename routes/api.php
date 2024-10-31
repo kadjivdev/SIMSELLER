@@ -95,6 +95,9 @@ Route::prefix('programmation')->group(function () {
 Route::prefix('reglement')->group(function () {
     Route::controller(ReglementController::class)->group(function () {
         Route::get('compte-solde/{vente}/{user}', 'getSoldeCompte');
+
+        // MODIFICATION D'UN APPROVISIONNEMENT
+        Route::get('approvisionnement/{approId}', 'getAppro');
     });
 });
 //Commande liste client

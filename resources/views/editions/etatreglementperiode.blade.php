@@ -6,7 +6,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-6">
-                    <h1 class="pb-3">ETAT DE REGLEMENT D'UNE PERIODE</h1>
+                    <h1 class="pb-3">ETAT DE REGLEMENT SUR VENTES</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -86,11 +86,7 @@
                                                     
                                                     <td class="text-center">
                                                         <b>
-                                                            @if($reglement->_mouvements)
-                                                            {{$reglement->_mouvements->first()?$reglement->_mouvements->first()->compteClient->client->raisonSociale:'---'}}
-                                                            @else
-                                                            ---
-                                                            @endif
+                                                            {{$reglement->client->raisonSociale}}
                                                         </b>
                                                     </td>
                                                     <td class="text-center">{{date_format(date_create($reglement->created_at),'d/m/Y H:i')}}</td>
@@ -105,6 +101,8 @@
                                                     </td>
                                                 </tr>
                                                 @endforeach
+
+                                                
                                             </tbody>
                                             <tfoot class="text-white text-center bg-gradient-gray-dark">
                                                 <tr>

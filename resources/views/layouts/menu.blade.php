@@ -239,7 +239,7 @@
                         <li class="nav-item">
                             <a href="{{ route('ctlventes.index') }}" class="nav-link {{ (request()->is('controle/*')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-cogs  text-cyan"></i>
-                                <p>Règlement en attente</p>
+                                <p>Approvisionement en attente</p>
                             </a>
                         </li>
                         @endif
@@ -258,7 +258,8 @@
                 @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()||
                 Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists()||
                 Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists()||
-                Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists())
+                Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists()||
+                Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists())
                 <li class="nav-header">FICHIERS</li>
                 <li class="nav-item {{request()->route()->getPrefix() == '/fichiers' ? 'menu-open':''}}">
                     <a href="#" class="nav-link {{(request()->route()->getPrefix() == '/fichiers') ? 'active':''}}">
@@ -296,7 +297,7 @@
                         </li>
                         @endif
 
-                        @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists())
+                        @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
                         <li class="nav-item">
                             <a href="{{ route('newclient.index') }}" class="nav-link {{ (request()->is('newclient/index')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>

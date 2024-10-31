@@ -115,7 +115,7 @@
                                     <h2>
                                         SOLDE : {{number_format($client->credit-$client->debit,0,',',' ')}}
                                     </h2>
-                                    @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists())
+                                    @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
                                     <a href="{{route('compteClient.appro',['client'=>$client->id])}}" class="float-right btn btn-primary">Approvisionner</a>
                                     @endif
                                 </div>
@@ -147,20 +147,43 @@
                                         <th>Libelle</th>
                                         <th>Crédit</th>
                                         <th>Débit</th>
+                                        <th>Pour dette</th>
+                                        <th>Reversement</th>
+                                        <th>Preuve</th>
                                         @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                                         <th>Action</th>
                                         @endif
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php($total = 0)
                                     @foreach($mouvements as $key=>$mouvement)
+                                    @php($total += !$mouvement->_Reglement->for_dette?$mouvement['montantMvt']:0)
                                     <tr>
                                         <td class="text-center">MVT-{{str_pad($key+1,6,'0',STR_PAD_LEFT)}}</td>
-                                        <td class="text-center">{{date_format(date_create($mouvement['dateMvt']),'d/m/Y H:i')}}</td>
+                                        <td class="text-center">{{date_format(date_create($mouvement['created_at']),'d/m/Y H:i')}}</td>
                                         <td class="text-center">{{$mouvement->_Reglement?$mouvement->_Reglement->reference:"--"}}</td>
                                         <td>{{$mouvement['libelleMvt']}}</td>
-                                        <td class="text-right">{{$mouvement['sens'] == 0 ? number_format($mouvement['montantMvt'],0,',',' '):''}}</td>
+                                        <td class="text-right">{{($mouvement['sens'] == 0 && !$mouvement->_Reglement->for_dette) ? number_format($mouvement['montantMvt'],0,',',' '):''}}</td>
                                         <td class="text-right">{{$mouvement['sens'] == 2 ?  number_format(-$mouvement['montantMvt'],0,',',' ') : ''}}</td>
+                                        <td class="text-center">
+                                            @if($mouvement->_Reglement->for_dette)
+                                            <span class="badge bg-success">Oui</span>
+                                            <span class="badge bg-info d-block">{{number_format($mouvement['montantMvt'],0,',',' ')}}</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if($mouvement->_Reglement->old_solde)
+                                            <span class="badge bg-success">Oui</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $mouvement->_Reglement->document?asset('storage/'.$mouvement->_Reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
+                                        </td>
                                         @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
                                         <td class="text-right">
                                             @if ($mouvement['destroy'] == false)
@@ -180,6 +203,9 @@
                                         <th>Libelle</th>
                                         <th>Crédit</th>
                                         <th>Débit</th>
+                                        <th>Pour dette</th>
+                                        <th>Reversement</th>
+                                        <th>Preuve</th>
                                         @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                                         <th>Action</th>
                                         @endif
@@ -187,6 +213,88 @@
                                 </tfoot>
                             </table>
 
+                            <table id="" class="table table-bordered table-striped table-sm" style="font-size: 12px">
+                                <tr>
+                                    <td class="text-left" colspan="2">Total :</td>
+                                    <td class="text-right" colspan="3"> <span class="badge bg-success" id="montant">{{number_format($total,0,',',' ')}}</span> FCFA </td>
+                                </tr>
+                            </table>
+
+
+                            @if(count($rejet_reglements)>0)
+
+                            <br><br><br><br><br>
+
+                            <!-- LES APPROVISIONNEMENTS REJETES -->
+                            <h6 class="text-center bg-warning p-1" style="display: inline!important;">LES APPROVISIONNEMENTS REJETES</h6>
+                            <table id="" class="table table-bordered table-striped table-sm" style="font-size: 12px">
+                                <thead class="text-white text-center bg-gradient-gray-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Réference</th>
+                                        <th>Libelle</th>
+                                        <th>Montant</th>
+                                        <th>Pour dette</th>
+                                        <th>Reversement</th>
+                                        <th>Preuve</th>
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        <th>Action</th>
+                                        @endif
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php($total = 0)
+                                    @foreach($rejet_reglements as $reglement)
+                                    <tr>
+                                        <td class="text-center">{{$reglement->reference}}</td>
+                                        <td class="text-center">{{$reglement->date}}</td>
+                                        <td class="text-center">{{$reglement->reference}}</td>
+                                        <td> <textarea name="" class="form-control" rows="1" placeholder="{{$reglement->observation_validation}}" disabled></textarea> </td>
+                                        <td class="text-right">{{number_format($reglement->montant,0,',',' ')}}</td>
+                                        <td class="text-center">
+                                            @if($reglement->for_dette)
+                                            <span class="badge bg-success">Oui</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if($reglement->old_solde)
+                                            <span class="badge bg-success">Oui</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document?asset('storage/'.$reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
+                                        </td>
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
+                                        <td class="text-right">
+                                            <a class="btn btn-warning btn-sm" href="#" data-bs-toggle="modal" onclick="showUpdateModal({{$reglement->id,$reglement->document}})" data-bs-target="#updateAppro">
+                                                <i class="bi bi-pencil"></i></a>
+                                        </td>
+                                        @endif
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="text-white text-center bg-gradient-gray-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Réference</th>
+                                        <th>Libelle</th>
+                                        <th>Montant</th>
+                                        <th>Pour dette</th>
+                                        <th>Reversement</th>
+                                        <th>Preuve</th>
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        <th>Action</th>
+                                        @endif
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            @endif
                         </div>
                         <!-- /.card-body -->
                     </div>
@@ -199,11 +307,91 @@
         <!-- /.container-fluid -->
     </section>
     <!-- /.content -->
+
+    <!--  MODIFICATION D4APPROVISIONNEMENT -->
+    <div class="modal fade" id="updateAppro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title fs-5" id="exampleModalLabel">Approvisionnement : <span class="badge bg-success" id="appro_amont_to_update"></span> </h6>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{{route('compteClient.updateAppro')}}" enctype="multipart/form-data">
+                        @csrf
+                        @method("PATCH")
+                        <input type="hidden" name="approId" id="approId">
+                        <div class="mb-3">
+                            <label for="reference" class="form-label">Reference</label>
+                            <input type="text" class="form-control" name="reference" id="reference">
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" id="date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Montant</label>
+                            <input type="montant" name="montant" class="form-control" id="appro_montant">
+                        </div>
+                        <div class="mb-3">
+                            <label for="document" class="form-label">Preuve</label>
+                            <input type="file" name="document" class="form-control" id="document">
+                        </div>
+                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                        <div class="d-flex">
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" name="for_dette" class="form-check-input" id="for_dette">
+                                <label class="form-check-label" for="for_dette">Pour dette</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" name="old_solde" class="form-check-input" id="old_solde">
+                                <label class="form-check-label" for="old_solde">Pour reversement de solde</label>
+                            </div>
+                        </div>
+                        @endif
+                        <button type="submit" title="Valider" class="btn btn-primary"><i class="bi bi-check-circle"></i> Valider</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('script')
 <script>
+    // GESTION DE LA MODIFICATION DES APPROVISIONNMENTS
+    function showUpdateModal(approId, document) {
+
+        axios.get("{{env('APP_BASE_URL')}}reglement/approvisionnement/" + approId)
+            .then(function(response) {
+                var data = response.data
+
+                $("#appro_amont_to_update").text(data.reference)
+                $("#approId").val(data.id)
+                $("#reference").val(data.reference)
+                $("#date").val(data.date)
+                $("#appro_montant").val(data.montant)
+                $("#date").val(data.date)
+
+                if (data.for_dette == 1) {
+                    $("#for_dette").attr("checked", true)
+                }
+                if (data.old_solde == 1) {
+                    $("#old_solde").attr("checked", true)
+                }
+
+                // window.location.reload()
+                // Afficher un message de succès
+                // alert("Approvisionnement validé avec succès!")
+            })
+            .catch(function(error) {
+                console.log(error)
+                // window.location.reload()
+                // Afficher un message de succès
+                alert("Opération échouée!")
+            });
+    }
+
     $(function() {
         $("#example1").DataTable({
             "responsive": true,
@@ -434,6 +622,18 @@
             "autoWidth": false,
             "responsive": true,
         });
+
+
+        // 
+        $("body").on('change', function() {
+            const amount = new DataTable('#example1').column(4, {
+                page: 'all',
+                search: 'applied'
+            }).data().sum()
+
+            __V = amount < 0 ? -amount : amount
+            $("#montant").html(__V.toLocaleString())
+        })
     });
 </script>
 @endsection

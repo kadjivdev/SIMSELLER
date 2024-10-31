@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>REGLEMENT A CONTROLLER</h1>
+                    <h1>APPROVISIONNEMENT A CONTROLLER</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -22,18 +22,66 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
+
                     <div class="card">
-                        @if($message = session('message'))
-                        <div class="alert alert-success alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{ $message }}
-                        </div>
-                        @endif
                         <!-- /.card-header -->
                         <div class="card-body">
+                            <!-- FILTRE -->
+                            <form method="post" id="form_bc" action="{{route('ctlventes.index')}}">
+                                @csrf
+                                <div class="row no-print">
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <label for="">Date début</label>
+                                            <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
+                                        </div>
+                                        @error('debut')
+                                        <span class="text-danger">{{$message}}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <label for="">Date Fin</label>
+                                            <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
+                                        </div>
+                                        @error('fin')
+                                        <span class="text-danger">{{$message}}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <label for="">Vendeur</label>
+                                            <select class="form-control form-select" name="user">
+                                                <option class="" value="tout" {{old('user') == 'tout'}}>Tout</option>
+                                                @foreach($users as $user)
+                                                <option value="{{$user->id}}" {{$user->id == old('user') ? 'selected':''}}>{{$user->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @error('fin')
+                                        <span class="text-danger">{{$message}}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
+                                    </div>
+                                </div>
+                            </form>
 
-                            <a class="btn btn-success btn-block btn-sm m-3 col-4" href="{{route('ctlventes.reglementSurCompte')}}">Contrôler Règlement Sur Compte Client</a>
+                            @if($message = session('message'))
+                            <div class="alert alert-success alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h5><i class="icon fas fa-check"></i> Alert!</h5>
+                                {{ $message }}
+                            </div>
+                            @endif
+
+                            @if(session("search"))
+                            <div class="alert bg-info"> Liste des reglements du <span class="badge bg-warning">{{session("search")["debut"]}} </span> au <span class="badge bg-warning">{{session("search")["fin"]}} </span> </div>
+                            @endif
+
+                            <br><br>
+                            <!-- <a class="btn btn-success btn-block btn-sm m-3 col-4" href="{{route('ctlventes.reglementSurCompte')}}">Contrôler Règlement Sur Compte Client</a> -->
 
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                 <thead class="text-white text-center bg-gradient-gray-dark">
@@ -45,23 +93,28 @@
                                         <th>Client</th>
                                         <th>Document</th>
                                         <th>Utilisateur</th>
+                                        <th>Dette</th>
+                                        <th>Reversement</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($reglements as $reglement)
-                                    @if($reglement->vente)
-                                    <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-dark':''  }} ">
-                                        <td>{{$reglement->code}}</td>
+                                    <!-- ICI ON AFFICHE QUE LES APPROVISIONNEMENTS NON VALIDES -->
+                                    @if($reglement->statut!=1)
+                                    <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-warning':''  }} ">
+                                        <td><span class="badge bg-warning">{{$reglement->code}} </span></td>
                                         <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
-                                        <td class="text-right">{{number_format($reglement->montant,0,',',' ')}}</td>
+                                        <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}}</td>
                                         <td>{{$reglement->reference}}</td>
                                         <td>
-                                            @if($reglement->vente && $reglement->vente->commandeclient)
-                                            {{$reglement->vente->commandeclient->client->nom}} {{$reglement->vente->commandeclient->client->prenom}}
-                                            @else
-                                            --
-                                            @endif
+                                            <span class="badge bg-info">
+                                                @if($reglement->_clt)
+                                                {{$reglement->_clt->nom}} {{$reglement->_clt->prenom}}
+                                                @else
+                                                ---
+                                                @endif
+                                            </span>
                                         </td>
                                         <td>
                                             @if ($reglement->document)
@@ -69,11 +122,26 @@
                                             @endif
                                         </td>
                                         <td>@if($reglement->utilisateur) {{$reglement->utilisateur->name}}@else Utilisateur manquant @endif</td>
-                                        <td width="20%">
-                                            @if($reglement->document && $reglement->compte_id)
+                                        <td class="text-center">
+                                            @if($reglement->for_dette)
+                                            <span class="badge bg-success">Oui</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if($reglement->old_solde)
+                                            <span class="badge bg-success">Oui</span>
+                                            @else
+                                            <span class="badge bg-danger">Non</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            @if(!$reglement->observation_validation)
                                             <a class="btn btn-success btn-block btn-sm" href="{{route('ctlventes.create',$reglement->id)}}">Contrôler</a>
-                                            @elseif($reglement->utilisateur)
-                                            Document manquand: Contactez {{$reglement->utilisateur->name}}. Tel: {{$reglement->utilisateur->representant->telephone}}
+                                            @else
+
+                                            <span class="bg-light px-1">{{$reglement->observation_validation}}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -89,11 +157,12 @@
                                         <th>Client</th>
                                         <th>Document</th>
                                         <th>Utilisateur</th>
+                                        <th>Dette</th>
+                                        <th>Reversement</th>
                                         <th>Action</th>
                                     </tr>
                                 </tfoot>
                             </table>
-
                         </div>
                         <!-- /.card-body -->
                     </div>
@@ -117,19 +186,9 @@
             "autoWidth": false,
             "buttons": ["pdf", "print"],
             "order": [
-                [0, 'asc']
+                [0, 'desc']
             ],
             "pageLength": 15,
-            // "columnDefs": [
-            //     {
-            //         "targets": 7,
-            //         "orderable": false
-            //     },
-            //     {
-            //         "targets": 8,
-            //         "orderable": false
-            //     }
-            // ],
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
                 "lengthMenu": "Afficher _MENU_ éléments",

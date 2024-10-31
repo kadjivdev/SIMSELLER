@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Reglement;
 use App\Models\User;
 use App\Models\Vente;
 use App\tools\CompteTools;
@@ -16,5 +17,11 @@ class ReglementController extends Controller
         $compte = $client->compteClient;
         $compte = $compte ? $compte: CompteTools::addCompte($client->id, $user->id);
         return response($compte);
+    }
+
+    // Modification d'un approvisionnement
+    function getAppro(Request $request, $approvisionnementId) {
+        $reglement = Reglement::find($approvisionnementId);
+        return response()->json($reglement);
     }
 }

@@ -84,193 +84,75 @@ class ReglementController extends Controller
             }
             // }
 
+            if ($vente->commandeclient->client->compteClients->toArray() == null) {
+                Session()->flash('error', 'Ce client n\'a pas de compte actif');
+                return redirect()->route('reglements.index', ['vente' => $vente->id]);
+            }
 
-            if ($request->compte_id == NULL) {
-                if ($vente->commandeclient->client->compteClients->toArray() == null) {
-                    Session()->flash('error', 'Ce client n\'a pas de compte actif');
-                    return redirect()->route('reglements.index', ['vente' => $vente->id]);
-                }
+            $validator = Validator::make($request->all(), [
+                'date' => ['required', 'before_or_equal:now'],
+                //   'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
+                'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
+            ]);
 
-                $validator = Validator::make($request->all(), [
-                    'date' => ['required', 'before_or_equal:now'],
-                    //   'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
-                    'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
+            if ($validator->fails()) {
+                return redirect()->route('reglements.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
+            }
+
+            $compte = $vente->commandeclient->client->compteClients->toArray()[0];
+            $format = env('FORMAT_REGLEMENT');
+            $parametre = Parametre::where('id', env('REGLEMENT'))->first();
+            $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
+
+            $reglement = Reglement::create([
+                'code' => $code,
+                'reference' => "REGLEMENT SUR COMPTE CLIENT :" . $vente->commandeclient->client->raisonSociale,
+                'date' => $request->date,
+                'montant' => $request->montant,
+                'vente_id' => $vente->id,
+                'compte_id' => $compte['id'],
+                'type_detail_recu_id' => null,
+                'user_id' => auth()->user()->id,
+                'client_id' => $vente->commandeclient->client->id,
+            ]);
+
+            if ($reglement) {
+
+                $valeur = $parametre->valeur;
+
+                $valeur = $valeur + 1;
+
+                $parametres = Parametre::find(env('REGLEMENT'));
+
+                $parametre = $parametres->update([
+                    'valeur' => $valeur,
                 ]);
 
-                if ($validator->fails()) {
-                    return redirect()->route('reglements.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
-                }
+                // Ici aussi on fait la même chose. On ajoute pas directement
+                // le mouvement au compte du client
+                //  on le fait plutôt après validation du reglement associé à ce mouvement
 
-                $compte = $vente->commandeclient->client->compteClients->toArray()[0];
-                $format = env('FORMAT_REGLEMENT');
-                $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-
-                $reglement = Reglement::create([
-                    'code' => $code,
-                    'reference' => "REGLEMENT SUR COMPTE CLIENT :" . $vente->commandeclient->client->raisonSociale,
-                    'date' => $request->date,
-                    'montant' => $request->montant,
-                    'vente_id' => $vente->id,
-                    'compte_id' => $compte['id'],
-                    'type_detail_recu_id' => null,
+                $mouvement = Mouvement::create([
+                    'libelleMvt' => "Règlement d'achat de ciment",
+                    'dateMvt' => $request->date,
+                    'montantMvt' => $request->montant,
+                    'compteClient_id' => $compte['id'],
                     'user_id' => auth()->user()->id,
-                    'client_id' => $vente->commandeclient->client->id,
+                    'sens' => 0,
+                    'reglement_id' => $reglement->id,
+                    // 'destroy' => true
                 ]);
 
-                if ($reglement) {
+                if ($mouvement) {
+                    $compte = $mouvement->compteClient;
 
-                    $valeur = $parametre->valeur;
-
-                    $valeur = $valeur + 1;
-
-                    $parametres = Parametre::find(env('REGLEMENT'));
-
-                    $parametre = $parametres->update([
-                        'valeur' => $valeur,
-                    ]);
-
-                    $mouvement = Mouvement::create([
-                        'libelleMvt' => "Règlement d'achat de ciment",
-                        'dateMvt' => $request->date,
-                        'montantMvt' => $request->montant,
-                        'compteClient_id' => $compte['id'],
-                        'user_id' => auth()->user()->id,
-                        'sens' => 0,
-                        'reglement_id' => $reglement->id,
-                        'destroy' => true
-                    ]);
-                    if ($mouvement) {
-                        $compte = $mouvement->compteClient;
-
-                        $client = $compte->client;
-                        $client->debit = $client->debit + $request->montant;
-                        $client->update();
-                    }
-
-                    if ($parametre) {
-                        Session()->flash('message', 'Règlement effectué avec succès');
-                        return redirect()->route('reglements.index', ['vente' => $vente->id]);
-                    }
-
-                    Session()->flash('message', 'Règlement effectué avec succès');
-                    return redirect()->route('reglements.index', ['vente' => $vente->id]);
+                    $client = $compte->client;
+                    $client->debit = $client->debit + $request->montant;
+                    $client->update();
                 }
-            } else {
 
-                if ($request->document == NULL) {
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required', 'before_or_equal:now'],
-                        'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
-                        'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
-                        'compte_id' => ['required'],
-                        'typedetailrecu_id' => ['required'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        return redirect()->route('reglements.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
-                    }
-
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'vente_id' => $vente->id,
-                        'compte_id' => $request->compte_id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
-                        'user_id' => auth()->user()->id,
-                        'client_id' => $vente->commandeclient->client->id,
-                    ]);
-
-
-                    if ($reglement) {
-                        $valeur = $parametre->valeur;
-                        $valeur = $valeur + 1;
-                        $parametres = Parametre::find(env('REGLEMENT'));
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
-                        $client = $vente->commandeclient->client;
-                        $client->debit = $client->debit + $request->montant;
-                        $client->update();
-
-
-                        if ($parametre) {
-                            Session()->flash('message', 'Règlement ajouté avec succès');
-                            return redirect()->route('reglements.index', ['vente' => $vente->id]);
-                        }
-                    }
-                } else {
-
-                    $validator = Validator::make($request->all(), [
-                        'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
-                        'date' => ['required', 'before_or_equal:now'],
-                        'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
-                        'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
-                        'compte_id' => ['required'],
-                        'typedetailrecu_id' => ['required'],
-                    ]);
-
-                    if ($validator->fails()) {
-                        return redirect()->route('reglements.create', ['vente' => $vente->id])->withErrors($validator->errors())->withInput();
-                    }
-
-                    $file = $request->file('document')->getPath();
-                    $filename = time() . '.' . $request->file('document')->extension();
-                    //ReglementUploadJob::dispatch($file,$filename);
-                    $file = $request->file('document')->storeAs(
-                        'documents',
-                        $filename,
-                        'public'
-                    );
-
-                    $format = env('FORMAT_REGLEMENT');
-                    $parametre = Parametre::where('id', env('REGLEMENT'))->first();
-                    $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
-
-                    $reglement = Reglement::create([
-                        'code' => $code,
-                        'reference' => strtoupper($request->reference),
-                        'date' => $request->date,
-                        'montant' => $request->montant,
-                        'document' => $file,
-                        'vente_id' => $vente->id,
-                        'compte_id' => $request->compte_id,
-                        'type_detail_recu_id' => $request->typedetailrecu_id,
-                        'user_id' => auth()->user()->id,
-                        'client_id' => $vente->commandeclient->client->id,
-                    ]);
-
-                    if ($reglement) {
-
-                        $valeur = $parametre->valeur;
-
-                        $valeur = $valeur + 1;
-
-                        $parametres = Parametre::find(env('REGLEMENT'));
-
-                        $parametre = $parametres->update([
-                            'valeur' => $valeur,
-                        ]);
-
-
-                        $client = $vente->commandeclient->client;
-                        $client->debit = $client->debit + $request->montant;
-                        $client->update();
-
-                        if ($parametre) {
-                            Session()->flash('message', 'Règlement ajouté avec succès!');
-                            return redirect()->route('reglements.index', ['vente' => $vente->id]);
-                        }
-                    }
-                }
+                Session()->flash('message', 'Règlement effectué avec succès');
+                return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
         } catch (\Exception $e) {
             if (env('APP_DEBUG') == TRUE) {

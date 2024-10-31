@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>REGLEMENT A CONTROLLER</h1>
+                    <h1>APPROVISIONNEMENT A CONTROLLER</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -35,59 +35,35 @@
 
                             <div class="row ">
                                 <div class="col-lg-12 alert border-warning shadow-2 text-center">
-                                    Vous ête sur le point de valider le règlement {{$reglement->code}}.<br>
+                                    Vous ête sur le point de valider l'Approvisionnement {{$reglement->code}}.<br>
                                     Veuillez verifier l'exactitude des informations avant de confirmer la validation
                                 </div><!-- col -->
                             </div>
                             <div class="row">
                                 <div class="col-4">
                                     <table class="table">
-                                        <tr class="bg-dark text-white font-weight-bold">
-                                            <td colspan="2" class="text-center">Vente : {{$reglement->vente->code}}</td>
-                                        </tr>
+                                        
                                         <tr>
-                                            <td>Date vente</td>
-                                            <td class="text-right font-weight-bold">{{date_format(date_create($reglement->vente->date),'d/m/Y')}}</td>
+                                            <td>Date de l'approvisionnement</td>
+                                            <td class="text-right font-weight-bold">{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
                                         </tr>
                                         <tr>
                                             <td>Client</td>
-                                            <td class="text-right font-weight-bold">{{$reglement->vente->commandeclient->client->nom}} {{$reglement->vente->commandeclient->client->prenom}} {{$reglement->vente->commandeclient->client->raisonSociale}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Qte vente</td>
-                                            <td class="text-right font-weight-bold"> {{number_format($reglement->vente->qteTotal,2,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">{{$reglement->_clt->raisonSociale}}</td>
                                         </tr>
                                         <tr>
                                             <td>Montant</td>
-                                            <td class="text-right font-weight-bold">{{number_format($reglement->vente->montant,0,',',' ')}}</td>
+                                            <td class="text-right font-weight-bold">{{number_format($reglement->montant,0,',',' ')}}</td>
                                         </tr>
                                         <tr class="bg-success text-white font-weight-bold">
                                             <td colspan="2" class="text-center">Règlement : {{$reglement->code}} associé</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Date règlement</td>
-                                            <td class="text-right font-weight-bold">{{date_format(date_create($reglement->date),'d/m/Y')}} </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Montant réglé</td>
-                                            <td class="text-right font-weight-bold">{{number_format($reglement->montant,0,',',' ')}}</td>
                                         </tr>
                                         <tr>
                                             <td>Référence</td>
                                             <td class="text-right font-weight-bold">{{$reglement->reference}}</td>
                                         </tr>
                                         <tr>
-                                            <td>Type règlement</td>
-                                            <td class="font-weight-bold text-right">
-                                                @if($reglement->typeReglement)
-                                                <span class="badge badge-warning p-2">{{$reglement->typeReglement->libelle}}</span>
-                                                @else
-                                                <span class="badge badge-success p-2">Règlement par compte</span>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Vendur</td>
+                                            <td>Responsable</td>
                                             <td class="font-weight-bold text-right">{{$reglement->utilisateur->name}}</td>
                                         </tr>
                                     </table>
@@ -135,7 +111,7 @@
                 </button>
             </div>
             
-            <form method="POST" action="{{ route('ctlventes.validerControle',['reglement'=>$reglement->id]) }}">
+            <form method="POST" action="{{ route('ctlventes.validerApprovisionnement',['reglement'=>$reglement->id]) }}">
                 @csrf
                 <div class="modal-footer justify-content-between">
                     <div class="col-12 alert-warning alert">
@@ -170,7 +146,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="POST" action="{{ route('ctlventes.askUpdate',['reglement'=>$reglement->id]) }}">
+            <form method="POST" action="{{ route('ctlventes.rejetApprovisionnement',['reglement'=>$reglement->id]) }}">
                 @csrf
                 <div class="modal-footer justify-content-between">
 

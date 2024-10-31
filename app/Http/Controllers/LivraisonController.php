@@ -710,7 +710,7 @@ class LivraisonController extends Controller
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
                     $messageReq = "Liste des programmations de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
@@ -719,7 +719,7 @@ class LivraisonController extends Controller
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
                         ->whereNotNull('dateSortie')
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
@@ -729,7 +729,7 @@ class LivraisonController extends Controller
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
                         ->whereNull('dateSortie')
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
