@@ -43,7 +43,7 @@
                                         <div class="form-group">
                                             <label for="">Fournisseur</label>
                                             <select id="client" class="form-control form-control-sm select2" name="fournisseur">
-                                                <option class="" value="" selected>Tous</option>
+                                                <option class="" value="tous" selected>Tous</option>
                                                 @foreach($fournisseurs as $frs)
                                                 <option value="{{$frs->sigle}}" {{old('fournisseur')==$frs->id?'selected':''}}>{{$frs->raisonSociale}}</option>
                                                 @endforeach

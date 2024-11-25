@@ -7,12 +7,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>TOUTES VENTES CONFONDUES</h1>
+                    <h1>LES TOTAUX</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Acceuil</a></li>
-                        <li class="breadcrumb-item active">Listes de toutes les ventes à la comptabilité.</li>
+                        <li class="breadcrumb-item active">Listes des ventes en instences de comptabilisation.</li>
                     </ol>
                 </div>
             </div>
@@ -27,7 +27,7 @@
                 <div class="col-md-12">
                     <div class="card card-secondary">
                         <div class="card-body">
-                            <form method="post" id="form_bc" action="{{route('ventes.postVenteAComptabiliser')}}">
+                            <form method="post" id="form_bc" action="{{route('ventes.postVenteTotaux')}}">
                                 @csrf
                                 <div class="row no-print">
                                     <div class="col-1"></div>
@@ -60,7 +60,7 @@
                                 @if(session('resultat'))
                                 <div class="col-md-12">
                                     <h4 class="col-12 text-center border border-info p-2 mb-2">
-                                    Listes de toutes catégories de ventes confondues de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
+                                        Liste des vente traitées de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
                                     </h4>
                                     @if(count(session('resultat')['AComptabilisers']) > 0)
                                     <!-- /.card-header -->
@@ -74,13 +74,13 @@
 
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
-                                                    <th>Type de Vente</th>
                                                     <th>Payeur</th>
                                                     <th>Qté</th>
                                                     <th>PU</th>
                                                     <th>Montant</th>
                                                     <th>Transport</th>
                                                     <th>Total</th>
+                                                    <th>Fournisseur</th>
                                                     <th>Statut</th>
                                                     @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
                                                     <th>Action</th>
@@ -113,13 +113,15 @@
 
                                                     <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                     <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
-                                                    <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
+                                                    <!-- <td class="">{{ $AComptabiliser->typeVente->libelle }}</td> -->
                                                     <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
                                                     <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
                                                     <td class="text-center"><strong> {{ $AComptabiliser->pu }}</strong></td>
                                                     <td class="text-right">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
                                                     <td class="text-right">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
                                                     <td class="text-right">{{ number_format($AComptabiliser->montant+$AComptabiliser->transport,0,'',' ') }}</td>
+                                                    <td class="text-center"> <strong>{{ $AComptabiliser->vendus[0]->programmation->detailboncommande->boncommande->fournisseur->raisonSociale }} </strong> </td>
+
                                                     <td class="text-right"><span class="badge badge-success">{{ $AComptabiliser->statut }}</span></td>
 
                                                     @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
@@ -143,7 +145,7 @@
 
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
-                                                    <th>Type de Vente</th>
+                                                    <th>Fournisseur</th>
                                                     <th>Payeur</th>
                                                     <th>Qté</th>
                                                     <th>PU</th>
@@ -200,27 +202,24 @@
                                 <div class="card-body">
                                     <table id="exampleA" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
-                                            <tr>
-                                                <th>Envoyé par:</th>
+                                            <th>Envoyé par:</th>
 
-                                                <th>Modifée</th>
+                                            <th>Modifée</th>
 
-                                                <th>Date Vente</th>
-                                                <th>Date Validation</th>
-                                                <th>Type de Vente</th>
-                                                <th>Payeur</th>
-                                                <th>Qté</th>
-                                                <th>PU</th>
-                                                <th>Montant</th>
-                                                <th>Transport</th>
-                                                <th>Total</th>
-                                                <th>Statut</th>
-                                                @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
-                                                <th>Action</th>
-                                                @endif
-
-                                                <th>Créer le </th>
-                                            </tr>
+                                            <th>Date Vente</th>
+                                            <th>Date Validation</th>
+                                            <th>Payeur</th>
+                                            <th>Qté</th>
+                                            <th>PU</th>
+                                            <th>Montant</th>
+                                            <th>Transport</th>
+                                            <th>Total</th>
+                                            <th>Fournisseur</th>
+                                            <th>Statut</th>
+                                            @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
+                                            <th>Action</th>
+                                            @endif
+                                            <th>Créer le </th>
                                         </thead>
                                         <tbody>
                                             @php($qteVenteAdj=0)
@@ -231,7 +230,7 @@
                                             @php($montantVenteAdj+=$AComptabiliser->montant)
 
                                             <tr class="{{$AComptabiliser->statut == "Vendue" ? 'bg-warning':'' }}">
-                                                <td class="text-center"><strong> {{ $AComptabiliser->pu }}</strong> </td>
+                                                <td class="text-center" style="font-weight: bold;">{{ $AComptabiliser->user->representant->nom }} {{ $AComptabiliser->user->representant->prenom }}</td>
 
                                                 <td class="text-center">
                                                     <!-- <span class="btn btn-sm bg-light" style="font-weight: bold;"> -->
@@ -246,14 +245,17 @@
 
                                                 <td class="text-center">{{ date_format(date_create($AComptabiliser->date),'d/m/Y') }}</td>
                                                 <td class="text-center">{{$AComptabiliser->validated_date? date_format(date_create($AComptabiliser->validated_date),'d/m/Y'):"---" }}</td>
-                                                <td class="">{{ $AComptabiliser->typeVente->libelle }}</td>
+                                                <!-- <td class="">{{ $AComptabiliser->typeVente->libelle }}</td> -->
                                                 <td class="">{{ count($AComptabiliser->filleuls) > 0 ? $AComptabiliser->filleuls['nomPrenom']." (IFU: ".$AComptabiliser->filleuls['ifu'].")" : $AComptabiliser->commandeclient->client->raisonSociale.' ('.$AComptabiliser->commandeclient->client->ifu.')' }}</td>
                                                 <td class="text-right">{{ number_format($AComptabiliser->qteTotal,0,'',' ') }}</td>
-                                                <td class="text-right">{{ number_format($AComptabiliser->pu,0,'',' ') }}</td>
+                                                <td class="text-center"><strong> {{ $AComptabiliser->pu }}</strong></td>
                                                 <td class="text-right">{{ number_format($AComptabiliser->montant,0,'',' ') }}</td>
                                                 <td class="text-right">{{ number_format($AComptabiliser->transport,0,'',' ') }}</td>
                                                 <td class="text-right">{{ number_format($AComptabiliser->montant+$AComptabiliser->transport,0,'',' ') }}</td>
+                                                <td class="text-center"> <strong>{{ $AComptabiliser->vendus[0]->programmation->detailboncommande->boncommande->fournisseur->raisonSociale }} </strong> </td>
+
                                                 <td class="text-right"><span class="badge badge-success">{{ $AComptabiliser->statut }}</span></td>
+
                                                 @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
                                                 <td>
                                                     @if(!$AComptabiliser->date_traitement)
@@ -270,16 +272,18 @@
                                         <tfoot class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
                                                 <th>Envoyé par:</th>
+
                                                 <th>Modifée</th>
+
                                                 <th>Date Vente</th>
                                                 <th>Date Validation</th>
-                                                <th>Type de Vente</th>
                                                 <th>Payeur</th>
                                                 <th>Qté</th>
                                                 <th>PU</th>
                                                 <th>Montant</th>
                                                 <th>Transport</th>
                                                 <th>Total</th>
+                                                <th>Fournisseur</th>
                                                 <th>Statut</th>
                                                 @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
                                                 <th>Action</th>
@@ -341,7 +345,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print","csv","excel"],
+            "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
                 [3, 'desc']
             ],
@@ -581,7 +585,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
                 [3, 'asc']
             ],
@@ -816,40 +820,41 @@
         });
     });
 
+
     $("body").on('change', function() {
-        const qteVente = new DataTable('#example1').column(6, {
+        const qteVente = new DataTable('#example1').column(5, {
             page: 'all',
             search: 'applied'
         }).data().sum()
         __qteVente = qteVente < 0 ? -qteVente : qteVente
 
-        const montantVente = new DataTable('#example1').column(7, {
+        const montantVente = new DataTable('#example1').column(9, {
             page: 'all',
             search: 'applied'
         }).data().sum()
         __montantVente = montantVente < 0 ? -montantVente : montantVente
 
 
-        $("#qteVente").html(__qteVente.toLocaleString()+" Tonnes")
-        $("#montantVente").html(__montantVente.toLocaleString()+" FCFA")
+        $("#qteVente").html(__qteVente.toLocaleString() + " Tonnes")
+        $("#montantVente").html(__montantVente.toLocaleString() + " FCFA")
 
 
         // ADJEOLA
-        const qteVenteAdj = new DataTable('#exampleA').column(6, {
+        const qteVenteAdj = new DataTable('#exampleA').column(5, {
             page: 'all',
             search: 'applied'
         }).data().sum()
         __qteVenteAdj = qteVenteAdj < 0 ? -qteVenteAdj : qteVenteAdj
 
-        const montantVenteAdj = new DataTable('#example1').column(7, {
+        const montantVenteAdj = new DataTable('#exampleA').column(9, {
             page: 'all',
             search: 'applied'
         }).data().sum()
         __montantVenteAdj = montantVenteAdj < 0 ? -montantVenteAdj : montantVenteAdj
 
 
-        $("#qteVenteAdj").html(__qteVenteAdj.toLocaleString()+" Tonnes")
-        $("#montantVenteAdj").html(__montantVenteAdj.toLocaleString()+" FCFA")
+        $("#qteVenteAdj").html(__qteVenteAdj.toLocaleString() + " Tonnes")
+        $("#montantVenteAdj").html(__montantVenteAdj.toLocaleString() + " FCFA")
 
     })
 </script>

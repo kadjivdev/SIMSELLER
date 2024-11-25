@@ -27,7 +27,7 @@
                                 @csrf
                                 <div class="row no-print">
 
-                                    <div class="col-3">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Date début</label>
                                             <input type="date" class="form-control" name="debut" value="{{old('debut')}}">
@@ -36,7 +36,7 @@
                                         <span class="text-danger">{{$message}}</span>
                                         @enderror
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Date début</label>
                                             <input type="date" class="form-control" name="fin" value="{{old('fin')}}">
@@ -46,18 +46,6 @@
                                         @enderror
                                     </div>
                                     <div class="col-4">
-                                        <div class="form-group">
-                                            <label for="">Fournisseur</label>
-                                            <select id="client" class="form-control form-control-sm select2" name="fournisseur">
-                                                <option class="" value="" selected>Tous</option>
-                                                @foreach($fournisseurs as $frs)
-                                                <option value="{{$frs->id}}" {{old('fournisseur')==$frs->id?'selected':''}}>{{$frs->raisonSociale}}</option>
-                                                @endforeach
-                                            </select>
-
-                                        </div>
-                                    </div>
-                                    <div class="col-2">
                                         <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
                                     </div>
                                     <div class="col-1"></div>
@@ -128,12 +116,12 @@
                                                 <td>{{date_format(date_create($item->bc->dateBon),'d/m/Y')}}</td>
                                                 <td>{{$item->bc->detailboncommandes[0]->produit->libelle}}</td>
                                                 <td>{{$item->bc->fournisseur->raisonSociale}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format($item->qteBc,2,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"> {{number_format($item->qteprog,2,',',' ')}} </td>
-                                                <td class="text-right font-weight-bold">{{number_format($item->qteLiv,2,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold"> {{number_format($item->qteVendu,2,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold text-danger"> {{number_format($restNonVendu,2,',',' ')}}</td>
-                                                <td class="text-right font-weight-bold">{{number_format($item->qteBc - $item->qteLiv,2,',',' ')}}</td>
+                                                <td class="text-right font-weight-bold">{{$item->qteBc}}</td>
+                                                <td class="text-right font-weight-bold"> {{$item->qteprog}} </td>
+                                                <td class="text-right font-weight-bold">{{$item->qteLiv}}</td>
+                                                <td class="text-right font-weight-bold"> {{$item->qteVendu}}</td>
+                                                <td class="text-right font-weight-bold text-danger"> {{$restNonVendu}}</td>
+                                                <td class="text-right font-weight-bold">{{$item->qteBc - $item->qteLiv}} @if($item->qteBc < $item->qteLiv) diff @endif </td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -166,7 +154,7 @@
                                                         <td class="text-right font-weight-bold" id="livre">{{number_format($livre,2,',',' ')}}</td>
                                                         <td class="text-right font-weight-bold" id="Vendu"> {{number_format($Vendu,2,',',' ')}} </td>
                                                         <td class="text-right font-weight-bold text-danger" id="totalNonVendu"> {{number_format($totalNonVendu,2,',',' ')}} </td>
-                                                        <td class="text-right font-weight-bold" id="stock">{{number_format($stock,2,',',' ')}}</td>
+                                                        <td class="text-right font-weight-bold" id="resteALivrer">{{number_format($stock,2,',',' ')}}</td>
                                                     </tr>
                                                     <tr class="">
                                                         <td colspan="5" class="font-weight-bold text-success">Montant</td>
@@ -679,6 +667,12 @@
             search: 'applied'
         }).data().sum()
         $("#totalNonVendu").html(totalNonVendu)
+        // 
+        const resteALivrer = new DataTable('#example1').column(10, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+        $("#resteALivrer").html(resteALivrer)
         
     })
 </script>

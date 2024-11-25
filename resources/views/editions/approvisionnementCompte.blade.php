@@ -88,7 +88,7 @@
                                                     <td class="text-center"><span class="badge bg-warning">{{$reglement->reference}} </span></td>
                                                     <td class="text-center">
                                                         <b>
-                                                            @if($reglement->_mouvements)
+                                                            @if($reglement->_mouvements && $reglement->_mouvements->first()->compteClient)
                                                             {{$reglement->_mouvements->first()?$reglement->_mouvements->first()->compteClient->client->raisonSociale:'---'}}
                                                             @else
                                                             ---

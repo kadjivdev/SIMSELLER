@@ -152,7 +152,7 @@
 
                     <div class="form-group col-12">
                         <label>Motifs de la demande de modification </label>
-                        <textarea class="form-control" name="observation" rows="3"></textarea>
+                        <textarea class="form-control" name="observation" required rows="3"></textarea>
                     </div>
                     <div class="col-12 text-center">
                         <button data-dismiss="modal" aria-label="Close" class="btn  btn-secondary">

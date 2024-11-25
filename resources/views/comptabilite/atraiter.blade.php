@@ -7,12 +7,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>TOUTES VENTES CONFONDUES</h1>
+                    <h1>VENTES A TRAITER</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Acceuil</a></li>
-                        <li class="breadcrumb-item active">Listes de toutes les ventes à la comptabilité.</li>
+                        <li class="breadcrumb-item active">Listes des ventes en instences de comptabilisation.</li>
                     </ol>
                 </div>
             </div>
@@ -27,14 +27,13 @@
                 <div class="col-md-12">
                     <div class="card card-secondary">
                         <div class="card-body">
-                            <form method="post" id="form_bc" action="{{route('ventes.postVenteAComptabiliser')}}">
-                                @csrf
+                            <form method="GET" id="form_bc" action="{{route('ventes.getVenteAtraiter')}}">
                                 <div class="row no-print">
                                     <div class="col-1"></div>
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Date début</label>
-                                            <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
+                                            <input type="date" class="form-control" name="debut" value="{{session('debut')}}">
                                         </div>
                                         @error('debut')
                                         <span class="text-danger">{{$message}}</span>
@@ -43,7 +42,7 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Date début</label>
-                                            <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
+                                            <input type="date" class="form-control" name="fin" value="{{session('fin')}}" >
                                         </div>
                                         @error('fin')
                                         <span class="text-danger">{{$message}}</span>
@@ -55,14 +54,20 @@
                                     <div class="col-1"></div>
                                 </div>
                             </form>
+                            @if(session()->has("message"))
+                            <div class="alert alert-success">
+                                {{session()->get("message")}}
+                            </div>
+                            @endif
 
                             <div class="row">
-                                @if(session('resultat'))
+                                @if(session('search'))
+                                <h4 class="col-12 text-center border border-info p-2 mb-2">
+                                    Liste des vente en instance de traitement de la période <span class="badge bg-info">{{session('debut')}}</span> au <span class="badge bg-info"> {{session('fin')}} </span>
+                                </h4>
+                                @endif
                                 <div class="col-md-12">
-                                    <h4 class="col-12 text-center border border-info p-2 mb-2">
-                                    Listes de toutes catégories de ventes confondues de la période du {{date_format(date_create(session('resultat')['debut']),'d/m/Y')}} au {{date_format(date_create(session('resultat')['fin']),'d/m/Y')}}
-                                    </h4>
-                                    @if(count(session('resultat')['AComptabilisers']) > 0)
+                                    @if(count($AComptabilisers) > 0)
                                     <!-- /.card-header -->
                                     <div class="card-body">
                                         <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
@@ -74,7 +79,7 @@
 
                                                     <th>Date Vente</th>
                                                     <th>Date Validation</th>
-                                                    <th>Type de Vente</th>
+                                                    <th>Fournisseur</th>
                                                     <th>Payeur</th>
                                                     <th>Qté</th>
                                                     <th>PU</th>
@@ -92,7 +97,7 @@
                                                 @php($qteVente=0)
                                                 @php($montantVente=0)
 
-                                                @foreach(session('resultat')['AComptabilisers'] as $key=>$AComptabiliser)
+                                                @foreach($AComptabilisers as $key=>$AComptabiliser)
 
                                                 @php($qteVente+=$AComptabiliser->qteTotal)
                                                 @php($montantVente+=$AComptabiliser->montant)
@@ -177,20 +182,15 @@
                                         </div>
                                     </div>
                                     @if(Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
-
+                                    @if(count($AComptabilisers) > 0)
                                     <div class="card-footer text-center no-print">
-                                        @if(session('resultat'))
-                                        @if(count(session('resultat')['AComptabilisers']) > 0)
                                         <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                                        @endif
-                                        @endif
                                     </div>
                                     @endif
                                     @endif
-
                                 </div>
 
-                                @if(count(session('resultat')['AComptabilisersAdjeOla']) > 0)
+                                @if(count($AComptabilisersAdjeOla) > 0)
                                 <!-- /.card-header -->
                                 <div class="col-12 text-center">
                                     <center>
@@ -226,7 +226,7 @@
                                             @php($qteVenteAdj=0)
                                             @php($montantVenteAdj=0)
 
-                                            @foreach(session('resultat')['AComptabilisersAdjeOla'] as $key=>$AComptabiliser)
+                                            @foreach($AComptabilisersAdjeOla as $key=>$AComptabiliser)
                                             @php($qteVenteAdj+=$AComptabiliser->qteTotal)
                                             @php($montantVenteAdj+=$AComptabiliser->montant)
 
@@ -316,10 +316,8 @@
 
                         @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
                         <div class="card-footer text-center no-print">
-                            @if(session('resultat'))
-                            @if(count(session('resultat')['AComptabilisersAdjeOla']) > 0)
+                            @if(count($AComptabilisersAdjeOla) > 0)
                             <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                            @endif
                             @endif
                         </div>
                         @endif
@@ -341,7 +339,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print","csv","excel"],
+            "buttons": ["pdf", "print"],
             "order": [
                 [3, 'desc']
             ],
@@ -830,8 +828,8 @@
         __montantVente = montantVente < 0 ? -montantVente : montantVente
 
 
-        $("#qteVente").html(__qteVente.toLocaleString()+" Tonnes")
-        $("#montantVente").html(__montantVente.toLocaleString()+" FCFA")
+        $("#qteVente").html(__qteVente.toLocaleString() + " Tonnes")
+        $("#montantVente").html(__montantVente.toLocaleString() + " FCFA")
 
 
         // ADJEOLA
@@ -848,8 +846,8 @@
         __montantVenteAdj = montantVenteAdj < 0 ? -montantVenteAdj : montantVenteAdj
 
 
-        $("#qteVenteAdj").html(__qteVenteAdj.toLocaleString()+" Tonnes")
-        $("#montantVenteAdj").html(__montantVenteAdj.toLocaleString()+" FCFA")
+        $("#qteVenteAdj").html(__qteVenteAdj.toLocaleString() + " Tonnes")
+        $("#montantVenteAdj").html(__montantVenteAdj.toLocaleString() + " FCFA")
 
     })
 </script>

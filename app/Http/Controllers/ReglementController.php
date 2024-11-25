@@ -66,12 +66,6 @@ class ReglementController extends Controller
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
 
-            ###___CONTROLE SUR LA REFERENCE
-            if (Reglement::where("reference", $request->reference)->whereNotNull("reference")->first()) {
-                Session()->flash('error', 'Cette reference existe déjà!');
-                return redirect()->route('reglements.index', ['vente' => $vente->id]);
-            }
-
             ####_____
             // if ($vente->commandeclient->client->compteClients->toArray()) {
 
@@ -178,7 +172,6 @@ class ReglementController extends Controller
 
     public function update(Request $request, Vente $vente, Reglement $reglement)
     {
-
         try {
 
             if ($request->document == NULL) {

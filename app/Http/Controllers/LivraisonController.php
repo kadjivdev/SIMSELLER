@@ -703,37 +703,42 @@ class LivraisonController extends Controller
         session(['option' => $request->option ?: 'Tous']);
         session(['fournisseur' => $request->fournisseur ?: 'Tous']);
 
+        $debut = date_format(date_create($request->debut),"Y-m-d");
+        $fin = date_format(date_create($request->fin),"Y-m-d");
+
         if ($request->debut && $request->fin) {
             switch ($request->option) {
-
                 case 'Tous':
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
+                        ->whereBetween('dateprogrammer', [$debut, $fin])
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
-                    $messageReq = "Liste des programmations de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
+                    $messageReq = "Liste des programmations de la période du " . $debut . " au " . $fin . $fournisseur;
+                    // dd($programmations);
                     break;
                 case 'OUI':
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
+                        ->whereBetween('dateprogrammer', [$debut, $fin])
                         ->whereNotNull('dateSortie')
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
-                    $messageReq = "Liste des camions chargés de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
+                    $messageReq = "Liste des programmations de la période du " . $debut . " au " . $fin . $fournisseur;
+
                     break;
                 case 'NON':
                     $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                         ->whereIn('statut', ['Valider', 'Livrer'])
                         ->where('imprimer', '1')
-                        ->whereBetween('dateSortie', [$request->debut, $request->fin])
+                        ->whereBetween('dateprogrammer', [$debut, $fin])
                         ->whereNull('dateSortie')
                         ->orderByDesc('code')->get();
                     $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
-                    $messageReq = "Liste des camions non chargés de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
+                    $messageReq = "Liste des programmations de la période du " . $debut . " au " . $fin . $fournisseur;
+
                     break;
             }
         } else {
@@ -766,9 +771,12 @@ class LivraisonController extends Controller
                     break;
             }
         }
-        $programmations = collect($programmations);
-        $programmations = $programmations->chunk(10);
+        // $programmations = collect($programmations);
+        // $programmations = $programmations->chunk(10);
         // $programmations = $programmations->all();
+
+        // dd($programmations);
+        
 
         return redirect()->route('livraisons.suivicamion')->with([
             'resultat' => $programmations,

@@ -50,8 +50,12 @@ use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
 use App\Models\Client;
+use App\Models\ClientOld;
 use App\Models\CompteClient;
+use App\Models\DetteReglement;
 use App\Models\Mouvement;
+use App\Models\Parametre;
+use App\Models\Programmation;
 use App\Models\Reglement;
 use App\Models\Vente;
 
@@ -67,22 +71,64 @@ use App\Models\Vente;
 */
 
 Route::get('/regulation', function () {
-    $clients = Client::all();
+    // $clients = Client::all();
 
-    // #### SUPPRESSION DE TOUS LES REGLEMENTS
+    // $mvts_to_delete = Mouvement::where("libelleMvt","Approvisionnement pour reglement d'ancienne dette")->get();
+    // foreach ($mvts_to_delete as $mvt) {
+    //     $mvt->delete();
+    // }
+
+    // ####### GESTION DES REGLEMENTS QUI N'ONT PAS DE MOUVEMENTS
+    // $reglements = Reglement::whereNull("vente_id")->where("for_dette", true)->orderBy("id", "desc")->get();
+
+    // $data = [];
+    // foreach ($reglements as $reglement) {
+    //     if (count($reglement->_mouvements) == 0) {
+    //         $data[] = $reglement;
+
+    //         Mouvement::create([
+    //             'libelleMvt' => "Approvisionnement pour reglement d'ancienne dette",
+    //             'dateMvt' => $reglement->date,
+    //             'montantMvt' => $reglement->montant,
+    //             // 'compteClient_id' => $client->compteClients[0]->id,
+    //             'compteClient_id' => null,
+    //             'reglement_id' => $reglement->id,
+    //             'sens' => 0,
+    //             'user_id' => $reglement->user_id
+    //         ]);
+    //     }
+    // }
+
+    // $reglement_whitout_mvts_ids = collect($data)->pluck("id");
+    // $mouvements = Mouvement::whereIn("reglement_id", $reglement_whitout_mvts_ids)->get();
+    // dd($mouvements);
+
+    #####____REGULATION DES STOCKS
+    // $programmations = Programmation::where("statut", "<>", "Annuler")->get();
+
+    // foreach ($programmations as $programmation) {
+    //     $qteProg = $programmation->qteprogrammer;
+    //     $qteVendu = $programmation->vendus->sum("qteVendu");
+
+    //     if ($qteProg == $qteVendu) {
+    //         $programmation->qtelivrer = $programmation->qteprogrammer;
+    //         $programmation->update();
+    //     }
+    // }
+
+    #### SUPPRESSION DE TOUS LES REGLEMENTS
     // $reglements = Reglement::all();
     // foreach ($reglements as $reglement) {
     //     $reglement->delete();
     // }
 
     // #### SUPPRESSION DE TOUS LES MOUVEMENTS
-    // compte client count : 2644
     // $mouvements = Mouvement::all();
     // foreach ($mouvements as $mouvement) {
     //     $mouvement->delete();
     // }
 
-    // ##### CHANGEMENT DES STATUS *Contrôller* DES VENTES EN STATUT *Vendue*
+    ##### CHANGEMENT DES STATUS *Contrôller* DES VENTES EN STATUT *Vendue*
     // $ventes = Vente::where("statut", "Contrôller")->get();#### count initial : 11
     // foreach ($ventes as $vente) {
     //     $vente->statut = "Vendue";
@@ -90,18 +136,18 @@ Route::get('/regulation', function () {
     // }
 
     ######======= REGULATION DES CREDITS DES CLIENTS
-    foreach ($clients as $clt) {
-        ####____LE CREDIT DU CLIENT REVIENT A LA SOMME DES APPROVISIONNEMENTS (reglements sans vente_id && non pour remboursement de dette) EFFECTUES SUR SON COMPTE
-        $clt->credit = $clt->reglements->whereNull("for_dette")->whereNull("vente_id")->sum("montant");
-        $clt->save();
-    }
+    // foreach ($clients as $clt) {
+    //     ####____LE CREDIT DU CLIENT REVIENT A LA SOMME DES APPROVISIONNEMENTS (reglements sans vente_id && non pour remboursement de dette) EFFECTUES SUR SON COMPTE
+    //     $clt->credit = $clt->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
+    //     $clt->save();
+    // }
 
     #######======== REGULATION DES DEBITS DES CLIENTS
-    foreach ($clients as $clt) {
-        // LE DEBIT DU CLIENT REVIENT A LA SOMME DES REGLEMENTS EFFECTUES SUR SON COMPTE
-        $clt->debit = $clt->reglements->whereNotNull("vente_id")->sum("montant");
-        $clt->save();
-    }
+    // foreach ($clients as $clt) {
+    //     // LE DEBIT DU CLIENT REVIENT A LA SOMME DES REGLEMENTS EFFECTUES SUR SON COMPTE
+    //     $clt->debit = $clt->reglements->whereNotNull("vente_id")->sum("montant");
+    //     $clt->save();
+    // }
 
     #####===== ATTACHEMENT DE CHAQUE REGLEMENT A SON CLIENT
     // $mouvements = Mouvement::all();
@@ -143,49 +189,51 @@ Route::get('/regulation', function () {
     //     $code = $format . str_pad($parametre->valeur, 6, "0", STR_PAD_LEFT);
 
     //     // DEBUT APPROVISIONNEMENT
-    //     $__reglement = Reglement::create([
+
+    //     $__reglement =  Reglement::create([
     //         'code' => $code,
-    //         'reference' => strtoupper($reglement->reference)."_". $key,
+    //         'reference' => strtoupper($reglement->reference),
     //         'date' => $reglement->date,
     //         'montant' => $reglement->montant,
     //         'document' => $reglement->document,
     //         'vente_id' => null,
     //         'compte_id' => $reglement->compte,
     //         'type_detail_recu_id' => $reglement->type_detail_recu,
-    //         'user_id' => $reglement->operator,
-    //         'client_id' => $reglement->_Client->id,
+    //         'user_id' => auth()->user()->id,
+    //         // 'client_id' => $client->id,
+    //         'clt' => $reglement->client,
     //         'for_dette' => true,
     //     ]);
 
     //     if ($__reglement) {
 
-    //         $valeur = $parametre->valeur;
+    //             $valeur = $parametre->valeur;
 
-    //         $valeur = $valeur + 1;
+    //             $valeur = $valeur + 1;
 
-    //         $parametres = Parametre::find(env('REGLEMENT'));
+    //             $parametres = Parametre::find(env('REGLEMENT'));
 
-    //         $parametre = $parametres->update([
-    //             'valeur' => $valeur,
-    //         ]);
-
-    //         if ($parametre) {
-    //             $mouvement = Mouvement::create([
-    //                 'libelleMvt' => "Approvisionnement pour remboursement de dette",
-    //                 'dateMvt' => $reglement->date,
-    //                 'montantMvt' => $reglement->montant,
-    //                 'compteClient_id' => $reglement->_Client->id,
-    //                 'reglement_id' => $__reglement->id,
-    //                 'sens' => 0,
-    //                 'user_id' => $reglement->operator
+    //             $parametre = $parametres->update([
+    //                 'valeur' => $valeur,
     //             ]);
-    //         }
-    //     }
 
-    //     // ACTUALISATION DU DEBIT & DU CREDIT DU CLIENT
-    //     // $reglement->_Client->credit += $reglement->montant;(une erreure qu'il ne fallait)
-    //     $reglement->_Client->debit_old += $reglement->montant;
-    //     $reglement->_Client->save();
+    //             // Ici aussi on fait la même chose. On ajoute pas directement
+    //             // le mouvement au compte du client
+    //             //  on le fait plutôt après validation de l'approvisionnement associé à ce mouvement
+
+    //             if ($parametre) {
+    //                 Mouvement::create([
+    //                     'libelleMvt' => "Approvisionnement pour reglement d'ancienne dette",
+    //                     'dateMvt' => $reglement->date,
+    //                     'montantMvt' => $reglement->montant,
+    //                     // 'compteClient_id' => $client->compteClients[0]->id,
+    //                     'compteClient_id' => null,
+    //                     'reglement_id' => $reglement->id,
+    //                     'sens' => 0,
+    //                     'user_id' => auth()->user()->id
+    //                 ]);
+    //             }
+    //         }
     // }
 
     return "Opération effectuée avec succès!";
@@ -320,10 +368,14 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/vente-a-comptabilise', 'getVenteAComptabiliser')->name('ventes.venteAComptabiliser');
             Route::get('/vente-a-comptabilise-deleted', 'getVenteAComptabiliserDeleted')->name('ventes.venteAComptabiliserDeleted');
             Route::get('/vente-a-comptabilise-updated', 'getVenteAComptabiliserUpdated')->name('ventes.venteAComptabiliserUpdated');
+            Route::get('/vente-totaux', 'getVenteTotaux')->name('ventes.getVenteTotaux');
+            Route::get('/vente-a-traiter', 'getVenteAtraiter')->name('ventes.getVenteAtraiter');
 
             Route::post('/vente-a-comptabilise', 'postVenteAComptabiliser')->name('ventes.postVenteAComptabiliser');
             Route::post('/vente-a-deleted', 'postVenteAComptabiliserDeleted')->name('ventes.postVenteAComptabiliserDeleted');
             Route::post('/vente-a-updated', 'postVenteAComptabiliserUpdated')->name('ventes.postVenteAComptabiliserUpdated');
+            Route::post('/vente-totaux', 'postVenteTotaux')->name('ventes.postVenteTotaux');
+            // Route::post('/vente-a-traiter', 'postVenteATraiter')->name('ventes.getVenteAtraiter');
 
             Route::get('/vente-a-comptabilises', 'postVenteAComptabiliser')->name('ventes.getPostVenteAComptabiliser');
             Route::get('/vente-a-traiter/{vente}', 'ventATraiter')->name('ventes.ventATraiter');

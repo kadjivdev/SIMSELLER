@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-
 @section('content')
-
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -35,7 +33,7 @@
                             @csrf
                             <div class="card-body">
                                 <div class="row">
-                                    
+
                                     @if ($programmation)
                                     <input type="hidden" class="form-control form-control-sm text-center" name="statut" value="{{ $programmation->statut }}" style="text-transform: uppercase" autofocus>
                                     <div class="col-sm-3">
@@ -58,7 +56,7 @@
                                     <div @if ($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
                                         <div class="form-group">
                                             <label>Avaliseurs<span class="text-danger">*</span></label>
-                                            
+
                                             <select id="avaliseur" class="select2 form-control form-control-sm @error('camion_id') is-invalid @enderror" name="avaliseur_id" style="width: 100%;">
                                                 <option value="{{ null }}" selected>** choisissez un avaliseur
                                                     **</option>
@@ -143,7 +141,7 @@
                                     <div class="col-sm-12">
                                         <div class="form-group">
                                             <label>Observation<span class="text-danger"> (facultatif)</span></label>
-                                           <textarea name="observation" value="{{old('observation')}}" class="form-control" rows="5" placeholder="Laissez une observation ici ...."></textarea>
+                                            <textarea name="observation" value="{{old('observation')}}" class="form-control" rows="5" placeholder="Laissez une observation ici ...."></textarea>
                                             @error('observation')
                                             <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -200,7 +198,9 @@
                                                     <th>Camion</th>
                                                     <th>Chauffeur</th>
                                                     <th>Avaliseur</th>
-                                                    <th>Quantité</th>
+                                                    <th>Qte Prog</th>
+                                                    <th>Qte Livrée</th>
+                                                    <th>Qte Vendu</th>
                                                     <th>Zone</th>
                                                     <!-- <th>Date Sortie</th> -->
                                                     <th>BL</th>
@@ -233,7 +233,15 @@
                                                         ({{ $programmation->avaliseur->telephone }})
                                                     </td>
                                                     <td class="text-right">
+                                                        @if($programmation->statut != 'Annuler')
                                                         {{ number_format($programmation->qteprogrammer, 2, ',', ' ') }}
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span class="badge bg-info">{{ number_format($programmation->qtelivrer, 2, ',', ' ') }} </span>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span class="badge bg-warning">{{ number_format($programmation->vendus->sum("qteVendu"), 2, ',', ' ') }} @if($programmation->qteprogrammer < $programmation->qtelivrer) diff @endif </span>
                                                     </td>
                                                     <td>{{ $programmation->zone->libelle }}
                                                         ({{ $programmation->zone->departement->libelle }})</td>
@@ -273,7 +281,7 @@
                                                         <a class="btn btn-danger btn-sm" href="{{ route('programmations.destroy', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id]) }}">
                                                             <i class="fa-solid fa-trash-can"></i></a>
                                                         @endif
-                                                        
+
                                                         @endif
 
                                                         @if(($programmation->statut != 'Livrer') && ($programmation->statut != 'Annuler') && ($programmation->imprimer) && ($programmation->bl_gest == Null))
@@ -356,286 +364,289 @@
 @endsection
 
 @section('script')
-    <script>
-            $('#success ').attr('hidden', 'hidden');
-            $('#danger').attr('hidden', 'hidden');
-        
-            var id_prog = 0
-            function getId(id){
-                id_prog = id ;
-            }
-            function saveBl() {
-                var bl_gest = $('#bl_gest').val();
-                axios.get('{{env('APP_BASE_URL')}}programmation/livraison/bl/' + id_prog +'/'+ bl_gest +'/{{ Auth::user()->name }}').then((response) => {
-                    console.log(response.data);
-                    if (response.data == 'success') {
-                        $("#message").text(response.data); 
-                        $('#success').removeAttr('hidden');
-                        $(`#annuler-${id_prog}`).attr('hidden', 'hidden');
-                        $(`#bl-${id_prog}`).attr('hidden', 'hidden');
-                    } else {
-                        $("#messageError").text(response.data); 
-                        $('#danger').removeAttr('hidden')    
-                    }
-                    var windowHeight = $(window).height(); 
-                     var scrollTo = windowHeight / 2; 
-                    $("html, body, .table").animate({ scrollTop: scrollTo }, "slow");
-                    
-                    //$('#success').attr('hidden', 'hidden');                 
-                }).catch(()=>{
-                    alert(response.data);                   
+<script>
+    $('#success ').attr('hidden', 'hidden');
+    $('#danger').attr('hidden', 'hidden');
 
-                });
-            }
-       
-    </script>
-    <script>
-        function selectDefaultDriver() {
-            if ($('#camion').val()) {
-                $('#champ').attr('hidden', 'hidden');
-                $('#loader').removeAttr('hidden')
-                $('#chauffeur option').removeAttr('selected');
-                axios.get("{{ env('APP_BASE_URL') }}programmation/chauffeur/" + $('#camion').val()).then((response) => {
-                    $('#chauffeur_' + response.data.id).attr('selected', 'true');
-                    $('.select2').select2();
-                    $('#loader').attr('hidden', 'hidden');
-                    $('#champ').removeAttr('hidden')
-                }).catch(() => {
-                    $('#loader').attr('hidden', 'hidden');
-                    $('#champ').removeAttr('hidden')
-                })
+    var id_prog = 0
+
+    function getId(id) {
+        id_prog = id;
+    }
+
+    function saveBl() {
+        var bl_gest = $('#bl_gest').val();
+        axios.get('{{env('
+            APP_BASE_URL ')}}programmation/livraison/bl/' + id_prog + '/' + bl_gest + '/{{ Auth::user()->name }}').then((response) => {
+            console.log(response.data);
+            if (response.data == 'success') {
+                $("#message").text(response.data);
+                $('#success').removeAttr('hidden');
+                $(`#annuler-${id_prog}`).attr('hidden', 'hidden');
+                $(`#bl-${id_prog}`).attr('hidden', 'hidden');
             } else {
-                $('#chauffeur_0').attr('selected', 'true');
-                $('.select2').select2()
+                $("#messageError").text(response.data);
+                $('#danger').removeAttr('hidden')
             }
+            var windowHeight = $(window).height();
+            var scrollTo = windowHeight / 2;
+            $("html, body, .table").animate({
+                scrollTop: scrollTo
+            }, "slow");
+
+            //$('#success').attr('hidden', 'hidden');                 
+        }).catch(() => {
+            alert(response.data);
+
+        });
+    }
+</script>
+<script>
+    function selectDefaultDriver() {
+        if ($('#camion').val()) {
+            $('#champ').attr('hidden', 'hidden');
+            $('#loader').removeAttr('hidden')
+            $('#chauffeur option').removeAttr('selected');
+            axios.get("{{ env('APP_BASE_URL') }}programmation/chauffeur/" + $('#camion').val()).then((response) => {
+                $('#chauffeur_' + response.data.id).attr('selected', 'true');
+                $('.select2').select2();
+                $('#loader').attr('hidden', 'hidden');
+                $('#champ').removeAttr('hidden')
+            }).catch(() => {
+                $('#loader').attr('hidden', 'hidden');
+                $('#champ').removeAttr('hidden')
+            })
+        } else {
+            $('#chauffeur_0').attr('selected', 'true');
+            $('.select2').select2()
         }
-    </script>
-    <script>
-        $(function() {
-            @if (session('message') || $programmation || $errors)
-                window.scrollTo(0, $("#entete_produit").offset().top);
-            @endif
-            $("#example1").DataTable({
-                "responsive": true,
-                "lengthChange": false,
-                "autoWidth": false,
-                "buttons": ["pdf", "print"],
-                "order": [
-                    [1, 'asc']
-                ],
-                "pageLength": 100,
-                "columnDefs": [{
+    }
+</script>
+<script>
+    $(function() {
+        @if(session('message') || $programmation || $errors)
+        window.scrollTo(0, $("#entete_produit").offset().top);
+        @endif
+        $("#example1").DataTable({
+            "responsive": true,
+            "lengthChange": false,
+            "autoWidth": false,
+            "buttons": ["pdf", "print"],
+            "order": [
+                [1, 'asc']
+            ],
+            "pageLength": 100,
+            "columnDefs": [{
                     "targets": 2,
                     "orderable": false
                 },
-                    {
-                        "targets": 0,
-                        "orderable": false
-                    }
-                ],
-                language: {
-                    "emptyTable": "Aucune donnée disponible dans le tableau",
-                    "lengthMenu": "Afficher _MENU_ éléments",
-                    "loadingRecords": "Chargement...",
-                    "processing": "Traitement...",
-                    "zeroRecords": "Aucun élément correspondant trouvé",
-                    "paginate": {
-                        "first": "Premier",
-                        "last": "Dernier",
-                        "previous": "Précédent",
-                        "next": "Suiv"
+                {
+                    "targets": 0,
+                    "orderable": false
+                }
+            ],
+            language: {
+                "emptyTable": "Aucune donnée disponible dans le tableau",
+                "lengthMenu": "Afficher _MENU_ éléments",
+                "loadingRecords": "Chargement...",
+                "processing": "Traitement...",
+                "zeroRecords": "Aucun élément correspondant trouvé",
+                "paginate": {
+                    "first": "Premier",
+                    "last": "Dernier",
+                    "previous": "Précédent",
+                    "next": "Suiv"
+                },
+                "aria": {
+                    "sortAscending": ": activer pour trier la colonne par ordre croissant",
+                    "sortDescending": ": activer pour trier la colonne par ordre décroissant"
+                },
+                "select": {
+                    "rows": {
+                        "_": "%d lignes sélectionnées",
+                        "1": "1 ligne sélectionnée"
                     },
-                    "aria": {
-                        "sortAscending": ": activer pour trier la colonne par ordre croissant",
-                        "sortDescending": ": activer pour trier la colonne par ordre décroissant"
+                    "cells": {
+                        "1": "1 cellule sélectionnée",
+                        "_": "%d cellules sélectionnées"
                     },
-                    "select": {
-                        "rows": {
-                            "_": "%d lignes sélectionnées",
-                            "1": "1 ligne sélectionnée"
-                        },
-                        "cells": {
-                            "1": "1 cellule sélectionnée",
-                            "_": "%d cellules sélectionnées"
-                        },
-                        "columns": {
-                            "1": "1 colonne sélectionnée",
-                            "_": "%d colonnes sélectionnées"
-                        }
-                    },
-                    "autoFill": {
-                        "cancel": "Annuler",
-                        "fill": "Remplir toutes les cellules avec <i>%d<\/i>",
-                        "fillHorizontal": "Remplir les cellules horizontalement",
-                        "fillVertical": "Remplir les cellules verticalement"
-                    },
-                    "searchBuilder": {
-                        "conditions": {
-                            "date": {
-                                "after": "Après le",
-                                "before": "Avant le",
-                                "between": "Entre",
-                                "empty": "Vide",
-                                "equals": "Egal à",
-                                "not": "Différent de",
-                                "notBetween": "Pas entre",
-                                "notEmpty": "Non vide"
-                            },
-                            "number": {
-                                "between": "Entre",
-                                "empty": "Vide",
-                                "equals": "Egal à",
-                                "gt": "Supérieur à",
-                                "gte": "Supérieur ou égal à",
-                                "lt": "Inférieur à",
-                                "lte": "Inférieur ou égal à",
-                                "not": "Différent de",
-                                "notBetween": "Pas entre",
-                                "notEmpty": "Non vide"
-                            },
-                            "string": {
-                                "contains": "Contient",
-                                "empty": "Vide",
-                                "endsWith": "Se termine par",
-                                "equals": "Egal à",
-                                "not": "Différent de",
-                                "notEmpty": "Non vide",
-                                "startsWith": "Commence par"
-                            },
-                            "array": {
-                                "equals": "Egal à",
-                                "empty": "Vide",
-                                "contains": "Contient",
-                                "not": "Différent de",
-                                "notEmpty": "Non vide",
-                                "without": "Sans"
-                            }
-                        },
-                        "add": "Ajouter une condition",
-                        "button": {
-                            "0": "Recherche avancée",
-                            "_": "Recherche avancée (%d)"
-                        },
-                        "clearAll": "Effacer tout",
-                        "condition": "Condition",
-                        "data": "Donnée",
-                        "deleteTitle": "Supprimer la règle de filtrage",
-                        "logicAnd": "Et",
-                        "logicOr": "Ou",
-                        "title": {
-                            "0": "Recherche avancée",
-                            "_": "Recherche avancée (%d)"
-                        },
-                        "value": "Valeur"
-                    },
-                    "searchPanes": {
-                        "clearMessage": "Effacer tout",
-                        "count": "{total}",
-                        "title": "Filtres actifs - %d",
-                        "collapse": {
-                            "0": "Volet de recherche",
-                            "_": "Volet de recherche (%d)"
-                        },
-                        "countFiltered": "{shown} ({total})",
-                        "emptyPanes": "Pas de volet de recherche",
-                        "loadMessage": "Chargement du volet de recherche..."
-                    },
-                    "buttons": {
-                        "copyKeys": "Appuyer sur ctrl ou u2318 + C pour copier les données du tableau dans votre presse-papier.",
-                        "collection": "Collection",
-                        "colvis": "Visibilité colonnes",
-                        "colvisRestore": "Rétablir visibilité",
-                        "copy": "Copier",
-                        "copySuccess": {
-                            "1": "1 ligne copiée dans le presse-papier",
-                            "_": "%ds lignes copiées dans le presse-papier"
-                        },
-                        "copyTitle": "Copier dans le presse-papier",
-                        "csv": "CSV",
-                        "excel": "Excel",
-                        "pageLength": {
-                            "-1": "Afficher toutes les lignes",
-                            "_": "Afficher %d lignes"
-                        },
-                        "pdf": "PDF",
-                        "print": "Imprimer"
-                    },
-                    "decimal": ",",
-                    "info": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
-                    "infoEmpty": "Affichage de 0 à 0 sur 0 éléments",
-                    "infoThousands": ".",
-                    "search": "Rechercher:",
-                    "thousands": ".",
-                    "infoFiltered": "(filtrés depuis un total de _MAX_ éléments)",
-                    "datetime": {
-                        "previous": "Précédent",
-                        "next": "Suivant",
-                        "hours": "Heures",
-                        "minutes": "Minutes",
-                        "seconds": "Secondes",
-                        "unknown": "-",
-                        "amPm": [
-                            "am",
-                            "pm"
-                        ],
-                        "months": [
-                            "Janvier",
-                            "Fevrier",
-                            "Mars",
-                            "Avril",
-                            "Mai",
-                            "Juin",
-                            "Juillet",
-                            "Aout",
-                            "Septembre",
-                            "Octobre",
-                            "Novembre",
-                            "Decembre"
-                        ],
-                        "weekdays": [
-                            "Dim",
-                            "Lun",
-                            "Mar",
-                            "Mer",
-                            "Jeu",
-                            "Ven",
-                            "Sam"
-                        ]
-                    },
-                    "editor": {
-                        "close": "Fermer",
-                        "create": {
-                            "button": "Nouveaux",
-                            "title": "Créer une nouvelle entrée",
-                            "submit": "Envoyer"
-                        },
-                        "edit": {
-                            "button": "Editer",
-                            "title": "Editer Entrée",
-                            "submit": "Modifier"
-                        },
-                        "remove": {
-                            "button": "Supprimer",
-                            "title": "Supprimer",
-                            "submit": "Supprimer",
-                            "confirm": {
-                                "1": "etes-vous sure de vouloir supprimer 1 ligne?",
-                                "_": "etes-vous sure de vouloir supprimer %d lignes?"
-                            }
-                        },
-                        "error": {
-                            "system": "Une erreur système s'est produite"
-                        },
-                        "multi": {
-                            "title": "Valeurs Multiples",
-                            "restore": "Rétablir Modification",
-                            "noMulti": "Ce champ peut être édité individuellement, mais ne fait pas partie d'un groupe. ",
-                            "info": "Les éléments sélectionnés contiennent différentes valeurs pour ce champ. Pour  modifier et "
-                        }
+                    "columns": {
+                        "1": "1 colonne sélectionnée",
+                        "_": "%d colonnes sélectionnées"
                     }
                 },
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-        })
-         
-    </script>
+                "autoFill": {
+                    "cancel": "Annuler",
+                    "fill": "Remplir toutes les cellules avec <i>%d<\/i>",
+                    "fillHorizontal": "Remplir les cellules horizontalement",
+                    "fillVertical": "Remplir les cellules verticalement"
+                },
+                "searchBuilder": {
+                    "conditions": {
+                        "date": {
+                            "after": "Après le",
+                            "before": "Avant le",
+                            "between": "Entre",
+                            "empty": "Vide",
+                            "equals": "Egal à",
+                            "not": "Différent de",
+                            "notBetween": "Pas entre",
+                            "notEmpty": "Non vide"
+                        },
+                        "number": {
+                            "between": "Entre",
+                            "empty": "Vide",
+                            "equals": "Egal à",
+                            "gt": "Supérieur à",
+                            "gte": "Supérieur ou égal à",
+                            "lt": "Inférieur à",
+                            "lte": "Inférieur ou égal à",
+                            "not": "Différent de",
+                            "notBetween": "Pas entre",
+                            "notEmpty": "Non vide"
+                        },
+                        "string": {
+                            "contains": "Contient",
+                            "empty": "Vide",
+                            "endsWith": "Se termine par",
+                            "equals": "Egal à",
+                            "not": "Différent de",
+                            "notEmpty": "Non vide",
+                            "startsWith": "Commence par"
+                        },
+                        "array": {
+                            "equals": "Egal à",
+                            "empty": "Vide",
+                            "contains": "Contient",
+                            "not": "Différent de",
+                            "notEmpty": "Non vide",
+                            "without": "Sans"
+                        }
+                    },
+                    "add": "Ajouter une condition",
+                    "button": {
+                        "0": "Recherche avancée",
+                        "_": "Recherche avancée (%d)"
+                    },
+                    "clearAll": "Effacer tout",
+                    "condition": "Condition",
+                    "data": "Donnée",
+                    "deleteTitle": "Supprimer la règle de filtrage",
+                    "logicAnd": "Et",
+                    "logicOr": "Ou",
+                    "title": {
+                        "0": "Recherche avancée",
+                        "_": "Recherche avancée (%d)"
+                    },
+                    "value": "Valeur"
+                },
+                "searchPanes": {
+                    "clearMessage": "Effacer tout",
+                    "count": "{total}",
+                    "title": "Filtres actifs - %d",
+                    "collapse": {
+                        "0": "Volet de recherche",
+                        "_": "Volet de recherche (%d)"
+                    },
+                    "countFiltered": "{shown} ({total})",
+                    "emptyPanes": "Pas de volet de recherche",
+                    "loadMessage": "Chargement du volet de recherche..."
+                },
+                "buttons": {
+                    "copyKeys": "Appuyer sur ctrl ou u2318 + C pour copier les données du tableau dans votre presse-papier.",
+                    "collection": "Collection",
+                    "colvis": "Visibilité colonnes",
+                    "colvisRestore": "Rétablir visibilité",
+                    "copy": "Copier",
+                    "copySuccess": {
+                        "1": "1 ligne copiée dans le presse-papier",
+                        "_": "%ds lignes copiées dans le presse-papier"
+                    },
+                    "copyTitle": "Copier dans le presse-papier",
+                    "csv": "CSV",
+                    "excel": "Excel",
+                    "pageLength": {
+                        "-1": "Afficher toutes les lignes",
+                        "_": "Afficher %d lignes"
+                    },
+                    "pdf": "PDF",
+                    "print": "Imprimer"
+                },
+                "decimal": ",",
+                "info": "Affichage de _START_ à _END_ sur _TOTAL_ éléments",
+                "infoEmpty": "Affichage de 0 à 0 sur 0 éléments",
+                "infoThousands": ".",
+                "search": "Rechercher:",
+                "thousands": ".",
+                "infoFiltered": "(filtrés depuis un total de _MAX_ éléments)",
+                "datetime": {
+                    "previous": "Précédent",
+                    "next": "Suivant",
+                    "hours": "Heures",
+                    "minutes": "Minutes",
+                    "seconds": "Secondes",
+                    "unknown": "-",
+                    "amPm": [
+                        "am",
+                        "pm"
+                    ],
+                    "months": [
+                        "Janvier",
+                        "Fevrier",
+                        "Mars",
+                        "Avril",
+                        "Mai",
+                        "Juin",
+                        "Juillet",
+                        "Aout",
+                        "Septembre",
+                        "Octobre",
+                        "Novembre",
+                        "Decembre"
+                    ],
+                    "weekdays": [
+                        "Dim",
+                        "Lun",
+                        "Mar",
+                        "Mer",
+                        "Jeu",
+                        "Ven",
+                        "Sam"
+                    ]
+                },
+                "editor": {
+                    "close": "Fermer",
+                    "create": {
+                        "button": "Nouveaux",
+                        "title": "Créer une nouvelle entrée",
+                        "submit": "Envoyer"
+                    },
+                    "edit": {
+                        "button": "Editer",
+                        "title": "Editer Entrée",
+                        "submit": "Modifier"
+                    },
+                    "remove": {
+                        "button": "Supprimer",
+                        "title": "Supprimer",
+                        "submit": "Supprimer",
+                        "confirm": {
+                            "1": "etes-vous sure de vouloir supprimer 1 ligne?",
+                            "_": "etes-vous sure de vouloir supprimer %d lignes?"
+                        }
+                    },
+                    "error": {
+                        "system": "Une erreur système s'est produite"
+                    },
+                    "multi": {
+                        "title": "Valeurs Multiples",
+                        "restore": "Rétablir Modification",
+                        "noMulti": "Ce champ peut être édité individuellement, mais ne fait pas partie d'un groupe. ",
+                        "info": "Les éléments sélectionnés contiennent différentes valeurs pour ce champ. Pour  modifier et "
+                    }
+                }
+            },
+        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    })
+</script>
 @endsection

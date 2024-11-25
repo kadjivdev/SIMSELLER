@@ -56,6 +56,7 @@
                                                 @endforeach
                                             </select> -->
                                             <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>-->
+                                                <option class="" value="tous" >Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
                                                     {{ $client->raisonSociale }}
@@ -131,6 +132,29 @@
                                     </div>
                                 </div>
                             </div>
+
+                            @if(!session('resultat'))
+                            <div class="row bg-dark pt-3">
+                                <div class="col-md-6">
+                                    <div class="info-box text-dark">
+                                        <span class="info-box-icon bg-secondary"><i class="bi bi-plus-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">SOLDE ANCIEN</span>
+                                            <span class="info-box-number">{{number_format($credit_old, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-box text-dark">
+                                        <span class="info-box-icon bg-danger"><i class="bi bi-plus-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">DETTE ANCIENNE</span>
+                                            <span class="info-box-number">{{number_format($debit_old, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             <hr>
                             @if (session('resultat'))

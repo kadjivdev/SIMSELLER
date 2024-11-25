@@ -122,6 +122,7 @@
                                         <td class="text-center">
                                             @foreach ( $vente->vendus as $vendu )
                                             <b>{{ $vendu->programmation->bl_gest ? $vendu->programmation->bl_gest : $vendu->programmation->bl }}</b> <br>
+                                            <span class="badge bg-dark">{{ $vendu->programmation->bl_gest?$vendu->programmation->bl_gest:'--'}} / {{$vendu->programmation->bl?$vendu->programmation->bl:'--'}}</span>
                                             @endforeach
                                         </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($vente->date)) }}</td>
@@ -184,6 +185,7 @@
                                             @endif
                                             <a class="btn btn-dark btn-sm" href="#" onclick="charger({{ $vente->id }} )" data-toggle="modal" data-target="#modal-lg"><i class="fa-solid fa-list"></i></a>
                                         </td>
+                                        
                                         @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
 
                                         <td class="text-center">

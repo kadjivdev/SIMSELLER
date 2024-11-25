@@ -95,7 +95,9 @@
                                         <th>Utilisateur</th>
                                         <th>Dette</th>
                                         <th>Reversement</th>
+                                        @if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists())
                                         <th>Action</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -103,14 +105,14 @@
                                     <!-- ICI ON AFFICHE QUE LES APPROVISIONNEMENTS NON VALIDES -->
                                     @if($reglement->statut!=1)
                                     <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-warning':''  }} ">
-                                        <td><span class="badge bg-warning">{{$reglement->code}} </span></td>
+                                        <td class="text-center"><span class="badge bg-warning">{{$reglement->code}} </span></td>
                                         <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
                                         <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}}</td>
-                                        <td>{{$reglement->reference}}</td>
-                                        <td>
+                                        <td class="text-center"><span class="badge bg-dark"> {{$reglement->reference}}</span> </td>
+                                        <td class="text-center">
                                             <span class="badge bg-info">
                                                 @if($reglement->_clt)
-                                                {{$reglement->_clt->nom}} {{$reglement->_clt->prenom}}
+                                                {{$reglement->_clt->raisonSociale}}
                                                 @else
                                                 ---
                                                 @endif
@@ -121,7 +123,7 @@
                                             <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document?asset('storage/'.$reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
                                             @endif
                                         </td>
-                                        <td>@if($reglement->utilisateur) {{$reglement->utilisateur->name}}@else Utilisateur manquant @endif</td>
+                                        <td class="text-center">@if($reglement->utilisateur) {{$reglement->utilisateur->name}}@else Utilisateur manquant @endif</td>
                                         <td class="text-center">
                                             @if($reglement->for_dette)
                                             <span class="badge bg-success">Oui</span>
@@ -136,14 +138,15 @@
                                             <span class="badge bg-danger">Non</span>
                                             @endif
                                         </td>
+                                        @if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists())
                                         <td class="text-center">
                                             @if(!$reglement->observation_validation)
                                             <a class="btn btn-success btn-block btn-sm" href="{{route('ctlventes.create',$reglement->id)}}">Contrôler</a>
                                             @else
-
-                                            <span class="bg-light px-1">{{$reglement->observation_validation}}</span>
                                             @endif
+                                            <span class="bg-light px-1">{{$reglement->observation_validation}}</span>
                                         </td>
+                                        @endif
                                     </tr>
                                     @endif
                                     @endforeach
@@ -159,7 +162,9 @@
                                         <th>Utilisateur</th>
                                         <th>Dette</th>
                                         <th>Reversement</th>
+                                        @if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists())
                                         <th>Action</th>
+                                        @endif
                                     </tr>
                                 </tfoot>
                             </table>
@@ -184,7 +189,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print","csv","excel"],
             "order": [
                 [0, 'desc']
             ],

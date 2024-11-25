@@ -64,6 +64,7 @@ class VenteController extends Controller
         }
 
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
+            // dd("gogo");
             $user = Auth::user();
             if ($user->id == 11) {
                 $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
@@ -73,6 +74,8 @@ class VenteController extends Controller
         } elseif (in_array(3, $roles)) {
             $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         }
+
+        // $ventes = $ventes->where("id", "<", 100);
 
         return view('ventes.index', compact('ventes'));
     }
@@ -376,7 +379,7 @@ class VenteController extends Controller
      * @param  \App\Models\Vente  $vente
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory
      */
-    
+
     public function edit(Request $request, Vente $vente)
     {
         $user = User::find(Auth::user()->id);
@@ -557,7 +560,7 @@ class VenteController extends Controller
 
                 foreach ($mvts as $mvt) {
                     $compteClient = $mvt->compteClient;
-                   
+
                     ###____
                     $client = $compteClient->client;
                     // $client->credit = $client->credit + $regle->montant;
@@ -744,7 +747,7 @@ class VenteController extends Controller
     public function askUpdate()
     {
         // $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
-        $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
+        $ventes = Vente::where('statut', 'En attente de modification')->orderByDesc('date')->get();
         return view('ventes.askUpadate', compact('ventes'));
     }
 
@@ -766,20 +769,6 @@ class VenteController extends Controller
             // ON CONFIRME QUE CETTE VENTE EST VALIDE
             $vente->valide = true;
             $vente->update();
-
-            //Mise à jour du compte Client.
-            $client = $vente->commandeclient->client;
-            $client->debit = $client->debit - $vente->montant;
-            $client->update();
-
-            // dd($client->compteClients->first());
-            // Mise à jour du Solde du client 
-            $client = $vente->commandeclient->client;
-            $compteClient = $client->compteClients->first();
-            if ($compteClient) {
-                $compteClient->solde = $client->credit + $client->debit;
-                $compteClient->update();
-            }
         }
 
         return redirect()->back()->with("message", "Envoie à la comptabilité effectuée avec succès!");
@@ -810,12 +799,98 @@ class VenteController extends Controller
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
+
+    ####___TOUTES VENTES CONFONDUES (TRAITEES OU PAS)
     public function getVenteAComptabiliser()
     {
         return view('comptabilite.listesVente');
     }
 
     public function postVenteAComptabiliser(Request $request)
+    {
+        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
+            ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', '<>', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
+            ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+        session(['debut_compta' => $request->debut]);
+        session(['fin_compta' => $request->fin]);
+
+        return redirect()->route('ventes.venteAComptabiliser')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
+    }
+
+    ####___TOUTES VENTES A TRAITER
+    public function getVenteATraiter(Request $request)
+    {
+
+        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', '<>', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+
+        if ($request->debut && $request->fin) {
+            session(["search" => true]);
+            session(["debut" => $request->debut]);
+            session(["fin" => $request->fin]);
+            $AComptabilisers = $AComptabilisers->whereBetween("validated_date", [$request->debut, $request->fin]);
+            $AComptabilisersAdjeOla = $AComptabilisersAdjeOla->whereBetween("validated_date", [$request->debut, $request->fin]);
+        }
+
+        return view('comptabilite.atraiter', compact("AComptabilisers", "AComptabilisersAdjeOla"));
+    }
+
+    public function postVenteATraiter(Request $request)
     {
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
@@ -856,10 +931,57 @@ class VenteController extends Controller
         session(['debut_compta' => $request->debut]);
         session(['fin_compta' => $request->fin]);
 
+        return redirect()->route('ventes.getVenteAtraiter')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
+    }
 
-        // dd(count($AComptabilisers),count($AComptabilisersAdjeOla));
+    #####____ LES TOTAUX
+    public function getVenteTotaux()
+    {
+        return view('comptabilite.totaux');
+    }
 
-        return redirect()->route('ventes.venteAComptabiliser')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
+    public function postVenteTotaux(Request $request)
+    {
+        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', '<>', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            // ->whereDate('ventes.created_at', '>=', $request->debut)
+            // ->whereDate('ventes.created_at', '<=', $request->fin)
+
+            ###__on recherche desormais via la date de validation
+            ->whereDate('ventes.validated_date', '>=', $request->debut)
+            ->whereDate('ventes.validated_date', '<=', $request->fin)
+
+            ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
+            ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
+            ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
+            ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
+            ->join('fournisseurs', 'fournisseurs.id', '=', 'bon_commandes.fournisseur_id')
+            ->select('ventes.*', 'fournisseurs.sigle')->where('fournisseurs.id', 4)
+            ->orderBy('date', 'DESC')
+            ->get();
+
+        session(['debut_compta' => $request->debut]);
+        session(['fin_compta' => $request->fin]);
+
+        return redirect()->route('ventes.getVenteTotaux')->withInput()->with('resultat', ['AComptabilisers' => $AComptabilisers, 'AComptabilisersAdjeOla' => $AComptabilisersAdjeOla, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
 
     #####____GET DES VENTES SUPPRIMEES
@@ -937,10 +1059,12 @@ class VenteController extends Controller
             $vente->traited_date = now();
             $vente->update();
 
-            return redirect()->route('ventes.getPostVenteAComptabiliser', [
-                'debut' => session('debut_compta'),
-                'fin' => session('fin_compta')
-            ]);
+            // return redirect()->route('ventes.getVenteAtraiter', [
+            //     'debut' => session('debut_compta'),
+            //     'fin' => session('fin_compta')
+            // ]);
+
+            return redirect()->route("ventes.getVenteAtraiter")->with("message", "Vente traitée avec succès!");
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -1003,6 +1127,7 @@ class VenteController extends Controller
         $fournisseurs = Fournisseur::all();
         return view('comptabilite.etatcomptabilite', compact('fournisseurs'));
     }
+
     public function viewVenteComptabiliser()
     {
         $fournisseurs = Fournisseur::all();
@@ -1011,59 +1136,35 @@ class VenteController extends Controller
 
     public function postexport(Request $request)
     {
+        $ventes = Vente::all();
+        $export_comptabilite = DB::select("SELECT * FROM export_comptabilite");
+        // // dd($export_comptabilite);
+        // $_vente = Vente::findOrFail(1786);
+        // dd($_vente,collect($export_comptabilite)[0]);
+
         $comptabiliser = [];
-        if ($request->filtre == 'on') {
-            session(['filtre' => $request->filtre]);
-            if ($request->fournisseur) {
-                $comptabiliser =  DB::select(
-                    "SELECT  *           
-                            FROM `export_comptabilite`  
-                                WHERE  `export_comptabilite`.`date_traitement` BETWEEN ? AND ?
-                                AND  `export_comptabilite`.`FRS` = ?
-                                AND  `export_comptabilite`.`date_comptabilisation` IS NULL
-                                ORDER BY `export_comptabilite`.`date_traitement` DESC;
-                     ",
-                    [$request->debut, $request->fin, $request->fournisseur]
-                );
-            } else {
-                $comptabiliser =  DB::select(
-                    "SELECT  *           
-                            FROM `export_comptabilite`  
-                                WHERE  `export_comptabilite`.`date_traitement` BETWEEN ? AND ?
-                                AND  `export_comptabilite`.`date_comptabilisation` IS NULL
-                                ORDER BY `export_comptabilite`.`date_traitement`DESC;
-
-                    ",
-                    [$request->debut, $request->fin]
-                );
-            }
+        if ($request->fournisseur == "tous") {
+            $comptabiliser =  DB::select(
+                "SELECT  *           
+                        FROM `export_comptabilite`  
+                            WHERE  `export_comptabilite`.`date_traitement` BETWEEN ? AND ?
+                            
+                            AND  `export_comptabilite`.`date_comptabilisation` IS NULL
+                            ORDER BY `export_comptabilite`.`date_traitement` DESC;
+                 ",
+                [$request->debut, $request->fin]
+            );
         } else {
-            session(['filtre' => $request->filtre]);
-            if ($request->fournisseur) {
-                $comptabiliser =  DB::select(
-                    "SELECT  *           
-                            FROM `export_comptabilite`  
-                                WHERE  `export_comptabilite`.`dateCreate` BETWEEN ? AND ?
-                                AND  `export_comptabilite`.`date_traitement` IS NOT NULL
-                                AND  `export_comptabilite`.`FRS` = ?
-                                AND  `export_comptabilite`.`date_comptabilisation` IS NULL
-                                ORDER BY `export_comptabilite`.`date_traitement` DESC;
-                     ",
-                    [$request->debut, $request->fin, $request->fournisseur]
-                );
-            } else {
-                $comptabiliser =  DB::select(
-                    "SELECT  *           
-                            FROM `export_comptabilite`  
-                                WHERE  `export_comptabilite`.`dateCreate` BETWEEN ? AND ?
-                                AND  `export_comptabilite`.`date_traitement` IS NOT NULL
-                                AND  `export_comptabilite`.`date_comptabilisation` IS NULL
-                                ORDER BY `export_comptabilite`.`date_traitement`DESC;
-
-                    ",
-                    [$request->debut, $request->fin]
-                );
-            }
+            $comptabiliser =  DB::select(
+                "SELECT  *           
+                        FROM `export_comptabilite`  
+                            WHERE  `export_comptabilite`.`date_traitement` BETWEEN ? AND ?
+                            AND  `export_comptabilite`.`FRS` = ?
+                            AND  `export_comptabilite`.`date_comptabilisation` IS NULL
+                            ORDER BY `export_comptabilite`.`date_traitement` DESC;
+                 ",
+                [$request->debut, $request->fin, $request->fournisseur]
+            );
         }
 
         foreach ($comptabiliser as $key => $comptabilise) {
@@ -1099,7 +1200,6 @@ class VenteController extends Controller
                     [$request->debut, $request->fin, $request->fournisseur]
                 );
             } else {
-
 
                 $comptabiliser =  DB::select(
                     "SELECT  *           
@@ -1165,19 +1265,7 @@ class VenteController extends Controller
                 );
             }
         }
-        /*  $comptabiliser =  DB::select("SELECT                 
-                export_comptabilite.`heureSysteme`, export_comptabilite.`dateSysteme`,export_comptabilite.`code`,export_comptabilite.`id`, export_comptabilite.`dateVente`, 
-                export_comptabilite.`clients`, export_comptabilite.`ifu`, export_comptabilite.dateAchat,  export_comptabilite.produit,
-                export_comptabilite.qte,  export_comptabilite.pvr,export_comptabilite.prixTTC, 
-                export_comptabilite.prixHt,export_comptabilite.`filleuls`,export_comptabilite.PrixBruite,export_comptabilite.NetHT,
-                export_comptabilite.TVA, export_comptabilite.AIB,   export_comptabilite.TTC, export_comptabilite.FRS
-                 FROM `export_comptabilite`  
-                        WHERE `export_comptabilite`.`dateCreate` BETWEEN ? AND ?
-                        AND  `export_comptabilite`.`date_traitement` IS NOT NULL
-                        AND  `export_comptabilite`.`date_comptabilisation` IS NOT NULL;
 
-                ",[$request->debut, $request->fin]); 
-            */
         foreach ($comptabiliser as $key => $comptabilise) {
             if ($comptabilise->filleuls !== null) {
                 $compta = json_decode($comptabilise->filleuls);

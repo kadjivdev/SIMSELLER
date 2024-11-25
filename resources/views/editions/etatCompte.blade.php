@@ -46,6 +46,9 @@
                                 </div>
                             </form>
 
+                            @php($__credit = session('resultat') ? session('resultat')['credit']: $credit)
+                            @php($__debit = session('resultat')? session('resultat')['debit']: $debit)
+
                             <!--  -->
                             <div class="row text-center">
                                 <!-- CREDIT -->
@@ -54,7 +57,7 @@
                                         <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
                                             <span class="info-box-text">CREDIT</span>
-                                            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['credit'], '0', '', ' '):  number_format($credit, '0', '', ' ') }}</span>
+                                            <span class="info-box-number">{{number_format($__credit, '0', '', ' ') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -65,7 +68,7 @@
                                         <span class="info-box-icon bg-danger"><i class="fas fa-hand-holding-usd"></i></span>
                                         <div class="info-box-content">
                                             <span class="info-box-text">DEBIT</span>
-                                            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['debit'], '0', '', ' '): number_format($debit, '0', '', ' ')  }}</span>
+                                            <span class="info-box-number">{{number_format($__debit, '0', '', ' ') }}</span>
                                         </div>
 
                                     </div>
@@ -77,7 +80,7 @@
                                         <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
                                             <span class="info-box-text">SOLDE</span>
-                                            <span class="info-box-number">{{(session('resultat')) ? number_format(session('resultat')['SommeCompte'], '0', '', ' '): number_format($SommeCompte, '0', '', ' ')  }}</span>
+                                            <span class="info-box-number">{{$__credit-$__debit }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -127,10 +130,8 @@
                                                     {{ number_format($item->debit, '0', '', ' ') }}
                                                 </td>
                                                 <td class="text-right font-weight-bold bg-primary">
-                                                    {{ number_format((count($item->compteClients) > 0)?$item->compteClients[0]->solde:0, '0', '', ' ') }}
+                                                    {{ number_format($item->credit - $item->debit, '0', '', ' ') }}
                                                 </td>
-
-
                                             </tr>
                                             @endforeach
 
@@ -411,7 +412,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["excel", "pdf", "print",'csv'],
+            "buttons": ["excel", "pdf", "print", 'csv'],
             "order": [
                 [1, 'asc']
             ],

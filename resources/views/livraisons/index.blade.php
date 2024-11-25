@@ -198,7 +198,7 @@
                                                             <a class="badge badge-dark p-2" title="Clôturer une livraison" href="{{ route('livraisons.cloturer', ['programmation'=>$programmation->id]) }}">cloturer</a>
                                                             @endif
 
-                                                            @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0)
+                                                            @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0 || $programmation->statut != 'Livrer')
                                                             <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
                                                             @endif
                                                         @endif
@@ -267,12 +267,12 @@
                                                             @endif
                                                         @endif
 
-                                                        @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() && count($programmation->vendus) <> 0)
+                                                        @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
                                                             @if(!$programmation->cloture)
                                                             <a class="badge badge-dark p-2" title="Clôturer une livraison" href="{{ route('livraisons.cloturer', ['programmation'=>$programmation->id]) }}">cloturer</a>
                                                             @endif
 
-                                                            @if($programmation->qteprogrammer>$programmation->vendus->sum('qteVendu'))
+                                                            @if(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu'))>0 || $programmation->statut != 'Livrer')
                                                             <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
                                                             @endif
                                                         @endif

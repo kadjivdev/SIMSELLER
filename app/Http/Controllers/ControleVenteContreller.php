@@ -18,7 +18,11 @@ class ControleVenteContreller extends Controller
         $users = User::all();
         $reglements = Reglement::whereNull("vente_id")->orderBy("id","desc")->get();
 
-        // dd($reglements);
+        #####____
+        if (Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) {
+            $reglements = $reglements->where("user_id",Auth::user()->id);
+        }
+
         if ($request->method() == "POST") {
             if ($request->user == "tout") {
                 $reglements = $reglements->whereBetween("created_at", [$request->debut, $request->fin]);
@@ -82,7 +86,7 @@ class ControleVenteContreller extends Controller
 
         $client->update();
 
-        #####===== APPROVISIONNEMENT POUR REGLER UNE ANCIENNE DETTE ======####
+        #####===== SI C'EST UN APPROVISIONNEMENT POUR REGLER UNE ANCIENNE DETTE ======####
         if ($client->debit_old && $reglement->for_dette) {
             $data = [
                 'reference' => strtoupper($reglement->reference),
@@ -98,7 +102,7 @@ class ControleVenteContreller extends Controller
 
             DetteReglement::create($data);
 
-            ###___ACTUALISATION DU DEBIT DU CLIENT
+            ###___ACTUALISATION DU DEBIT_OLD DU CLIENT
             $client->debit_old = $client->debit_old + $reglement->montant;
             $client->save();
         }
@@ -129,9 +133,6 @@ class ControleVenteContreller extends Controller
         // Mail::send($mail);
         return redirect()->route('ctlventes.index')->with('message', 'Règlement rejeté');;
     }
-
-
-
 
     // =========== old
     public function _validerControle(Reglement $reglement)

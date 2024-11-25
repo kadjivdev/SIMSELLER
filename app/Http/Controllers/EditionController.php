@@ -42,6 +42,7 @@ class EditionController extends Controller
                 $detailboncommandes = DetailBonCommande::all()->pluck('id');
                 $programmations = Programmation::where('statut', 'Livrer')->whereBetween('datelivrer', [$request->debut, $request->fin])->whereIn('detail_bon_commande_id', $detailboncommandes)->with('camion')->get();
                 $newProgrammation = [];
+
                 foreach ($programmations as $programmation) {
                     $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
                     if ($qteVendu <= $programmation->qtelivrer) {
@@ -58,7 +59,6 @@ class EditionController extends Controller
             foreach ($programmations as $programmation) {
                 $qteVendu = Vendu::where('programmation_id', $programmation->id)->sum('qteVendu');
                 if ($qteVendu <= $programmation->qtelivrer) {
-
                     $newProgrammation[$programmation->id]['programmation'] = $programmation;
                     $newProgrammation[$programmation->id]['qteVendu'] = $qteVendu;
                 }
@@ -200,7 +200,10 @@ class EditionController extends Controller
         $credit = $clients->sum('credit');
         $debit = $clients->sum('debit');
 
-        return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'sommeVentes'));
+        $credit_old = $clients->sum('credit_old');
+        $debit_old = $clients->sum('debit_old');
+
+        return view('editions.pointSolde', compact('clients', 'zones', 'credit', 'credit_old', 'debit_old', 'debit', 'reglements', 'sommeVentes'));
     }
 
     public function postPointSolde(Request $request)
@@ -209,6 +212,10 @@ class EditionController extends Controller
         $client = Client::find($request->client);
         $credit = 0;
         $debit = 0;
+
+        if ($request->client == "tous") {
+            return redirect()->route('edition.solde');
+        }
 
         ###___
         $credit = $client->credit;
@@ -220,36 +227,61 @@ class EditionController extends Controller
         $reglements = $client->reglements->sum("montant");
 
         $ventes = [];
-       
+
         if (!$request->zone && $request->client) {
-            $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
-                ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
-                ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
-                ->where('clients.id', $client->id)
+            if ($request->client == "tous") {
+                $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+                    ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+                    ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
 
-                // SEULE LES VENTES VALIDE SONT RECUPERES
-                ->where('valide', true)
+                    // SEULE LES VENTES VALIDE SONT RECUPERES
+                    ->where('valide', true)
 
-                ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
-                ->orderByDesc('ventes.code')
-                ->get();
-            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
+                    ->orderByDesc('ventes.code')
+                    ->get();
+            } else {
+                $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+                    ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+                    ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
+                    ->where('clients.id', $client->id)
+
+                    // SEULE LES VENTES VALIDE SONT RECUPERES
+                    ->where('valide', true)
+
+                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
+                    ->orderByDesc('ventes.code')
+                    ->get();
+            }
         }
 
         if ($request->zone && $request->client) {
-            $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
-                ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
-                ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
-                ->where('clients.id', $client->id)
-                ->where('zones.id', $zone->id)
+            if ($request->client == "tous") {
+                $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+                    ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+                    ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
+                    ->where('zones.id', $zone->id)
 
-                // SEULE LES VENTES VALIDE SONT RECUPERES
-                ->where('valide', true)
+                    // SEULE LES VENTES VALIDE SONT RECUPERES
+                    ->where('valide', true)
 
-                ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
-                ->orderByDesc('ventes.code')
-                ->get();
-            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
+                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
+                    ->orderByDesc('ventes.code')
+                    ->get();
+            } else {
+                $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+                    ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+                    ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
+                    ->where('clients.id', $client->id)
+                    ->where('zones.id', $zone->id)
+
+                    // SEULE LES VENTES VALIDE SONT RECUPERES
+                    ->where('valide', true)
+
+                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
+                    ->orderByDesc('ventes.code')
+                    ->get();
+            }
         }
 
         if ($request->zone && !$request->client) {
@@ -264,11 +296,9 @@ class EditionController extends Controller
                 ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
                 ->orderByDesc('ventes.code')
                 ->get();
-            // return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'SommeCompte' => $SommeCompte]);
         }
 
         $_sommeVentes = $ventes->sum('montant');
-        // $_reglements = $reglements;
         $_client = $client;
         $montant = 0;
         $regle = 0;
@@ -363,10 +393,6 @@ class EditionController extends Controller
 
     public function etatLivCde()
     {
-        $bc = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->where('code', "BCI-0002")->first();
-        // dd($bc);
-        // dd($bc->detailboncommandes[0]->programmations->whereNull("qtelivrer"));
-
         $fournisseurs = Fournisseur::all();
         return view('editions.etatlivcde', compact('fournisseurs'));
     }
@@ -375,100 +401,24 @@ class EditionController extends Controller
     {
         $fournisseur = Fournisseur::find($request->fournisseur);
         $newBcs = [];
-        if (!$request->fournisseur) {
-            if ($request->debut && $request->fin)
-                $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-            else
-                $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->get();
-
-            foreach ($bcs as $bc) {
-                // $_bon = BonCommande::where("code","BCI-0013")->first();
-                // $_bon_programmations = $_bon->detailboncommandes[0]->programmations->whereNotNull("qtelivrer")->whereIn('statut', ['Valider', 'Livrer', 'Vendu']);
-                // dd($_bon_programmations->sum('qteprogrammer'),$_bon_programmations->sum('qtelivrer'));
-
-                $item = new \stdClass();
-                $qteBc = $bc->detailboncommandes()->sum('qteCommander');
-                $montBc = $bc->montant;
-
-                if ($bc->code == "BCI-0258") {
-                    $valider = $bc->detailboncommandes[0]->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
-                    // dd(number_format(collect($valider)->sum('qteprogrammer'), 2, ",", " "));
-                }
-
-                // dd($totalValider);
-                $totalValider = $bc->detailboncommandes[0]->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
-                $_qteprogrammer = collect($totalValider)->sum('qteprogrammer'); # number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
-                $_qteLiv = collect($totalValider)->sum('qtelivrer'); #number_format(collect($totalValider)->sum('qtelivrer'), 2, ",", " ");
-                $_Montprog = collect($totalValider)->sum('qteprogrammer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qteprogrammer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
-                $_MontLiv = collect($totalValider)->sum('qtelivrer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qtelivrer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
-                // dd($total);
-
-                // $qteLiv = DB::select(
-                //     'SELECT SUM(qtelivrer) as qteLiv,SUM(qtelivrer * detail_bon_commandes.pu) as MontLiv, SUM(qteprogrammer) as qteprog, SUM(qteprogrammer * detail_bon_commandes.pu) as Montprog
-                //         FROM programmations
-                //         WHERE statut IN ("Valider", "Programmer", "Livrer")
-                //         INNER JOIN detail_bon_commandes ON programmations.detail_bon_commande_id = detail_bon_commandes.id
-                //         WHERE bon_commande_id = ?
-                //     ',
-                //     [$bc->id]
-                // );
-
-                // $qteLiv = DB::select(
-                //     'SELECT SUM(qtelivrer) as qteLiv,SUM(qtelivrer * detail_bon_commandes.pu) as MontLiv, SUM(qteprogrammer) as qteprog, SUM(qteprogrammer * detail_bon_commandes.pu) as Montprog
-                //         FROM programmations
-                //         INNER JOIN detail_bon_commandes ON programmations.detail_bon_commande_id = detail_bon_commandes.id
-                //         WHERE qtelivrer IS NOT NULL 
-                //         AND bon_commande_id = ?
-                //     ',
-                //     [$bc->id]
-                // );
-
-                $prog = Programmation::join('detail_bon_commandes', 'programmations.detail_bon_commande_id', '=', 'detail_bon_commandes.id')->where('bon_commande_id', $bc->id)->pluck('programmations.id');
-                $qteVendu = Vendu::whereIn('programmation_id', $prog)->sum('qteVendu');
-                $montVendu = Vendu::whereIn('programmation_id', $prog)
-                    ->select('qteVendu', 'pu')
-                    ->get()
-                    ->sum(function ($item) {
-                        return $item->qteVendu * $item->pu;
-                    });
-
-                // dd($qteLiv);
-                // if ($qteBc >= $_qteLiv) {
-                $item->bc = $bc;
-                $item->qteBc = $qteBc;
-                $item->montBc = $montBc;
-                $item->qteprog = $_qteprogrammer;
-                $item->Montprog = $_Montprog;
-                $item->qteLiv = $_qteLiv;
-                $item->MontLiv = $_MontLiv;
-                $item->qteVendu = $qteVendu;
-                $item->montVendu = $montVendu;
-                $newBcs[] = $item;
-                // }
-
-                // if ($bc->code=="BCI-0013") {
-                //     dd($item);
-                // }
-            }
-
-            return redirect()->route('edition.etatlivraisoncde')->withInput()->with('resultat', ['type' => 1, 'bcs' => $newBcs, 'fournisseur' => $fournisseur]);
-        }
-
         if ($request->debut && $request->fin)
-            $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->whereBetween('dateBon', [$request->debut, $request->fin])->where('fournisseur_id', $request->fournisseur)->get();
+            $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->whereBetween('dateBon', [$request->debut, $request->fin])->get();
         else
-            $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->where('fournisseur_id', $request->fournisseur)->get();
+            $bcs = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer'])->get();
 
+        ####____
         foreach ($bcs as $bc) {
+
             $item = new \stdClass();
             $qteBc = $bc->detailboncommandes()->sum('qteCommander');
             $montBc = $bc->montant;
-            $qteLiv = DB::select('SELECT SUM(qtelivrer) as qteLiv,SUM(qtelivrer * detail_bon_commandes.pu) as MontLiv, SUM(qteprogrammer) as qteprog, SUM(qteprogrammer * detail_bon_commandes.pu) as Montprog
-                    FROM programmations
-                    INNER JOIN detail_bon_commandes ON programmations.detail_bon_commande_id = detail_bon_commandes.id
-                    WHERE qtelivrer IS NOT NULL 
-                    AND bon_commande_id = ?
-                ', [$bc->id]);
+
+            $totalValider = $bc->detailboncommandes[0]->programmations()->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->orderByDesc('id')->get();
+            $_qteprogrammer = collect($totalValider)->sum('qteprogrammer'); # number_format(collect($totalValider)->sum('qteprogrammer'), 2, ",", " ");
+            $_qteLiv = collect($totalValider)->sum('qtelivrer'); #number_format(collect($totalValider)->sum('qtelivrer'), 2, ",", " ");
+            $_Montprog = collect($totalValider)->sum('qteprogrammer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qteprogrammer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
+            $_MontLiv = collect($totalValider)->sum('qtelivrer') * $bc->detailboncommandes[0]->pu; # number_format(collect($totalValider)->sum('qtelivrer')*$bc->detailboncommandes[0]->pu, 2, ",", " ");
+
             $prog = Programmation::join('detail_bon_commandes', 'programmations.detail_bon_commande_id', '=', 'detail_bon_commandes.id')->where('bon_commande_id', $bc->id)->pluck('programmations.id');
             $qteVendu = Vendu::whereIn('programmation_id', $prog)->sum('qteVendu');
             $montVendu = Vendu::whereIn('programmation_id', $prog)
@@ -478,20 +428,19 @@ class EditionController extends Controller
                     return $item->qteVendu * $item->pu;
                 });
 
-            if ($qteBc >= $qteLiv[0]->qteLiv) {
-                $item->bc = $bc;
-                $item->qteBc = $qteBc;
-                $item->montBc = $montBc;
-                $item->qteprog = $qteLiv[0]->qteprog;
-                $item->Montprog = $qteLiv[0]->Montprog;
-                $item->qteLiv = $qteLiv[0]->qteLiv;
-                $item->MontLiv = $qteLiv[0]->MontLiv;
-                $item->qteVendu = $qteVendu;
-                $item->montVendu = $montVendu;
-                $newBcs[] = $item;
-            }
+            $item->bc = $bc;
+            $item->qteBc = $qteBc;
+            $item->montBc = $montBc;
+            $item->qteprog = $_qteprogrammer;
+            $item->Montprog = $_Montprog;
+            $item->qteLiv = $_qteLiv;
+            $item->MontLiv = $_MontLiv;
+            $item->qteVendu = $qteVendu;
+            $item->montVendu = $montVendu;
+            $newBcs[] = $item;
         }
-        return redirect()->route('edition.etatlivraisoncde')->withInput()->with('resultat', ['type' => 2, 'bcs' => $newBcs, 'fournisseur' => $fournisseur]);
+
+        return redirect()->route('edition.etatlivraisoncde')->withInput()->with('resultat', ['type' => 1, 'bcs' => $newBcs, 'fournisseur' => $fournisseur]);
     }
 
     public function EtatGenePeriode()

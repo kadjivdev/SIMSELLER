@@ -44,6 +44,7 @@ class Reglement extends Model
     {
         return $this->belongsTo(TypeDetailRecu::class, 'type_detail_recu_id', 'id');
     }
+    
     public function utilisateur()
     {
         return $this->belongsTo(User::class, 'user_id');

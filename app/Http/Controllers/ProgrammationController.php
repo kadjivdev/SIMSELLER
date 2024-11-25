@@ -36,7 +36,7 @@ class ProgrammationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['gest'])->only(['store', 'allvalidate', 'update', 'postImpression', 'confirmationImpression', 'show']);
+        // $this->middleware(['gest'])->only(['store', 'allvalidate', 'update', 'postImpression', 'confirmationImpression', 'show']);
         $this->middleware(['superviseur'])->only([]);
     }
 
@@ -159,6 +159,15 @@ class ProgrammationController extends Controller
 
     public function store(Request $request, DetailBonCommande $detailboncommande, Programmation $programmation = NULL)
     {
+        // LA QUANTITE PROGRAMMEE NE DOIT PAS DEPASSER LA QUANTITE COMMANDEE
+        $qteCommander = $detailboncommande->qteCommander;
+        $qteProgrammer = $detailboncommande->programmations->whereIn('statut', ['Valider', 'Livrer', 'Vendu'])->sum("qteprogrammer");
+
+        ####
+        if (($qteProgrammer + $request->qteprogrammer) > $qteCommander) {
+            return back()->with("alert", "Cette programmation, ajoutée aux precedentes, dépasse la quantité de bon acheté!");
+        }
+
         try {
             if ($programmation) {
                 $validator = Validator::make($request->all(), [
@@ -398,7 +407,7 @@ class ProgrammationController extends Controller
         if ($programmation->vendus) {
             return back()->with("error", "Il y a des ventes attachées à cette programmations!");
         }
-        
+
         ControlesTools::generateLog($programmation, 'Programmation', 'Suppression ligne');
         $programmation = $programmation->delete();
         if ($programmation) {
@@ -499,7 +508,6 @@ class ProgrammationController extends Controller
 
     public function confirmationImpression($debut, $fin, Fournisseur $fournisseur)
     {
-
         $entreprise = Entreprise::find(1);
         $qrcode = base64_encode(QrCode::format('svg')->size(70)->errorCorrection('H')->generate($debut . ',' . $fournisseur->raisonSocial . ',' . md5($fournisseur->id)));
         $formater = new \NumberFormatter("fr", \NumberFormatter::SPELLOUT);

@@ -74,7 +74,7 @@
                     </div>
                     <div class="card card-secondary">
                         <div class="card-header">
-                            <h3 class="card-title">Nouvel Approvisionement</h3>
+                            <h3 class="card-title">Nouvel Approvisionnement</h3>
                         </div>
                         <form method="POST" action="{{ route('compteClient.postAppro', ['client'=>$client->id]) }}" enctype="multipart/form-data">
                             @csrf

@@ -26,8 +26,8 @@
                             <form method="post" id="form_bc" action="{{route('ventes.postDejaExport')}}">
                                 @csrf
                                 <div class="row no-print">
-                                    <div class="col-1"></div>
-                                    <div class="col-3">
+                                    <!-- <div class="col-1"></div> -->
+                                    <!-- <div class="col-3">
                                         <div class="form-group mt-3">
 
                                             <div class="custom-control custom-radio">
@@ -43,13 +43,18 @@
                                                 <label for="customRadio5" class="custom-control-label">Filtrer par date de comptabilisation</label>
                                             </div>
                                         </div>
+                                    </div> -->
+
+                                    <div class="custom-control custom-radio" hidden>
+                                        <input class="custom-control-input custom-control-input-success" type="radio" id="customRadio4" name="filtre" checked="" value="traitement">
+                                        <label for="customRadio4" class="custom-control-label">Filtrer par date de traitement</label>
                                     </div>
 
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <div class="form-group">
                                             <label for="">Fournisseur</label>
                                             <select id="client" class="form-control form-control-sm select2" name="fournisseur">
-                                                <option class="" value="" selected>Tous</option>
+                                                <!-- <option class="" value="" selected>Tous</option> -->
                                                 @foreach($fournisseurs as $frs)
                                                 <option value="{{$frs->sigle}}" {{old('fournisseur')==$frs->id?'selected':''}}>{{$frs->raisonSociale}}</option>
                                                 @endforeach
@@ -57,7 +62,7 @@
 
                                         </div>
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <div class="form-group">
                                             <label for="">Date début</label>
                                             <input type="date" class="form-control" name="debut" value="{{old('debut')}}" required>
@@ -66,7 +71,7 @@
                                         <span class="text-danger">{{$message}}</span>
                                         @enderror
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <div class="form-group">
                                             <label for="">Date Fin</label>
                                             <input type="date" class="form-control" name="fin" value="{{old('fin')}}" required>
@@ -75,7 +80,7 @@
                                         <span class="text-danger">{{$message}}</span>
                                         @enderror
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col-3">
                                         <button class="btn btn-primary" type="submit" style="margin-top: 2em">Afficher</button>
                                     </div>
                                 </div>
@@ -116,8 +121,11 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-
+                                            @php($qteVente = 0)
+                                            @php($montantVente=0)
                                             @foreach(session('resultat')['comptabilisers'] as $key=>$item)
+                                            @php($qteVente+=$item->qte)
+                                            @php($montantVente+=$item->prixTTC)
                                             <tr>
                                                 <td class="text-center text-danger">{{GetVenteTraitedDateViaCode($item->code)?GetVenteTraitedDateViaCode($item->code):"---"}}</td>
                                                 <!-- <td>{{date_format(date_create($item->dateSysteme),'d/m/Y')}} {{$item->heureSysteme}}</td> -->
@@ -145,6 +153,23 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <table class="table table-bordered table-sm">
+                                                <tr>
+                                                    <br />
+                                                    <td class="" colspan="2"><b>Total Quantité Vendu</b></td>
+                                                    <td colspan="6" class="text-right"><b id='qteVente'>{{ number_format($qteVente ?? 0,0,","," ") }} Tonnes</b></td>
+                                                </tr>
+                                                <tr>
+                                                    <br />
+                                                    <td class="" colspan="2"><b>Total Montant Vendu</b></td>
+                                                    <td colspan="6" class="text-right"><b id='montantVente'>{{ number_format($montantVente ?? 0,0,","," ")  }} FCFA</b></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                                 @else
                                 <div class="col-12 text-center border border-info p-2">
@@ -180,7 +205,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print", "excel", "csv"],
             "order": [
                 [0, 'desc']
             ],
@@ -397,5 +422,23 @@
             },
         }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
     });
+
+    $("body").on('change', function() {
+        const qteVente = new DataTable('#example1').column(10, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+        __qteVente = qteVente < 0 ? -qteVente : qteVente
+
+        const montantVente = new DataTable('#example1').column(15, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+        __montantVente = montantVente < 0 ? -montantVente : montantVente
+
+
+        $("#qteVente").html(__qteVente.toLocaleString() + " Tonnes")
+        $("#montantVente").html(__montantVente.toLocaleString() + " FCFA")
+    })
 </script>
 @endsection

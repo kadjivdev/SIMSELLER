@@ -221,7 +221,7 @@
                 @endif
 
                 @endif
-                @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists()||Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
+                @if (Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists()||Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists() ||Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
                 <li class="nav-header">CONTROLLER</li>
                 <li class="nav-item {{request()->route()->getPrefix() == '/controle' ? 'menu-open':''}}">
                     <a href="#" class="nav-link {{request()->route()->getPrefix() == '/controle' ? 'active':''}}">
@@ -233,9 +233,7 @@
                     </a>
                     <ul class="nav nav-treeview">
 
-                        @if (Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()||Auth::user()->roles()->where('libelle', ['CONTROLEUR VENTE'])->exists() || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
-
-                        @if (Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                        @if (Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('ctlventes.index') }}" class="nav-link {{ (request()->is('controle/*')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-cogs  text-cyan"></i>
@@ -244,6 +242,7 @@
                         </li>
                         @endif
 
+                        @if (Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('ventes.venteAEnvoyerComptabiliser') }}" class="nav-link {{ (request()->is('ventes/vente-a-envoyer-comptabilise')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-cogs  text-cyan"></i>
@@ -606,7 +605,19 @@
                         <li class="nav-item">
                             <a href="{{ route('ventes.venteAComptabiliser') }}" class="nav-link {{ (request()->is('/comptabilite/vente-a-comptabilise')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-money-bill-alt  text-cyan"></i>
-                                <p>Liste des Ventes</p>
+                                <p>Toutes Ventes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('ventes.getVenteAtraiter') }}" class="nav-link {{ (request()->is('/comptabilite/vente-a-traiter')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-money-bill-alt  text-cyan"></i>
+                                <p>Ventes à traiter</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('ventes.getVenteTotaux') }}" class="nav-link {{ (request()->is('/comptabilite/vente-totaux')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid bi-database-add"></i>
+                                <p>Totaux des ventes</p>
                             </a>
                         </li>
                         <li class="nav-item">

@@ -22,15 +22,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CompteClientController extends Controller
 {
-    // public function __construct()
-    // {
-    //     /*   $possedeAuMoinsUnDroit = User::where('users.id',Auth::user()->id)->join('avoirs', 'users.id','=','avoirs.user_id')
-    //     ->join('roles', 'roles.id','=','avoirs.role_id')->whereIn('libelle', ['RECOUVREUR', 'SUPERVISEUR'])->exists();
-
-    //     if (!$possedeAuMoinsUnDroit) {
-    //         $this->middleware(['recouvreur', 'superviseur'])->except('show');
-    //     } */
-    // }
 
     public function show(Client $client)
     {
@@ -41,9 +32,13 @@ class CompteClientController extends Controller
         $reglements = $client->reglements->whereNull("vente_id");
         $mouvements = [];
 
+        $reglement = Reglement::findOrFail(6919);
+        
         // on recupere les mouvements associés à chaque approvisionnement
         foreach ($reglements as $reglement) {
-            $mouvements[] = $reglement->_mouvements->first();
+            if (count($reglement->_mouvements)>0) {
+                $mouvements[] = $reglement->_mouvements->first();
+            }
         }
         $mouvements = collect($mouvements);
 
@@ -97,13 +92,20 @@ class CompteClientController extends Controller
             }
 
             /* Uploader les documents dans la base de données */
-            $filename = time() . '.' . $request->document->extension();
+            // $filename = time() . '.' . $request->document->extension();
 
-            $file = $request->file('document')->storeAs(
-                'documents',
-                $filename,
-                'public'
-            );
+            // $file = $request->file('document')->storeAs(
+            //     'documents',
+            //     $filename,
+            //     'public'
+            // );
+
+            // TRAITEMENT DU DOCUMENT
+            $doc = $request->file("document");
+            $doc_name = $doc->getClientOriginalName();
+            $doc->move("files/", $doc_name);
+
+            $file = asset("files/" . $doc_name);
 
             $format = env('FORMAT_REGLEMENT');
             $parametre = Parametre::where('id', env('REGLEMENT'))->first();
@@ -182,6 +184,15 @@ class CompteClientController extends Controller
     {
         $appro = Reglement::findOrFail($request->approId);
 
+        ###___CONTROLE SUR LA REFEREENCE AU CAS OU L'AGENT ENTRE UNE REFERENCE DIFFERENTE DE CELLE 
+        #####  DU REGLEMENT EN MODIFICATION
+        if ($appro->reference != $request->reference) {
+            $reglement_existe = Reglement::where("reference", $request->reference)->first();
+            if ($reglement_existe) {
+                return back()->with("error", "Cette reference existe déjà");
+            }
+        }
+
         if ($request->document) {
             /* Uploader les documents dans la base de données */
             $filename = time() . '.' . $request->document->extension();
@@ -207,8 +218,10 @@ class CompteClientController extends Controller
         $appro->update($data);
 
         // update du mouvement attaché à cet approvisionnement
-        $appro->_mouvements[0]->montantMvt = $request->montant;
-        $appro->_mouvements[0]->update();
+        if (count($appro->_mouvements)>0) {
+            $appro->_mouvements[0]->montantMvt = $request->montant;
+            $appro->_mouvements[0]->update();
+        }
 
         return back()->with("message", "Approvisionnement ($request->reference) modifié avec succès! Attendez sa validation.");
     }

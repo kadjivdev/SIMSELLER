@@ -12,6 +12,7 @@ use App\Models\DetteReglement;
 use App\Models\Porteuille;
 use App\Models\TypeClient;
 use App\Models\TypeDetailRecu;
+use App\Models\User;
 use App\Models\Vente;
 use App\Models\Zone;
 use Illuminate\Http\Request;
@@ -35,6 +36,13 @@ class clientsController extends Controller
         } else {
             // $clients = Client::orderBy('id','desc')->paginate(1000);          
             $clients = Client::orderBy('id', 'desc')->get();
+        }
+
+        // UN AGENT NE VERA QUE LES CLIENTS SE TROUVANT DANS LA ZONE DE SON REPREENTANT
+        $user = User::find(Auth::user()->id);
+
+        if (!(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) && Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists()) {
+            $clients = $clients->where("zone_id", $user->zone_id);
         }
 
         $zones = Zone::all();
@@ -499,7 +507,6 @@ class clientsController extends Controller
 
     public function achatClient(Client $client)
     {
-
         $achatClients =  DB::table('commande_clients')->Join('clients', 'clients.id', '=', 'commande_clients.client_id')
             ->Join('ventes', 'commande_client_id', '=', 'commande_clients.id')
             ->Join('users', 'users.id', '=', 'ventes.users')
