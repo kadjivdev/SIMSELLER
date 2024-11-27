@@ -587,7 +587,7 @@ class VenteController extends Controller
             $vente->delete();
         }
 
-        ####====
+        ####====______
         foreach ($vente->vendus as $vendu) {
             $programmation = $vendu->programmation;
             $bl = $programmation->bl;
@@ -1099,6 +1099,7 @@ class VenteController extends Controller
         //  $ventes = Vente::where('statut', 'Contrôller')->whereBetween('date_traitement',[$request->debut, $request->fin])->orderByDesc('code')->get();
         return redirect()->route('ventes.listeDesTraitementPeriode')->withInput()->with('resultat', ['ventes' => $ventes, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
+
     public function filleuilfictive(Request $request)
     {
         $validator = Validator::make($request->all(), [

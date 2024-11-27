@@ -726,8 +726,4 @@
     });
 </script>
 @endif
-
-
-
-
 @endsection

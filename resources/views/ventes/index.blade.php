@@ -136,17 +136,17 @@
                                         <td class="pl-2"> {{ $vente->commandeclient->zone->libelle }} </td>
                                         @endif
                                         @if ($vente->statut == 'Vendue')
-                                        @if(($vente->montant-$vente->remise) - $vente->reglements->sum('montant') == 0)
-                                        <td class="text-center"><span class="badge badge-success">Soldé</span></td>
-                                        @elseif( $vente->reglements->sum('montant') > 0)
-                                        <td class="text-center"><span class="badge badge-warning">Solde en cours</span></td>
-                                        @else
-                                        <td class="text-center"><span class="badge badge-success">{{ $vente->statut }}</span></td>
-                                        @endif
+                                            @if(($vente->montant-$vente->remise) - $vente->reglements->sum('montant') == 0)
+                                            <td class="text-center"><span class="badge badge-success">Soldé</span></td>
+                                            @elseif( $vente->reglements->sum('montant') > 0)
+                                            <td class="text-center"><span class="badge badge-warning">Solde en cours</span></td>
+                                            @else
+                                            <td class="text-center"><span class="badge badge-success">{{ $vente->statut }}</span></td>
+                                            @endif
                                         @elseif ($vente->statut == 'Annulée')
-                                        <td class="text-center"><span class="badge badge-danger">{{ $vente->statut }}</span></td>
+                                            <td class="text-center"><span class="badge badge-danger">{{ $vente->statut }}</span></td>
                                         @else
-                                        <td class="text-center"><span class="badge badge-info">{{ $vente->statut }}</span></td>
+                                            <td class="text-center"><span class="badge badge-info">{{ $vente->statut }}</span></td>
                                         @endif
 
                                         <!-- COMPTABILITE -->

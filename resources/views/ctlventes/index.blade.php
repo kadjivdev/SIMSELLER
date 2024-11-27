@@ -102,8 +102,6 @@
                                 </thead>
                                 <tbody>
                                     @foreach($reglements as $reglement)
-                                    <!-- ICI ON AFFICHE QUE LES APPROVISIONNEMENTS NON VALIDES -->
-                                    @if($reglement->statut!=1)
                                     <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-warning':''  }} ">
                                         <td class="text-center"><span class="badge bg-warning">{{$reglement->code}} </span></td>
                                         <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
@@ -148,7 +146,6 @@
                                         </td>
                                         @endif
                                     </tr>
-                                    @endif
                                     @endforeach
                                 </tbody>
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">

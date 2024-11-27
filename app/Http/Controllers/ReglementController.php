@@ -70,7 +70,10 @@ class ReglementController extends Controller
             // if ($vente->commandeclient->client->compteClients->toArray()) {
 
             $cli = Client::findOrFail($vente->commandeclient->client->id);
-            $clientSolde = $cli->credit - $cli->debit;
+            $credit = $cli->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
+            $debit = $cli->reglements->whereNotNull("vente_id")->sum("montant");
+
+            $clientSolde = $credit - $debit;
 
             if ($clientSolde < $request->montant) {
                 Session()->flash('error', 'Le solde du client est insuffisant!');

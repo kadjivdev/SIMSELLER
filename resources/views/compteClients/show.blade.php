@@ -50,13 +50,16 @@
                                         </div>
                                     </ul>
 
+                                    @php($credit = $client->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant"))
+                                    @php($debit = $client->reglements->whereNotNull("vente_id")->sum("montant"))
+
                                     <div class="row">
                                         <div class="col-md-4 col-sm-6 col-12">
                                             <div class="info-box">
                                                 <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                                                 <div class="info-box-content">
                                                     <span class="info-box-text">CREDIT</span>
-                                                    <span class="info-box-number">{{ number_format($client->credit, 0, ',', ' ')  }}</span>
+                                                    <span class="info-box-number">{{ number_format($credit, 0, ',', ' ')  }}</span>
                                                 </div>
 
                                             </div>
@@ -67,7 +70,7 @@
                                                 <span class="info-box-icon bg-danger"><i class="fas fa-hand-holding-usd"></i></span>
                                                 <div class="info-box-content">
                                                     <span class="info-box-text">DEBIT</span>
-                                                    <span class="info-box-number">{{number_format($client->debit, 0, ',', ' ')   }}</span>
+                                                    <span class="info-box-number">{{number_format($debit, 0, ',', ' ')   }}</span>
                                                 </div>
 
                                             </div>
@@ -78,7 +81,7 @@
                                                 <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                                 <div class="info-box-content">
                                                     <span class="info-box-text">SOLDE</span>
-                                                    <span class="info-box-number">{{number_format($client->credit-$client->debit, 0, ',', ' ')  }}</span>
+                                                    <span class="info-box-number">{{number_format($credit-$debit, 0, ',', ' ')  }}</span>
                                                 </div>
                                             </div>
                                         </div>

@@ -163,7 +163,7 @@
 
                         @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()||Auth::user()->roles()->where('libelle', 'CONTROLEUR VENTE')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
 
-                        @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                        @if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('ventes.askUpdate') }}" class="nav-link {{ (request()->is('ventes/askUpdate')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-hand-holding-dollar text-cyan"></i>
@@ -427,6 +427,7 @@
                                 </p>
                             </a>
                         </li>
+                        
                         <li class="nav-item">
                             <a href="{{ route('edition.solde') }}" class="nav-link {{ (route('edition.solde') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>

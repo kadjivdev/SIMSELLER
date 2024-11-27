@@ -197,8 +197,13 @@ class EditionController extends Controller
         // $SommeCompte = CompteClient::all()->sum('solde');
         $reglements = Reglement::all()->sum('montant');
         $sommeVentes = Vente::all()->sum('montant');
-        $credit = $clients->sum('credit');
-        $debit = $clients->sum('debit');
+
+        // $credit = $clients->sum('credit');
+        // $debit = $clients->sum('debit');
+
+        // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
+        $credit = Reglement::where("for_dette",false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
+        $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
 
         $credit_old = $clients->sum('credit_old');
         $debit_old = $clients->sum('debit_old');
@@ -218,8 +223,8 @@ class EditionController extends Controller
         }
 
         ###___
-        $credit = $client->credit;
-        $debit = $client->debit;
+        $credit = $client->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
+        $debit = $client->reglements->whereNotNull("vente_id")->sum("montant");
 
         $ventesDleted = $client->_deletedVentes;
 

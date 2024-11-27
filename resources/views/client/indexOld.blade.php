@@ -110,7 +110,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print","excel","csv"],
             "order": [
                 [1, 'asc']
             ],

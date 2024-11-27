@@ -35,6 +35,9 @@ class ControleVenteContreller extends Controller
             $request->session()->flash("search", ["debut" => $request->debut, "fin" => $request->fin]);
         }
 
+        ####____ ON RECUPERE LES REGLEMENTS NON VALIDES
+        $reglements = $reglements->where("statut","<>",1);
+
         ####____
         return view('ctlventes.index', compact('reglements', 'users'));
     }
