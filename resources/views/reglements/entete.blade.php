@@ -61,22 +61,7 @@
                             <div class="row">
                                 <div class="col-12 text-center">
                                     @if(($vente->montant-$vente->remise) - $vente->reglements->sum('montant') == 0)
-                                        @if($vente->statut_reglement == 1)
-                                            <div class="alert alert-success">
-                                                <h4 class=""><i class="fa fa-check-circle"></i> Cette vente a été déjà validée.</h4>
-                                            </div>
-                                        @else
-                                            <div class="alert alert-info">
-                                                <h4 class=""><i class="fa fa-info"></i> Vente soldée. Merci de cliquer sur le bouton ci-dessous pour valider.</h4>
-                                            </div>
-                                        @endif
-                                        <div class="row">
-                                            <div class="col-12 text-center">
-                                                @if(($vente->montant-$vente->remise) - $vente->reglements->sum('montant') == 0 && $vente->statut_reglement == 0)
-                                                    <button class="btn btn-success btn-lg" data-toggle="modal" data-target="#validation_reglement"><b><i class="fa fa-check"></i> Valider le(s) règlement(s)</b>.</button>
-                                                @endif
-                                            </div>
-                                        </div>
+                                        
                                     @else
                                         <h3>Reste à regler: {{number_format((($vente->montant-$vente->remise) - $vente->reglements->sum('montant')),2,","," ")}}</h3>
                                     @endif

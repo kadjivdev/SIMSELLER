@@ -56,7 +56,7 @@
                                                 @endforeach
                                             </select> -->
                                             <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>-->
-                                                <option class="" value="tous" >Tous les clients</option>
+                                                <option class="" value="tous">Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
                                                     {{ $client->raisonSociale }}
@@ -255,6 +255,7 @@
                                                 <th>Réglé</th>
                                                 <th>Reste</th>
                                                 <th>Echéance</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody class="table-body">
@@ -314,14 +315,9 @@
                                                     <span class="badge bg-danger"><i class="fa fa-times"></i> Anomalie</span>
                                                     @endif
                                                 </td>
-                                                <!-- <td class="text-center font-weight-bold">
-                                                    @if(IsClientHasADebt($item->commandeclient->client->id))
-                                                    <span class="d-block bg-danger"> {{_ClientDebtReste($item->commandeclient->client)}} </span>
-                                                    <a target="_blank" href="{{route('newclient.reglement',$item->commandeclient->client->id)}}" style="border-radius:5px" class="bt-sm p-1 btn-success my-2 d-block">Regler</a> 
-                                                    @else
-                                                    <span class="d-block bg-succes"> --- </span>
-                                                    @endif
-                                                </td> -->
+                                                <td>
+                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$item])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement {{$item->id}} <span class="badge badge-info">{{$item->reglements ? count($item->reglements):0}}</span></a>
+                                                </td>
                                             </tr>
 
                                             @endforeach

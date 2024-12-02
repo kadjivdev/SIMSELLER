@@ -45,6 +45,7 @@
                                     <tr>
                                         <th>Code</th>
                                         <th>Code Commande</th>
+                                        <th>Code Pro</th>
                                         <th>Date</th>
                                         <th>Client</th>
                                         <th>PU</th>
@@ -64,6 +65,7 @@
                                     @foreach($ventes as $vente)
                                     <tr>
                                         <td>{{ $vente->code }}</td>
+                                        <td class="text-center"> <span class="badge bg-warning">{{ $vente->vendus->first()?$vente->vendus->first()->programmation->code:"---" }} </span> </td>
                                         <td>{{!$vente->commandeclient->byvente ?  $vente->commandeclient->code : '' }}</td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($vente->date)) }}</td>
                                         <td class="pl-2">

@@ -65,9 +65,7 @@ class ReglementController extends Controller
                 Session()->flash('error', 'Cette vente ne vous appartient pas!');
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
-
             ####_____
-            // if ($vente->commandeclient->client->compteClients->toArray()) {
 
             $cli = Client::findOrFail($vente->commandeclient->client->id);
             $credit = $cli->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
@@ -79,7 +77,6 @@ class ReglementController extends Controller
                 Session()->flash('error', 'Le solde du client est insuffisant!');
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
-            // }
 
             if ($vente->commandeclient->client->compteClients->toArray() == null) {
                 Session()->flash('error', 'Ce client n\'a pas de compte actif');
@@ -88,7 +85,6 @@ class ReglementController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'date' => ['required', 'before_or_equal:now'],
-                //   'document' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg'],
                 'montant' => ['required', new ReglementMontantRule($vente, $request->srcReg, $reglmt)],
             ]);
 
@@ -137,7 +133,6 @@ class ReglementController extends Controller
                     'user_id' => auth()->user()->id,
                     'sens' => 0,
                     'reglement_id' => $reglement->id,
-                    // 'destroy' => true
                 ]);
 
                 if ($mouvement) {
@@ -368,6 +363,7 @@ class ReglementController extends Controller
             return redirect()->route('reglements.index', ['vente' => $vente->id]);
         }
     }
+
     public function validerReglement(Vente $vente)
     {
         $reglements = $vente->reglements;

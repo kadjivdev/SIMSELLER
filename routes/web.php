@@ -70,7 +70,6 @@ use App\Models\Vente;
 |
 */
 
-
 #######================#######
 Route::get('/', function () {
     return redirect()->route('login');

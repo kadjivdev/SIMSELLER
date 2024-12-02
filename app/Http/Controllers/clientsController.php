@@ -23,11 +23,6 @@ use Illuminate\Validation\Rule;
 
 class clientsController extends Controller
 {
-    //
-    /**
-     * 
-     */
-
     public function index(Request $request)
     {
         if ($request->search) {
@@ -422,8 +417,6 @@ class clientsController extends Controller
     public function update(Request $request, Client $client)
     {
         try {
-
-
             $validator = Validator::make($request->all(), [
                 'logo' => ['nullable', 'image', 'mimes:jpg,bmp,png'],
                 'sigle' => ['nullable', 'string', 'max:255'],

@@ -241,9 +241,9 @@
                                         <th>Pour dette</th>
                                         <th>Reversement</th>
                                         <th>Preuve</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        <!-- @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
                                         <th>Action</th>
-                                        @endif
+                                        <!-- @endif -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -272,12 +272,12 @@
                                         <td class="text-center">
                                             <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document}}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
                                         </td>
-                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
+                                        <!-- @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists()) -->
                                         <td class="text-right">
                                             <a class="btn btn-warning btn-sm" href="#" data-bs-toggle="modal" onclick="showUpdateModal({{$reglement->id,$reglement->document}})" data-bs-target="#updateAppro">
                                                 <i class="bi bi-pencil"></i></a>
                                         </td>
-                                        @endif
+                                        <!-- @endif -->
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -291,9 +291,9 @@
                                         <th>Pour dette</th>
                                         <th>Reversement</th>
                                         <th>Preuve</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        <!-- @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
                                         <th>Action</th>
-                                        @endif
+                                        <!-- @endif -->
                                     </tr>
                                 </tfoot>
                             </table>
@@ -351,7 +351,7 @@
                             </div>
                         </div>
                         @endif
-                        <button type="submit" title="Valider" class="btn btn-primary"><i class="bi bi-check-circle"></i> Valider</button>
+                        <button type="submit" title="Valider" hidden class="btn btn-primary" id="validUpdateBtn"><i class="bi bi-check-circle"></i> Valider</button>
                     </form>
                 </div>
             </div>
@@ -383,12 +383,16 @@
                     $("#old_solde").attr("checked", true)
                 }
 
+                if (data.user_id=={{auth()->user()->id}}) {
+                    $('#validUpdateBtn').removeAttr("hidden")
+                }
+
                 // window.location.reload()
                 // Afficher un message de succès
                 // alert("Approvisionnement validé avec succès!")
             })
             .catch(function(error) {
-                console.log(error)
+                
                 // window.location.reload()
                 // Afficher un message de succès
                 alert("Opération échouée!")

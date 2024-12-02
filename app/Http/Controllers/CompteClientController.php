@@ -32,8 +32,6 @@ class CompteClientController extends Controller
         $reglements = $client->reglements->whereNull("vente_id");
         $mouvements = [];
 
-        $reglement = Reglement::findOrFail(6919);
-        
         // on recupere les mouvements associés à chaque approvisionnement
         foreach ($reglements as $reglement) {
             if (count($reglement->_mouvements)>0) {
@@ -72,7 +70,7 @@ class CompteClientController extends Controller
             }
 
             $validator = Validator::make($request->all(), [
-                'reference' => ['required', 'string', 'max:255', 'unique:detail_recus'],
+                'reference' => ['required', 'string', 'max:255', 'unique:reglements'],
                 'date' => ['required', 'before_or_equal:now'],
                 'montant' => ['required'],
                 'document' => ['required', 'file', 'mimes:pdf,docx,doc,jpg,jpeg'],
@@ -90,15 +88,6 @@ class CompteClientController extends Controller
                     "reference" => ["required", "unique:dette_reglements,reference"],
                 ]);
             }
-
-            /* Uploader les documents dans la base de données */
-            // $filename = time() . '.' . $request->document->extension();
-
-            // $file = $request->file('document')->storeAs(
-            //     'documents',
-            //     $filename,
-            //     'public'
-            // );
 
             // TRAITEMENT DU DOCUMENT
             $doc = $request->file("document");
