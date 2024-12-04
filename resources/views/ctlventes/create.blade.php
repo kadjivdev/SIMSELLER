@@ -42,7 +42,6 @@
                             <div class="row">
                                 <div class="col-4">
                                     <table class="table">
-                                        
                                         <tr>
                                             <td>Date de l'approvisionnement</td>
                                             <td class="text-right font-weight-bold">{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
@@ -68,10 +67,11 @@
                                         </tr>
                                     </table>
                                 </div>
-                                <div class="col-8">
+                                <div class="col-8 text-center">
                                     @if($reglement->document)
-                                    <img src="{{asset('storage/'.$reglement->document)}}" alt="" width="100%">
-                                    <!-- <img src="{{$reglement->document}}" alt="" width="100%"> -->
+                                    <!-- <img src="{{asset('storage/'.$reglement->document)}}" alt="" width="100%"> -->
+                                    <img src="{{$reglement->document}}" alt="" width="100%">
+                                    <a target="_blank" href="{{$reglement->document}}" class="btn btn-sm btn-dark text-center"><i class="bi bi-eye"></i> Voir</a>
                                     @else
                                     Sans document
                                     @endif
@@ -82,6 +82,7 @@
                                     <a href="{{route('ctlventes.index')}}" onclick="annuler()" class="btn btn-dark btn-rounded "><i class="fa fa-arrow-circle-left"></i> J'annule.</a>
                                     <button class="btn btn-success btn-rounded " type="button" data-toggle="modal" data-target="#modal-default"><i class="fa fa-check"></i> Je valide</button>
                                     <button class="btn btn-danger btn-rounded " type="button" data-toggle="modal" data-target="#modal-rejet"><i class="fa fa-close"></i> Je Rejete</button>
+                                    <button class="btn btn-danger btn-rounded " type="button" data-toggle="modal" data-target="#modal-delete"><i class="fa fa-close"></i> Supprimer</button>
                                 </div>
                                 <div class="col-lg-12 text-center mt-3" id="valider_chargement" hidden>
                                     <button class="btn btn-danger btn-rounded" disabled id="btn_charg"><i class="fa fa-spin fa-spinner"></i> Validation encours...</button>
@@ -110,7 +111,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            
+
             <form method="POST" action="{{ route('ctlventes.validerApprovisionnement',['reglement'=>$reglement->id]) }}">
                 @csrf
                 <div class="modal-footer justify-content-between">
@@ -161,6 +162,34 @@
                         <button type="submit" class="btn btn-success">Je valide</button>
                     </div>
 
+                </div>
+            </form>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-delete">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger ">
+                <h5 class="modal-title">Ëtes vous sûr de vouloir supprimer ce approvisionnement?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="POST" action="{{ route('ctlventes.destroy',['reglement'=>$reglement->id]) }}">
+                @csrf
+                @method("DELETE")
+                <div class="modal-footer justify-content-between">
+
+                    <div class="col-12 text-center">
+                        <button data-dismiss="modal" aria-label="Close" class="btn  btn-secondary">
+                            {{ __('Annuler') }}
+                        </button>
+                        <button type="submit" class="btn btn-success">Confirmer</button>
+                    </div>
                 </div>
             </form>
         </div>

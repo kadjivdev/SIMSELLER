@@ -1337,10 +1337,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
     Route::controller(ControleVenteContreller::class)->prefix('controle')->group(function () {
         Route::match(["GET", "POST"], 'reglement-en-attente', 'index')->name('ctlventes.index');
+        Route::delete('reglement-en-attente/{reglement}', 'destroy')->name('ctlventes.destroy');
         Route::get('reglement-en-attente/sur-compte', 'reglementSurCompte')->name('ctlventes.reglementSurCompte');
         Route::get('controler/{reglement}', 'controler')->name('ctlventes.create');
-        // Route::post('controler/{reglement}', 'validerControle')->name('ctlventes.validerControle');
-        // Route::post('controler/askUpdate/{reglement}', 'rejetReglement')->name('ctlventes.askUpdate');
 
         Route::post('controler/{reglement}', 'validerApprovisionnement')->name('ctlventes.validerApprovisionnement');
         Route::post('controler/askUpdate/{reglement}', 'rejetApprovisionnement')->name('ctlventes.rejetApprovisionnement');

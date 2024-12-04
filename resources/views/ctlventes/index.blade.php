@@ -26,6 +26,7 @@
                     <div class="card">
                         <!-- /.card-header -->
                         <div class="card-body">
+                            
                             <!-- FILTRE -->
                             <form method="post" id="form_bc" action="{{route('ctlventes.index')}}">
                                 @csrf
@@ -186,7 +187,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print","csv","excel"],
+            "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
                 [0, 'desc']
             ],

@@ -29,7 +29,7 @@ class LivraisonController extends Controller
 
     public function index(Request $request)
     {
-        $user = User::find(Auth::user()->id);
+        $user = Auth::user();
 
         $repre = $user->representant;
         $zones = $repre->zones;
@@ -100,11 +100,7 @@ class LivraisonController extends Controller
                 }
             }
         } else {
-
-            /*$boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmé','Livrer','Annuler'])->pluck('id');
-            $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
-            $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)->whereIn('statut', ['Valider','Livrer'])->where('imprimer','1')->orderByDesc('code')->get();*/
-
+           
             if ($request->debut && $request->fin) {
                 $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer'])->pluck('id');
                 $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
@@ -120,21 +116,22 @@ class LivraisonController extends Controller
         }
         $req = $request->all();
 
-        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()) {
-            if ($request->debut && $request->fin)
-                $programmations = $programmations->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
-            else
-                $programmations = $programmations;
-        }
-
-        if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()) {
-            // LE VENDEUR NE VERRA DESORMAIS QUE LES LIVRAISONS DE SA ZONE
-            if ($request->debut && $request->fin)
-                // $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'))->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
-                $programmations = $programmations->where('zone_id', $user->zone_id)->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
-            else
-                // $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'));
-                $programmations = $programmations->where('zone_id', $user->zone_id);
+        // ON AFFICHE TOUTES LES LIVRAISONS POUR LES COMPTES *AIME & CHRISTIAN*
+        if (!IS_AIME_ACCOUNT($user) && !IS_CHRISTIAN_ACCOUNT($user)) {
+            if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()) {
+                if ($request->debut && $request->fin)
+                    $programmations = $programmations->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                else
+                    $programmations = $programmations;
+            }
+    
+            if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()) {
+                // LE VENDEUR NE VERRA DESORMAIS QUE LES LIVRAISONS DE SA ZONE
+                if ($request->debut && $request->fin)
+                    $programmations = $programmations->where('zone_id', $user->zone_id)->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                else
+                    $programmations = $programmations->where('zone_id', $user->zone_id);
+            }
         }
 
         return view('livraisons.index', compact('programmations', 'req'));
@@ -703,8 +700,8 @@ class LivraisonController extends Controller
         session(['option' => $request->option ?: 'Tous']);
         session(['fournisseur' => $request->fournisseur ?: 'Tous']);
 
-        $debut = date_format(date_create($request->debut),"Y-m-d");
-        $fin = date_format(date_create($request->fin),"Y-m-d");
+        $debut = date_format(date_create($request->debut), "Y-m-d");
+        $fin = date_format(date_create($request->fin), "Y-m-d");
 
         if ($request->debut && $request->fin) {
             switch ($request->option) {
@@ -776,7 +773,7 @@ class LivraisonController extends Controller
         // $programmations = $programmations->all();
 
         // dd($programmations);
-        
+
 
         return redirect()->route('livraisons.suivicamion')->with([
             'resultat' => $programmations,

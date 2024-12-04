@@ -23,6 +23,15 @@ function IS_AIME_ACCOUNT($user)
     return false;
 }
 
+function IS_CHRISTIAN_ACCOUNT($user)
+{
+    if ($user->id == 30) {
+        return true;
+    }
+
+    return false;
+}
+
 function IS_RODOLPHO_ACCOUNT($user)
 {
     if ($user->id == 19) {
