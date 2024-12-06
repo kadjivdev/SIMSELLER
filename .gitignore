@@ -20,6 +20,6 @@ storage/*.key
 .env_prod
 Homestead.yaml
 Homestead.json
-composer.json
+# composer.json
 /.vagrant
 .phpunit.result.cache

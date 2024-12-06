@@ -70,7 +70,10 @@ use App\Models\Vente;
 |
 */
 
+// {{ route('ctlventes.destroy',['reglement'=>$reglement->id]) }}
+
 #######================#######
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
