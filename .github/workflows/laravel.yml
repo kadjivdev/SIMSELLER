@@ -41,13 +41,7 @@ jobs:
         server: ${{ secrets.SERVER }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.SECRET_KEY }}
-
-  Make-migrations:
-    name: FTP-Migration-Action
-    runs-on: ubuntu-latest
-    
-    steps:
-    uses: actions/checkout@v4
+# 
     - name: Copy .env
       run: php -r "file_exists('.env')"
       
@@ -57,6 +51,23 @@ jobs:
         DB_USERNAME: ${{ secrets.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: php artisan migrate --seed
+
+
+  # Make-migrations:
+  #   name: FTP-Migration-Action
+  #   runs-on: ubuntu-latest
+    
+  #   steps:
+  #   uses: actions/checkout@v4
+  #   - name: Copy .env
+  #     run: php -r "file_exists('.env')"
+
+  #   - name: Execution des migrations
+  #     env:
+  #       DB_DATABASE: ${{ secrets.DB_DATABASE }}
+  #       DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  #       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  #     run: php artisan migrate --seed
 
   # ========= FTP TEST ====== ###
 #  Nom d’utilisateur FTP: cimseller@hete6559.odns.fr
