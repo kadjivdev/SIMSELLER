@@ -42,8 +42,8 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.SECRET_KEY }}
 # 
-    - name: Copy .env
-      run: php -r "file_exists('.env')"
+    # - name: Copy .env
+    #   run: php -r "file_exists('.env')"
       
     - name: Execution des migrations
       env:
