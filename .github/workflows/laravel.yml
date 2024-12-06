@@ -24,16 +24,16 @@ jobs:
           php-version: "8.2" # Adjust to match the PHP version used by your Laravel project
           tools: 'composer'
     
-    # - uses: actions/checkout@v4
-    # - name: Copy .env
-    #   run: php -r "file_exists('.env_prod');"
+    - uses: actions/checkout@v4
+    - name: Copy .env
+      run: php -r "file_exists('.env');"
 
     - name: Install PHP dependencies
       run: | 
         composer install --no-dev --optimize-autoloader
         
-    # - name: Generate app key
-    #   run: php artisan key:generate
+    - name: Generate app key
+      run: php artisan key:generate
 
     - name: FTP-Deploy-Action
       uses: SamKirkland/FTP-Deploy-Action@4.3.3
@@ -42,12 +42,12 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.SECRET_KEY }}
 
-    # - name: Execution des migrations
-    #   env:
-    #     DB_DATABASE: ${{ secrets.DB_DATABASE }}
-    #     DB_USERNAME: ${{ secrets.DB_USERNAME }}
-    #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-    #   run: php artisan migrate
+    - name: Execution des migrations
+      env:
+        DB_DATABASE: ${{ secrets.DB_DATABASE }}
+        DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      # run: php artisan migrate
 
   # Make-migrations:
   #   name: FTP-Migration-Action
