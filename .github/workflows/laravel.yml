@@ -50,7 +50,7 @@ jobs:
         DB_DATABASE: ${{ secrets.DB_DATABASE }}
         DB_USERNAME: ${{ secrets.DB_USERNAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      run: php artisan migrate --seed
+      run: php artisan migrate 
 
 
   # Make-migrations:
