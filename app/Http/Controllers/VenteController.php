@@ -32,6 +32,7 @@ use App\Models\VenteDeleteDemand;
 use App\tools\ControlesTools;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Contracts\Validation\Validator as ValidationValidator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Transport\Transport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,7 @@ class VenteController extends Controller
     public function __construct()
     {
         $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
+        ini_set("max_execution_time", 3600);
     }
 
     public function index(Request $request)
@@ -64,18 +66,26 @@ class VenteController extends Controller
         }
 
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
-            // dd("gogo");
             $user = Auth::user();
             if ($user->id == 11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->where("users", $user->id)->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)
+                    ->where('statut', '<>', 'En attente de modification')->where("users", $user->id)
+                    ->orderByDesc('code')
+                    ->lazy(200);
             } else {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'En attente de modification')->orderByDesc('code')->get();
+                $ventes = Vente::whereIn('commande_client_id', $commandeclients)
+                    ->where('statut', '<>', 'En attente de modification')
+                    ->orderByDesc('code')
+                    ->lazy(200);
             }
         } elseif (in_array(3, $roles)) {
-            $ventes = Vente::whereIn('commande_client_id', $commandeclients)->where('statut', '<>', 'Contrôller')->where('statut', '<>', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
+            $ventes = Vente::whereIn('commande_client_id', $commandeclients)
+                ->where('statut', '<>', 'Contrôller')
+                ->where('statut', '<>', 'En attente de modification')
+                ->where('users', Auth::user()->id)
+                ->orderByDesc('date')
+                ->lazy(200);
         }
-
-        // $ventes = $ventes->where("id", "<", 100);
 
         return view('ventes.index', compact('ventes'));
     }
@@ -856,7 +866,7 @@ class VenteController extends Controller
 
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            
+
             ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
@@ -868,7 +878,7 @@ class VenteController extends Controller
 
         $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            
+
             ->join('vendus', 'ventes.id', '=', 'vendus.vente_id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')

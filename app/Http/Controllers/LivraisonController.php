@@ -25,6 +25,7 @@ class LivraisonController extends Controller
     public function __construct()
     {
         $this->middleware('vendeur')->only(['create', 'store', 'delete', 'cloturer']);
+        ini_set("max_execution_time",3600);
     }
 
     public function index(Request $request)

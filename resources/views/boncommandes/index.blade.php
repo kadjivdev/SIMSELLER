@@ -268,7 +268,7 @@
         "lengthChange": false,
         "autoWidth": false,
 
-        "buttons": ["pdf", "print"],
+        "buttons": ["pdf", "print","excel"],
 
         "order": [
             [0, 'asc']

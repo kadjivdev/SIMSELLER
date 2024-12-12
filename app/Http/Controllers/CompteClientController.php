@@ -11,13 +11,11 @@ use App\Models\Parametre;
 use App\Models\Reglement;
 use App\Models\TypeDetailRecu;
 use App\Models\User;
-use App\Models\Vente;
 use App\Rules\ReglementMontantRule;
 use App\tools\CompteTools;
 use App\tools\ControlesTools;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class CompteClientController extends Controller

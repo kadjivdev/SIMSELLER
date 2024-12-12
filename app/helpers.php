@@ -41,6 +41,15 @@ function IS_RODOLPHO_ACCOUNT($user)
     return false;
 }
 
+function IS_LAWANI_ACCOUNT($user)
+{
+    if ($user->id == 12) {
+        return true;
+    }
+
+    return false;
+}
+
 function IS_HIPLYTE_ACCOUNT($user)
 {
     if ($user->id == 11) {

@@ -314,7 +314,11 @@
                                                 <button class="btn btn-success"
 
                                                         @if(!$vente->byvente)
-                                                            @if($vente->vendus()->sum('qteVendu') && $vente->vendus()->sum('qteVendu') == $vente->qteTotal) data-toggle="modal" data-target="#Validation_vente" @else disabled @endif
+                                                            @if($vente->vendus()->sum('qteVendu') && $vente->vendus()->sum('qteVendu') == $vente->qteTotal) 
+                                                                data-toggle="modal" data-target="#Validation_vente" 
+                                                            @else 
+                                                                disabled 
+                                                            @endif
                                                         @else
                                                             @if($total == $vente->qteTotal) data-toggle="modal" data-target="#Validation_vente" @else disabled @endif
                                                         @endif

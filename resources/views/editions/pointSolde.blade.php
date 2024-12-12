@@ -90,7 +90,6 @@
                             @php($debit = session('resultat') ? session('resultat')['debit']: $debit)
                             @php($solde = $credit-$debit)
 
-
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="info-box">
@@ -324,7 +323,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="7" class="font-weight-bold">Total</td>
+                                                <td colspan="8" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">
                                                     {{ number_format($qte, 0, ',', ' ') }}
                                                 </td>
@@ -354,12 +353,6 @@
                             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content bg-transparent">
-                                        <!-- <div class="modal-header">
-                                            <h4 class="text-dark">Liste des ventes supprimées de ce client</h4>
-                                        </div>
-                                        <div class="modal-body"> -->
-                                        <!-- VENTES SUPPRIMEES POUR CE CLIENT -->
-                                        <!-- <div class="card-body"> -->
                                         @if (count(session('resultat')['ventesDleted']) > 0)
 
                                         <table class="table table-bordered table-striped table-sm" style="font-size: 12px">
@@ -433,21 +426,10 @@
                                             Aucune vente supprimée du compte de ce client.
                                         </div>
                                         @endif
-                                        <!-- </div> -->
-                                        <!-- </div> -->
                                     </div>
                                 </div>
                             </div>
                             @endif
-
-                            <!-- 
-                            <div class="card-footer text-center no-print">
-                                @if (session('resultat'))
-                                @if (count(session('resultat')['ventes']) > 0)
-                                <button class="btn btn-success" onclick="window.print()"><i class="fa fa-print"></i> Imprimer</button>
-                                @endif
-                                @endif
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -494,7 +476,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["excel", "pdf", "print"],
+            "buttons": ["pdf","excel", "print"],
             "order": [
                 [1, 'asc']
             ],

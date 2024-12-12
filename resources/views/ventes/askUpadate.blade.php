@@ -137,6 +137,7 @@
                         <tr>
                             <th>Code</th>
                             <th>Code Commande</th>
+                            <th>Code Pro</th>
                             <th>Date</th>
                             <th>Client</th>
                             <th>PU</th>
