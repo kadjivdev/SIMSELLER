@@ -2,11 +2,11 @@
     {
         "name": "server-1",
         "ip": "109.234.166.219",
-        "username": "web",
-        "password": "web",
+        "username": "hete6559",
+        "password": "yUuW-Gqwa-agQ{",
         "port": "22",
         "beforeHooks": "",
         "afterHooks": "",
-        "path": ""
+        "path": "/home/hete6559/public_html/cimseller"
     }
 ]
