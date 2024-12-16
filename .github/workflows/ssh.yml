@@ -49,7 +49,7 @@ jobs:
               echo "$JSON" >> "${GITHUB_OUTPUT}"
               echo "${delimiter}" >> "${GITHUB_OUTPUT}"
 
-  # // JOB 2
+  # // JOB 2 (Deployement on server)
   prepare-release-on-servers:
     name: "${{ matrix.server.name }}: Prepare release"
     runs-on: ubuntu-latest
