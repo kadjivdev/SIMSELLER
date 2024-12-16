@@ -42,7 +42,7 @@ jobs:
           id: export-deployment-matrix
           run: |
               delimiter="$(openssl rand -hex 8)"
-              JSON="$(cat ../deployement-config.json)"
+              JSON="$(cat ./deployment-config.json)"
               echo "DEPLOYMENT_MATRIX<<${delimiter}" >> "${GITHUB_OUTPUT}"
               echo "$JSON" >> "${GITHUB_OUTPUT}"
               echo "${delimiter}" >> "${GITHUB_OUTPUT}"
