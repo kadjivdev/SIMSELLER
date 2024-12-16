@@ -73,4 +73,3 @@ jobs:
         source: ${{ github.sha }}.tar.gz
         target: ${{ matrix.server.path }}/artifacts
         
-    
