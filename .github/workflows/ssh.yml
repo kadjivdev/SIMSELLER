@@ -26,4 +26,9 @@ jobs:
         - name: Composer install
           run: |
             composer install --no-dev --no-interaction --prefer-dist
+        # //
+        - name: Put all the projet to one file
+          env:
+            GITHUB_SHA: ${{ github.sha }}
+          run: tar -czf "${GITHUB_SHA}".tar.gz --exclude=*.git --exclude=node_modules *
         
