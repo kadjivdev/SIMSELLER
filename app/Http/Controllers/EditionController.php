@@ -192,10 +192,11 @@ class EditionController extends Controller
 
     public function pointSolde()
     {
+        
         $clients = Client::all();
         $zones = Zone::all();
         // $SommeCompte = CompteClient::all()->sum('solde');
-        $reglements = Reglement::all()->sum('montant');
+        $reglements = Reglement::whereNotNull("vente_id")->sum('montant');
         $sommeVentes = Vente::all()->sum('montant');
 
         // $credit = $clients->sum('credit');

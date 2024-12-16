@@ -323,7 +323,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="8" class="font-weight-bold">Total</td>
+                                                <td colspan="7" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">
                                                     {{ number_format($qte, 0, ',', ' ') }}
                                                 </td>
