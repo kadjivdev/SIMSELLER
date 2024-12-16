@@ -72,5 +72,5 @@ jobs:
         port: ${{ matrix.server.port }}
         source: ${{ github.sha }}.tar.gz
         target: ${{ matrix.server.path }}
-        # timeout: 3600s
+        timeout: 7200s
         
