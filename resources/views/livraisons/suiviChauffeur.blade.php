@@ -49,57 +49,81 @@
                                 <form id="statutsForm" action="{{route('livraisons.postSuivichauffeur')}}" method="post">
                                     @csrf
                                     <div class="row">
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="">Début</label>
-                                                <input type="date" class="form-control" name="debut" value="{{old('debut')}}">
+                                        <div class="col-sm-4">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label for="">Début</label>
+                                                        <input type="date" class="form-control" name="debut" value="{{old('debut')}}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label for="">Fin</label>
+                                                        <input type="date" class="form-control" name="fin" value="{{old('fin')}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 d-flex justify-content-between">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="prog" id="flexCheckDefault">
+                                                        <label class="form-check-label" for="flexCheckDefault">
+                                                            Par Prog Date
+                                                        </label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="bon" id="flexCheckChecked">
+                                                        <label class="form-check-label" for="flexCheckChecked">
+                                                            Par Bon Date
+                                                        </label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group">
-                                                <label for="">Début</label>
-                                                <input type="date" class="form-control" name="fin" value="{{old('fin')}}">
+                                        <div class="col-sm-8">
+                                            <div class="row">
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label for="">Chauffeurs</label>
+                                                        <select class="custom-select form-control select2" id="chauffeur"
+                                                                name="chauffeur">
+                                                            <option value="tous" >Tous</option>
+                                                            @foreach($chauffeurs as $chauffeur)
+                                                                <option value="{{$chauffeur->id}}" @if(old('chauffeur') == $chauffeur->id) selected @endif>{{$chauffeur->nom}} {{$chauffeur->prenom}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label for="">Fournisseur</label>
+                                                        <select class="custom-select form-control select2" id="fournisseur"
+                                                                name="fournisseur">
+                                                            <option value="tous" >Tous</option>
+                                                            @foreach($fournisseurs as $fournisseur)
+                                                                <option value="{{$fournisseur->id}}" @if(old('fournisseur') == $fournisseur->id) selected @endif>{{$fournisseur->raisonSociale}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label for="">Charger</label>
+                                                        <select class="custom-select form-control" id="fournisseur"
+                                                                name="option">
+                                                            <option value="Tous" >Tous</option>
+                                                            <option value="OUI" @if(old('option') == 'OUI') selected @endif>OUI</option>
+                                                            <option value="NON" @if(old('option') == 'NON') selected @endif>NON</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3 ">
+                                                    <button class="btn btn-lg btn-primary" type="submit"
+                                                            style="margin-top: 2em">Afficher
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <div class="form-group">
-                                                <label for="">Chauffeurs</label>
-                                                <select class="custom-select form-control select2" id="chauffeur"
-                                                        name="chauffeur">
-                                                    <option value="tous" >Tous</option>
-                                                    @foreach($chauffeurs as $chauffeur)
-                                                        <option value="{{$chauffeur->id}}" @if(old('chauffeur') == $chauffeur->id) selected @endif>{{$chauffeur->nom}} {{$chauffeur->prenom}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <div class="form-group">
-                                                <label for="">Fournisseur</label>
-                                                <select class="custom-select form-control select2" id="fournisseur"
-                                                        name="fournisseur">
-                                                    <option value="tous" >Tous</option>
-                                                    @foreach($fournisseurs as $fournisseur)
-                                                        <option value="{{$fournisseur->id}}" @if(old('fournisseur') == $fournisseur->id) selected @endif>{{$fournisseur->raisonSociale}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <div class="form-group">
-                                                <label for="">Charger</label>
-                                                <select class="custom-select form-control" id="fournisseur"
-                                                        name="option">
-                                                    <option value="Tous" >Tous</option>
-                                                    <option value="OUI" @if(old('option') == 'OUI') selected @endif>OUI</option>
-                                                    <option value="NON" @if(old('option') == 'NON') selected @endif>NON</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-2 ">
-                                            <button class="btn btn-lg btn-primary" type="submit"
-                                                    style="margin-top: 2em">Afficher
-                                            </button>
                                         </div>
                                     </div>
                                 </form>
@@ -119,7 +143,8 @@
                                             <th>#</th>
                                             <th>Code</th>
                                             <th>Code Prog</th>
-                                            <th>Date</th>
+                                            <th>Date Prog</th>
+                                            <th>Date Bon</th>
                                             <th>Fournisseur</th>
                                             <th>Produit</th>
                                             <th>BL</th>
@@ -143,6 +168,7 @@
                                                         <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
                                                         <td>{{ $programmation->code }}</td>
                                                         <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
+                                                        <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->detailboncommande->boncommande->dateBon), 'd/m/Y'):'' }}</td>
                                                         <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
                                                         <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
                                                         <td>{{ $programmation->bl_gest?$programmation->bl_gest:$programmation->bl }}</td>
@@ -177,6 +203,7 @@
                                                             <td>{{ $programmation->detailboncommande->boncommande->code }}</td>
                                                             <td>{{ $programmation->code }}</td>
                                                             <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->dateprogrammer), 'd/m/Y'):'' }}</td>
+                                                        <td class="text-center">{{ $programmation->dateprogrammer?date_format(date_create($programmation->detailboncommande->boncommande->dateBon), 'd/m/Y'):'' }}</td>
                                                             <td>{{ $programmation->detailboncommande->boncommande->fournisseur->sigle }}</td>
                                                             <!--<td>{{ $programmation->detailboncommande->produit->libelle }}</td>-->
                                                             <td>{{ $programmation->detailboncommande->produit->libelle }}</td>
@@ -207,7 +234,8 @@
                                             <th>#</th>
                                             <th>Code</th>
                                             <th>Code Prog</th>
-                                            <th>Date</th>
+                                            <th>Date Prog</th>
+                                            <th>Date Bon</th>
                                             <th>Fournisseur</th>
                                             <th>Produit</th>
                                             <th>BL</th>

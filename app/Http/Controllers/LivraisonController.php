@@ -795,12 +795,24 @@ class LivraisonController extends Controller
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
         $zones = $repre->zones;
-        $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer', 'Annuler'])->pluck('id');
+
+        $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer', 'Livrer', 'Annuler']);
+        if ($request->bon) {
+            $boncommandes = $boncommandesV->whereBetween('dateBon', [$request->debut, $request->fin]);
+        }else {
+            $boncommandes = $boncommandesV;
+        }
+        $boncommandesV = $boncommandes->pluck('id');
+
         $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
         $fournisseur = Fournisseur::find($request->fournisseur);
         $chauffeur = Chauffeur::find($request->chauffeur);
 
         if ($request->debut && $request->fin) {
+            if ($request->bon==$request->prog) {
+                return back()->with("error","Choisissez soit un filtrage par date de programmation ou par date de bon de commande");
+            }
+
             session(['debut' => $request->debut]);
             session(['fin' => $request->fin]);
             session(['option' => $request->option]);
@@ -813,7 +825,7 @@ class LivraisonController extends Controller
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
                             ->where('chauffeur_id', $chauffeur->id)
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
                         $messageReq = "Liste des programmations de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
@@ -823,7 +835,7 @@ class LivraisonController extends Controller
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
                             ->where('chauffeur_id', $chauffeur->id)
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->whereNotNull('dateSortie')
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
@@ -834,7 +846,7 @@ class LivraisonController extends Controller
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
                             ->where('chauffeur_id', $chauffeur->id)
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->whereNull('dateSortie')
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
@@ -847,7 +859,7 @@ class LivraisonController extends Controller
                         $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
                         $messageReq = "Liste des programmations de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
@@ -856,7 +868,7 @@ class LivraisonController extends Controller
                         $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->whereNotNull('dateSortie')
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
@@ -866,13 +878,18 @@ class LivraisonController extends Controller
                         $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
                             ->whereIn('statut', ['Valider', 'Livrer'])
                             ->where('imprimer', '1')
-                            ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                            // ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
                             ->whereNull('dateSortie')
                             ->orderByDesc('code')->get();
                         $fournisseur = $fournisseur ? " du fournisseur " . $fournisseur->raisonSociale : '';
                         $messageReq = "Liste des camions non chargés de la période du " . date_format(date_create($request->debut), 'd/m/y') . " au " . date_format(date_create($request->fin), 'd/m/Y') . $fournisseur;
                         break;
                 }
+            }
+
+            // 
+            if ($request->prog) {
+                $programmations = $programmations->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
             }
         } else {
             if ($chauffeur) {
