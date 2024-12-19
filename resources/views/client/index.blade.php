@@ -192,7 +192,7 @@
                                                     Actions<i class="dw dw-more"></i>
                                                 </button>
                                                 <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
-                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists())
+                                                    @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
 
                                                     <a class="dropdown-item"
                                                         href="{{ route('compteClient.show', ['client' => $client->id]) }}"><i
