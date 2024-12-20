@@ -35,6 +35,7 @@ class NewPasswordController extends Controller
             return redirect()->route('dashboard');*/
         return view('auth.reset-pwd', ['request' => $request]);
     }
+    
     public function storePwdUpdate(Request $request){
         $request->validate([
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -44,9 +45,12 @@ class NewPasswordController extends Controller
         $user->password = Hash::make($request->password);
         $user->pwd_change = 1;
         $user->update();
-        if($pwdchang)
-            return redirect()->route('logout');
-        return redirect()->route('dashboard');
+
+        # DECONNEXION
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
 
     /**
