@@ -182,6 +182,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
                                                 <div class="col-6">
                                                     <div class="info-box">
                                                         <span class="info-box-icon bg-dark" style="width: 50px!important;"><i class="bi bi-cash-coin"></i></span>

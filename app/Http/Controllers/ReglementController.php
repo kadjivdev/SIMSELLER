@@ -32,7 +32,7 @@ class ReglementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
+        // $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
     }
 
     public function index(Vente $vente)
