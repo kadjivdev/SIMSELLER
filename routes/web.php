@@ -307,7 +307,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
 
     // Programmation router
-
     Route::prefix('programmations')->group(function () {
 
         Route::controller(ProgrammationController::class)->group(function () {
@@ -375,11 +374,9 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/edit/{programmation}', 'edit')->name('livraisons.edit');
 
             Route::post('/update/{programmation}', 'update')->name('livraisons.update');
-            // Route::post('/transfert', 'transfertLivraison')->name('livraisons.transfert');
-
+            
             Route::get('/transfert/{programmation}', 'getTransfertPage')->name('livraisons.getTransfert');
             Route::post('/transfert', 'transfertLivraison_redirect')->name('livraisons.transfert');
-
 
             Route::get('/delete/{programmation}', 'delete')->name('livraisons.delete');
 
@@ -389,7 +386,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/datesortie/{detailboncommande}/{programmation}', 'postDateSortie')->name('programmations.postDateSortie');
         });
     });
-
 
     //Produit commander par un client
 

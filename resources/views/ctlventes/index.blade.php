@@ -119,7 +119,7 @@
                                         </td>
                                         <td>
                                             @if ($reglement->document)
-                                            <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document?asset('storage/'.$reglement->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
+                                            <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
                                             @endif
                                         </td>
                                         <td class="text-center">@if($reglement->utilisateur) {{$reglement->utilisateur->name}}@else Utilisateur manquant @endif</td>

@@ -43,7 +43,6 @@ class clientsController extends Controller
         $zones = Zone::all();
         return view('client.index', compact('clients', "zones"));
         // <!-- {{ $clients->links('pagination') }}  à ajouter à la fin du tableau pour affichage de la pagination laravel -->
-
     }
 
     ###_____CLIENTS ANCIENS
@@ -490,7 +489,6 @@ class clientsController extends Controller
         $statuts = NULL;
 
         $clients = $client->delete();
-
 
         if ($clients) {
             Session()->flash('message', 'Client supprimé avec succès!');

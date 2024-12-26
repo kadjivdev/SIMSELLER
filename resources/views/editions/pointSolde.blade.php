@@ -242,11 +242,11 @@
                                     <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 11px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
-                                                <th>#</th>
+                                                <!-- <th>#</th> -->
                                                 <th>Code</th>
                                                 <th>Bl</th>
                                                 <th>date</th>
-                                                <th>Chauffeur/Destination</th>
+                                                <th>Chauf../Destin../Acteur</th>
                                                 <th>Type</th>
                                                 <th>Zones</th>
                                                 <th>Quantite</th>
@@ -255,6 +255,7 @@
                                                 <th>Reste</th>
                                                 <th>Echéance</th>
                                                 <th>Action</th>
+                                                <!-- <th>Acteur</th> -->
                                             </tr>
                                         </thead>
                                         <tbody class="table-body">
@@ -265,7 +266,7 @@
                                             @php($montant = $montant + $item->montant)
                                             @php($regle = $regle + $item->reglements()->sum('montant'))
                                             <tr style="align-items: center!important;">
-                                                <td>{{ $cpt }}</td>
+                                                <!-- <td>{{ $cpt }}</td> -->
                                                 <td>{{ $item->code }}</td>
                                                 <td class="text-center font-weight-bold">
                                                     @if(count($item->vendus)>0)
@@ -281,7 +282,7 @@
                                                 <td>
                                                     @if(count($item->vendus)>0)
                                                     @foreach ($item->vendus as $vendu )
-                                                    {{ $vendu->programmation->chauffeur->nom}} {{ $vendu->programmation->chauffeur->prenom}} / {{ $item->destination }}
+                                                    {{ $vendu->programmation->chauffeur->nom}} {{ $vendu->programmation->chauffeur->prenom}} / {{ $item->destination }}/ <span class="badge text-white bg-warning">{{$item->user->name}}</span>
                                                     @endforeach
                                                     @else
                                                     ---
@@ -317,13 +318,16 @@
                                                 <td>
                                                     <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$item])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement {{$item->id}} <span class="badge badge-info">{{$item->reglements ? count($item->reglements):0}}</span></a>
                                                 </td>
+                                                <!-- <td>
+                                                    <span class="badge text-white bg-dark">{{$item->user->name}}</span>
+                                                </td> -->
                                             </tr>
 
                                             @endforeach
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td colspan="7" class="font-weight-bold">Total</td>
+                                                <td colspan="6" class="font-weight-bold">Total</td>
                                                 <td class="text-right font-weight-bold">
                                                     {{ number_format($qte, 0, ',', ' ') }}
                                                 </td>
@@ -476,7 +480,7 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf","excel", "print"],
+            "buttons": ["pdf", "excel", "print"],
             "order": [
                 [1, 'asc']
             ],
