@@ -12,11 +12,8 @@ class AvoirController extends Controller
     public function create(User $user)
     {
         $roles = Role::orderBy('libelle')->get();
-
         return view('avoirs.create', compact('user', 'roles'));
     }
-
-
 
     public function store(Request $request, User $user)
     {
@@ -76,45 +73,12 @@ class AvoirController extends Controller
         return view('avoirs.index', compact('user'));
     }
 
-    /*
-    public function edit($societe_id, $chantier_id)
-    {
-        $chantier = Chantier::findOrFail($chantier_id);
-        $societe = $chantier->societes()->findOrFail($societe_id);
-        $societes = Societe::all();
-
-        return view('intervenirs.edit', compact('societe', 'chantier', 'societes'));
-    }
-
-
-    public function update(Request $request)
-    {
-        //$societes = Societe::find($request->id);
-            request() ->validate([
-                'societe_id' => ['required'],
-                'chantier_id' => ['required'],
-                'observation' => ['required', 'string'],
-            ]);
-
-            $chantier = Chantier::find($request->chantier_id);
-
-            $intervenir = $chantier->societes()->sync([$request->societe_id =>['observation' => ucfirst($request->observation)]]);
-
-            if($intervenir){
-                Session()->flash('message', 'Société associé au chantier modifié avec succès!');
-                return redirect()->route('intervenirs.show', [$chantier->id]);
-            }
-    }
-
-    */
-
     public function delete(User $user, Role $role)
     {
         $role = $user->roles()->findOrFail($role->id);
 
         return view('avoirs.delete', compact('role', 'user'));
     }
-
 
     public function destroy(User $user, Role $role)
     {

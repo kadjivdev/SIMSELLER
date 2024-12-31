@@ -17,27 +17,22 @@ class ChauffeurController extends Controller
         $this->chauffeurs = $chauffeurs;
     }
 
-
     public function index()
     {
         $chauffeurs = $this->chauffeurs::all();
         return view('chauffeurs.index', compact('chauffeurs'));
     }
 
-
-
     public function create()
     {
         return view('chauffeurs.create');
     }
 
-
-
     public function store(Request $request)
     {
-        if($request->photo){
-            request() ->validate([
-               'nom' => ['required', 'string', 'max:255'],
+        if ($request->photo) {
+            request()->validate([
+                'nom' => ['required', 'string', 'max:255'],
                 'prenom' => ['required', 'string', 'max:255'],
                 'dateNaissance' => ['nullable', 'date', 'max:255', new DateChauffeurRule()],
                 'telephone' => ['nullable', 'string', 'max:255', 'unique:chauffeurs,telephone'],
@@ -48,26 +43,23 @@ class ChauffeurController extends Controller
             ]);
 
             /* Uploader la photo de profile */
-
             $image = $request->file('photo');
-            $photo = time().'.'.$image->extension();
+            $photo = time() . '.' . $image->extension();
             $image->move(public_path('images'), $photo);
 
 
-            if($request->document){
+            if ($request->document) {
                 /* Uploader les documents dans la base de données */
-                $filename = time().'.'.$request->document->extension();
+                $filename = time() . '.' . $request->document->extension();
 
                 $file = $request->file('document')->storeAs(
                     'documents',
                     $filename,
                     'public'
                 );
-            }
-            else{
+            } else {
                 $file = null;
             }
-
 
             $chauffeurs = $this->chauffeurs::create([
                 'nom' => strtoupper($request->nom),
@@ -80,41 +72,37 @@ class ChauffeurController extends Controller
                 'statut' => ucfirst($request->statut),
             ]);
 
-            if($chauffeurs){
+            if ($chauffeurs) {
                 Session()->flash('message', 'Chauffeur ajouté avec succès!');
                 return redirect()->route('chauffeurs.index');
-            }
-            else{
+            } else {
                 Session()->flash('error', 'Echec: Une erreur est survenue lors de l\'enregistrement du chauffeur.
                 Veuiller réessayer et si l\'erreur persiste, contacter le concepteur!');
                 return redirect()->route('chauffeurs.index');
             }
-
-        }else{
-            request() ->validate([
+        } else {
+            request()->validate([
                 'nom' => ['required', 'string', 'max:255'],
                 'prenom' => ['required', 'string', 'max:255'],
-                'dateNaissance' => ['nullable', 'date', 'max:255',new DateChauffeurRule()],
+                'dateNaissance' => ['nullable', 'date', 'max:255', new DateChauffeurRule()],
                 'telephone' => ['nullable', 'string', 'max:255', 'unique:chauffeurs,telephone'],
                 'numero' => ['nullable', 'unique:chauffeurs,numero'],
                 'document' => ['nullable', 'file', 'mimes:pdf,docx,doc'],
                 'statut' => ['string', 'max:255'],
             ]);
 
-            if($request->document){
+            if ($request->document) {
                 /* Uploader les documents dans la base de données */
-                $filename = time().'.'.$request->document->extension();
+                $filename = time() . '.' . $request->document->extension();
 
                 $file = $request->file('document')->storeAs(
                     'documents',
                     $filename,
                     'public'
                 );
-            }
-            else{
+            } else {
                 $file = null;
             }
-
 
             $chauffeurs = $this->chauffeurs::create([
                 'nom' => strtoupper($request->nom),
@@ -126,19 +114,16 @@ class ChauffeurController extends Controller
                 'numero' => $request->numero,
             ]);
 
-            if($chauffeurs){
+            if ($chauffeurs) {
                 Session()->flash('message', 'Chauffeur ajouté avec succès!');
                 return redirect()->route('chauffeurs.index');
-            }
-            else{
+            } else {
                 Session()->flash('error', 'Echec: Une erreur est survenue lors de l\'enregistrement du chauffeur.
                 Veuiller réessayer et si l\'erreur persiste, contacter le concepteur!');
                 return redirect()->route('chauffeurs.index');
             }
         }
     }
-
-
 
     public function show($id)
     {
@@ -147,39 +132,31 @@ class ChauffeurController extends Controller
         return view('chauffeurs.show', compact('chauffeurs'));
     }
 
-
     public function edit($id)
     {
         $chauffeurs = $this->chauffeurs->findOrFail($id);
 
         return view('chauffeurs.edit', compact('chauffeurs'));
-
     }
-
 
     public function addPhoto($id)
     {
         $chauffeurs = $this->chauffeurs->findOrFail($id);
-
         return view('chauffeurs.addPhoto', compact('chauffeurs'));
-
     }
-
 
     public function photo(Request $request)
     {
-        if(!$request->remoov){
-            request() ->validate([
+        if (!$request->remoov) {
+            request()->validate([
                 'photo' => ['required', 'image', 'mimes:jpg,bmp,png'],
             ]);
 
             /* Uploader les images dans la base de données */
             $image = $request->file('photo');
-            $photo = time().'.'.$image->extension();
+            $photo = time() . '.' . $image->extension();
             $image->move(public_path('images'), $photo);
-
-        }
-        else{
+        } else {
             $photo = null;
         }
 
@@ -189,44 +166,39 @@ class ChauffeurController extends Controller
             'photo' => $photo,
         ]);
 
-        if($chauffeurs){
+        if ($chauffeurs) {
             Session()->flash('message', 'Photo chauffeur actualisée avec succès!');
             return redirect()->route('chauffeurs.index');
         }
     }
 
-
-
     public function update(Request $request)
     {
-        if($request->document){
-            request() ->validate([
+        if ($request->document) {
+            request()->validate([
                 'nom' => ['required', 'string', 'max:255'],
                 'prenom' => ['required', 'string', 'max:255'],
-                'dateNaissance' => ['nullable', 'date', 'max:255',new DateChauffeurRule()],
+                'dateNaissance' => ['nullable', 'date', 'max:255', new DateChauffeurRule()],
                 'telephone' => ['nullable', 'string', 'max:255', Rule::unique('chauffeurs')->ignore($request->id)],
                 'document' => ['nullable', 'file', 'mimes:pdf,docx,doc'],
                 'statut' => ['string', 'max:255'],
                 'numero' => ['nullable', Rule::unique('chauffeurs')->ignore($request->id)],
             ]);
             $chauffeurs = $this->chauffeurs->findOrFail($request->id);
-            if($request->statut == 'on'){
+            if ($request->statut == 'on') {
                 $statut = 'Actif';
-            }
-            else{
+            } else {
                 $statut = 'Inactif';
             }
-            //dd($request->all());
-                /* Uploader les documents dans la base de données */
+            /* Uploader les documents dans la base de données */
 
-                $filename = time().'.'.$request->document->extension();
+            $filename = time() . '.' . $request->document->extension();
 
-                $file = $request->file('document')->storeAs(
-                    'documents',
-                    $filename,
-                    'public'
-                );
-            
+            $file = $request->file('document')->storeAs(
+                'documents',
+                $filename,
+                'public'
+            );
 
             $chauffeurs = $chauffeurs->update([
                 'nom' => strtoupper($request->nom),
@@ -238,24 +210,23 @@ class ChauffeurController extends Controller
                 'numero' => $request->numero,
             ]);
 
-            if($chauffeurs){
+            if ($chauffeurs) {
                 Session()->flash('message', 'chauffeurs modifier avec succès!');
                 return redirect()->route('chauffeurs.index');
             }
-        }else{
-            request() ->validate([
+        } else {
+            request()->validate([
                 'nom' => ['required', 'string', 'max:255'],
                 'prenom' => ['required', 'string', 'max:255'],
-                'dateNaissance' => ['nullable', 'date', 'max:255',new DateChauffeurRule()],
+                'dateNaissance' => ['nullable', 'date', 'max:255', new DateChauffeurRule()],
                 'telephone' => ['nullable', 'string', 'max:255', Rule::unique('chauffeurs')->ignore($request->id)],
                 'statut' => ['string', 'max:255'],
                 'numero' => ['nullable', Rule::unique('chauffeurs')->ignore($request->id)],
             ]);
             $chauffeurs = $this->chauffeurs->findOrFail($request->id);
-            if($request->statut == 'on'){
+            if ($request->statut == 'on') {
                 $statut = 'Actif';
-            }
-            else{
+            } else {
                 $statut = 'Inactif';
             }
             $chauffeurs = $chauffeurs->update([
@@ -268,13 +239,11 @@ class ChauffeurController extends Controller
                 'permis' => $request->remoovdoc ? null : $chauffeurs->permis,
             ]);
 
-            if($chauffeurs){
+            if ($chauffeurs) {
                 Session()->flash('message', 'chauffeurs modifier avec succès!');
                 return redirect()->route('chauffeurs.index');
             }
-
         }
-
     }
 
 
@@ -283,15 +252,12 @@ class ChauffeurController extends Controller
         $chauffeurs = $this->chauffeurs->findOrFail($id);
 
         return view('chauffeurs.delete', compact('chauffeurs'));
-
     }
-
-
 
     public function destroy($id)
     {
         $chauffeurs = $this->chauffeurs->findOrFail($id)->delete();
-        if($chauffeurs){
+        if ($chauffeurs) {
             Session()->flash('message', 'chauffeurs supprimé avec succès!');
             return redirect()->route('chauffeurs.index');
         }

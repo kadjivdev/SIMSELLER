@@ -55,7 +55,7 @@
                                                 </option>
                                                 @endforeach
                                             </select> -->
-                                            <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>-->
+                                            <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }} >
                                                 <option class="" value="tous">Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
@@ -165,7 +165,6 @@
                                     </div>
                                     <br>
                                     <div class="row text-center">
-                                        <!-- <div class="col-3"></div> -->
                                         <div class="col-12">
                                             <div class="row">
                                                 <div class="col-6">
@@ -175,9 +174,7 @@
                                                             <span class="info-box-text">Il nous devait:</span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['debit_old'], '0', '', ' ')}}</span>
                                                             @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
-                                                            <!-- if(IsClientHasADebt(session('resultat')['client']['id'])) -->
                                                             <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success"><i class="bi bi-list-ul"></i> Reglements</a>
-                                                            <!-- endif -->
                                                             @endif
                                                         </div>
                                                     </div>
@@ -194,7 +191,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- <div class="col-3"></div> -->
                                     </div>
                                 </div>
 
@@ -243,7 +239,6 @@
                                     <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 11px">
                                         <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
-                                                <!-- <th>#</th> -->
                                                 <th>Code</th>
                                                 <th>Bl</th>
                                                 <th>date</th>
@@ -256,7 +251,6 @@
                                                 <th>Reste</th>
                                                 <th>Echéance</th>
                                                 <th>Action</th>
-                                                <!-- <th>Acteur</th> -->
                                             </tr>
                                         </thead>
                                         <tbody class="table-body">
@@ -267,7 +261,6 @@
                                             @php($montant = $montant + $item->montant)
                                             @php($regle = $regle + $item->reglements()->sum('montant'))
                                             <tr style="align-items: center!important;">
-                                                <!-- <td>{{ $cpt }}</td> -->
                                                 <td>{{ $item->code }}</td>
                                                 <td class="text-center font-weight-bold">
                                                     @if(count($item->vendus)>0)
@@ -319,9 +312,6 @@
                                                 <td>
                                                     <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$item])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement {{$item->id}} <span class="badge badge-info">{{$item->reglements ? count($item->reglements):0}}</span></a>
                                                 </td>
-                                                <!-- <td>
-                                                    <span class="badge text-white bg-dark">{{$item->user->name}}</span>
-                                                </td> -->
                                             </tr>
 
                                             @endforeach
@@ -375,7 +365,6 @@
                                                     <th>Date de suppression</th>
                                                     <th>Montant</th>
                                                     <th>Reglement</th>
-                                                    <th>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -401,15 +390,6 @@
                                                         @endif
                                                         @else
                                                         <span class="badge bg-light">---</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="text-center font-weight-bold">
-                                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists()==true)
-                                                        @if(!$vente->restituted)
-                                                        <a href="{{route('edition.RestoreVenteDeleted',['vente'=>$vente->id,'client'=>session('resultat')['client']])}}" class="btn btn-sm btn-light"> <span> Restituer </span></a>
-                                                        @else
-                                                        <span class="badge bg-light">---</span>
-                                                        @endif
                                                         @endif
                                                     </td>
                                                 </tr>

@@ -3,17 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonCommande;
-use App\Models\Client;
-use App\Models\ClientOld;
 use App\Models\CommandeClient;
 use App\Models\Programmation;
-use App\Models\Reglement;
-use App\Models\User;
-use App\Models\Vendu;
 use App\Models\Vente;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -43,7 +37,6 @@ class DashboardController extends Controller
         $boncommandesV = BonCommande::where('statut', 'Valider')->count();
         $programmationsV = Programmation::where('statut', 'Valider')->count();
         $cdes = BonCommande::where('statut', 'Valider')->get();
-        // $progs = Programmation::whereNotNull('imprimer')->count();
         $_progs = Programmation::where('statut', "Livrer")->get();
         $progs = $_progs->count();
         $livs = Programmation::whereNotNull('qtelivrer')->get();
@@ -56,16 +49,7 @@ class DashboardController extends Controller
                 $sansRecu++;
         }
 
-        // foreach ($livs as $liv) {
-        //     $qteVendu = Vendu::where('programmation_id', $liv->id)->sum('qteVendu');
-        //     $stockDispo = $liv->qtelivrer - $qteVendu;
-        //     if ($stockDispo > 0) {
-        //         $qteLiv += $stockDispo;
-        //         $nbrLiv++;
-        //     }
-        // }
-
-        $produitNP = $progs; //DetailBonCommande::whereIn('bon_commande_id', $boncommandes)->whereNotIn('id', $programmations)->count();
+        $produitNP = $progs; 
         $now = Carbon::now();
         $vente = Vente::where('statut', 'Vendue')->whereBetween('date', [$now->startOfWeek()->format('Y-m-d'), $now->endOfWeek()->format('Y-m-d')])->sum('montant');
 
@@ -81,7 +65,6 @@ class DashboardController extends Controller
                 $impayer += $vte->montant - $vte->reglements()->sum('montant');
             }
         }
-
         return view('dashboard', compact('boncommandesP', 'boncommandesV', 'programmationsV', 'produitNP', 'sansRecu', 'nbrLiv', 'qteLiv', 'vente', 'cde', 'client', 'impayer', "umpaid_vente"));
     }
 }

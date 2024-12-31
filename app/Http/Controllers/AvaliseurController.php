@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AvaliseurController extends Controller
 {
-
     public function index()
     {
         $avaliseurs = Avaliseur::all();
@@ -21,16 +20,12 @@ class AvaliseurController extends Controller
         return view('avaliseurs.index', compact('avaliseurs'));
     }
 
-
-
     public function create()
     {
         $typeavaliseurs = TypeAvaliseur::all();
 
         return view('avaliseurs.create', compact('typeavaliseurs'));
     }
-
-
 
     public function store(Request $request)
     {

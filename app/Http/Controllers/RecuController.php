@@ -17,11 +17,8 @@ class RecuController extends Controller
 {
     public function index(BonCommande $boncommandes)
     {
-
         return view('recus.index', compact('boncommandes'));
     }
-
-
 
     public function create(BonCommande $boncommande)
     {
@@ -30,8 +27,6 @@ class RecuController extends Controller
         $boncommandes = $boncommande;
         return view('recus.create', compact('boncommandes', 'prixTonnage'));
     }
-
-
 
     public function store(Request $request, BonCommande $boncommande)
     {
@@ -77,7 +72,6 @@ class RecuController extends Controller
                 'bon_commande_id' => $boncommande->id,
             ]);
 
-
             if ($recus) {
 
                 $valeur = $parametre->valeur;
@@ -105,22 +99,16 @@ class RecuController extends Controller
         }
     }
 
-
-
     public function show(Recu $recu)
     {
         //
     }
-
-
 
     public function edit(BonCommande $boncommande, Recu $recu)
     {
         $boncommandes = $boncommande;
         return view('recus.edit', compact('boncommandes', 'recu'));
     }
-
-
 
     public function update(Request $request, BonCommande $boncommande, Recu $recu)
     {
@@ -151,7 +139,6 @@ class RecuController extends Controller
                     'document' => $request->remoovdoc ? null : $recu->document,
                 ]);
 
-
                 if ($recu) {
                     Session()->flash('message', 'Réçu modifié avec succès!');
                     return redirect()->route('recus.index', ['boncommandes' => $boncommande->id]);
@@ -170,7 +157,6 @@ class RecuController extends Controller
                 if ($validator->fails()) {
                     return redirect()->route('recus.create', ['boncommande' => $boncommande->id])->withErrors($validator->errors())->withInput();
                 }
-
                 /* Uploader les documents dans la base de données */
                 $filename = time() . '.' . $request->document->extension();
 
@@ -190,7 +176,6 @@ class RecuController extends Controller
                     'bon_commande_id' => $boncommande->id,
                 ]);
 
-
                 if ($recu) {
                     Session()->flash('message', 'Réçu modifié avec succès!');
                     return redirect()->route('recus.index', ['boncommandes' => $boncommande->id]);
@@ -206,14 +191,11 @@ class RecuController extends Controller
         }
     }
 
-
     public function delete(BonCommande $boncommande, Recu $recu)
     {
         $boncommandes = $boncommande;
         return view('recus.delete', compact('boncommandes', 'recu'));
     }
-
-
 
     public function destroy(BonCommande $boncommande, Recu $recu)
     {

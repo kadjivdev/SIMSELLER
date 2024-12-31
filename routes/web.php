@@ -49,15 +49,9 @@ use App\Http\Controllers\CommandeClientController;
 use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
-use App\Models\Client;
-use App\Models\ClientOld;
-use App\Models\CompteClient;
-use App\Models\DetteReglement;
 use App\Models\Mouvement;
-use App\Models\Parametre;
-use App\Models\Programmation;
 use App\Models\Reglement;
-use App\Models\Vente;
+use Illuminate\Database\Eloquent\Collection;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,9 +64,21 @@ use App\Models\Vente;
 |
 */
 
-// {{ route('ctlventes.destroy',['reglement'=>$reglement->id]) }}
 
-#######================#######
+#####================#######
+
+Route::get('/regulation', function () {
+    Reglement::where('client_id', 1432)->whereNull('vente_id')
+        ->chunkById(200, function (Collection $reglement) {
+            $reglement->each->update(['client_id' => 1511, 'clt' => 1511]);
+        }, column: 'id');
+
+    $mouvements = Mouvement::where('compteClient_id', 1432)->get();
+    foreach ($mouvements as $m) {
+        $m->update(['compteClient_id' => 1511]);
+    }
+    return "transfert éffectué avec succès!";
+});
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -345,10 +351,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
     // Livraison router
     Route::prefix('livraisons')->group(function () {
-        // Route::controller(ProgrammeController::class)->group(function () {
-        //     Route::get('livraison/{programation}', 'getProgrammationById_redirect')->name("livraisons.getTransfertProgramme");
-        // });
-
+      
         Route::controller(LivraisonController::class)->group(function () {
 
             Route::get('/index', 'index')->name('livraisons.index');
@@ -374,7 +377,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/edit/{programmation}', 'edit')->name('livraisons.edit');
 
             Route::post('/update/{programmation}', 'update')->name('livraisons.update');
-            
+
             Route::get('/transfert/{programmation}', 'getTransfertPage')->name('livraisons.getTransfert');
             Route::post('/transfert', 'transfertLivraison_redirect')->name('livraisons.transfert');
 
@@ -393,8 +396,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
         Route::controller(CommanderController::class)->group(function () {
 
-            //Route::get('/index', 'index')->name('boncommandes.index');
-
             Route::post('/commanders/store/{commandeclient}/{commander?}', 'store')->where(['commandeclient' => '[0-9]+'])->name('commanders.store');
 
             Route::get('/commanders/show/{id}', 'show')->name('commanders.show');
@@ -405,15 +406,12 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::post('/commanders/destroy/{id}', 'destroy')->name('commanders.destroy');
 
-            //Route::post('/store/{detailboncommandes?}', 'store')->name('detailboncommandes.store');
-
         });
     });
 
     //Detail bon de commande
     Route::prefix('boncommandes')->group(function () {
         Route::controller(DetailBonCommandeController::class)->group(function () {
-            //Route::get('/index', 'index')->name('boncommandes.index');
 
             Route::post('/detailboncommandes/store/{boncommande}/{detailboncommandes?}', 'store')->where(['boncommande' => '[0-9]+'])->name('detailboncommandes.store');
 
@@ -424,8 +422,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/detailboncommandes/edit/{id}', 'edit')->name('detailboncommandes.edit');
 
             Route::get('/detailboncommandes/delete/{id}', 'delete')->name('detailboncommandes.delete');
-
-            //Route::post('/store/{detailboncommandes?}', 'store')->name('detailboncommandes.store');
 
         });
     });
@@ -479,7 +475,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::post('/etat-camion-programmation-periode', 'postEtatCaProgPeriode')->name('edition.postEtatCaProgPeriode');
 
             Route::match(["GET", "POST"], '/etat-reglement-periode', 'etatReglementPeriode')->name('edition.etatReglementperiode');
-            // Route::post('/etat-reglement-periode', 'postEtatReglementPeriode')->name('edition.postEtatReglementPeriode');
 
             Route::get('/etat-reglement-periode-Rep', 'etatReglementPeriodeRep')->name('edition.etatReglementperiodeRep');
             Route::post('/etat-reglement-periode-Rep', 'postEtatReglementPeriodeRep')->name('edition.postEtatReglementPeriodeRep');
@@ -1286,9 +1281,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         });
     });
 
-    // Route::prefix('agent')->group( function () {
-
-    //Route::resource('/agent', AgentController::class);
     Route::controller(AgentController::class)->group(function () {
 
         Route::get('/agent/index', 'index')->name('agent.index');

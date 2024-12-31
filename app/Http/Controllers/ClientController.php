@@ -61,7 +61,6 @@ class ClientController extends Controller
 
     public function store(Request $request, TypeClient $typeclient)
     {
-
         try {
 
             $statuts = $request->statuts;
@@ -491,8 +490,6 @@ class ClientController extends Controller
     public function sommeil(Request $request, Client $client)
     {
         try {
-
-
             if ($client->typeclient->parent->libelle == env('TYPE_CLIENT_P')) {
                 $statuts = $client->typeclient->id;
                 $client->sommeil = 1;
@@ -527,8 +524,6 @@ class ClientController extends Controller
     public function reveil(Request $request, Client $client)
     {
         try {
-
-
             if ($client->typeclient->parent->libelle == env('TYPE_CLIENT_P')) {
                 $statuts = $client->typeclient->id;
                 $client->sommeil = 0;

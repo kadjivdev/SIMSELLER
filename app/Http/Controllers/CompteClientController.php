@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Compte;
-use App\Models\CompteClient;
-use App\Models\DetteReglement;
 use App\Models\Mouvement;
 use App\Models\Parametre;
 use App\Models\Reglement;
 use App\Models\TypeDetailRecu;
-use App\Models\User;
-use App\Rules\ReglementMontantRule;
 use App\tools\CompteTools;
 use App\tools\ControlesTools;
 use Carbon\Carbon;
@@ -20,7 +16,6 @@ use Illuminate\Support\Facades\Validator;
 
 class CompteClientController extends Controller
 {
-
     public function show(Client $client)
     {
         $compteClient = $client->compteClients;

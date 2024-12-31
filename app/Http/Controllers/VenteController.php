@@ -19,30 +19,19 @@ use App\Models\TypeCommande;
 use Illuminate\Http\Request;
 use App\Models\CommandeClient;
 use App\Models\DeletedVente;
-use App\Models\DetailBonCommande;
 use App\Models\filleuil;
 use App\Models\Fournisseur;
-use App\Models\Mouvement;
 use App\Models\Produit;
 use App\Models\Programmation;
-use App\Models\Reglement;
 use App\Models\UpdateVente;
 use App\Models\Vendu;
 use App\Models\VenteDeleteDemand;
 use App\tools\ControlesTools;
-use Illuminate\Contracts\Session\Session;
-use Illuminate\Contracts\Validation\Validator as ValidationValidator;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Mail\Transport\Transport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-//use Maatwebsite\Excel\Excel;
 use Maatwebsite\Excel\Facades\Excel;
-
-use function PHPSTORM_META\map;
 
 class VenteController extends Controller
 {
@@ -129,18 +118,15 @@ class VenteController extends Controller
         $ventes = Vente::whereIn('commande_client_id', $commandeclients)
             ->where('ventes.statut', '<>', 'Contrôller')
             ->where('ventes.statut', '<>', 'En attente de modification')
-            //->where('ventes.users',Auth::user()->id)
             ->where('ventes.id', $vente->id)
             ->join('vendus', 'vendus.vente_id', '=', 'ventes.id')
             ->join('programmations', 'programmations.id', '=', 'vendus.programmation_id')
             ->join('detail_bon_commandes', 'detail_bon_commandes.id', '=', 'programmations.detail_bon_commande_id')
-            // ->join('produits', 'produits.id', '=', 'detail_bon_commandes.produit_id')
             ->join('produits', 'produits.id', '=', 'ventes.produit_id')
             ->join('bon_commandes', 'bon_commandes.id', '=', 'detail_bon_commandes.bon_commande_id')
             ->join('camions', 'camions.id', '=', 'programmations.camion_id')
             ->join('chauffeurs', 'chauffeurs.id', '=', 'programmations.chauffeur_id')
             ->select('ventes.code as vente', 'programmations.code', 'bon_commandes.code as codeBC', 'programmations.bl', 'camions.immatriculationTracteur', 'chauffeurs.nom', 'chauffeurs.prenom', 'vendus.qteVendu', 'ventes.destination', 'produits.libelle')
-            // ->with("produit")
             ->orderByDesc('date')->get();
         return response()->json($ventes);
     }
@@ -162,21 +148,15 @@ class VenteController extends Controller
 
         if ($request->statuts) {
             if ($request->statuts == 1) {
-                // $clients = Client::all();
-                //$zones = Zone::all();
                 $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
                 $commandeclients = CommandeClient::whereIn('statut', ['Non livrée', 'Livraison partielle'])->get();
                 $req = $request->statuts;
             } elseif ($request->statuts == 2) {
-                // $clients = Client::all();
-                //$zones = Zone::all();
                 $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
                 $commandeclients = CommandeClient::where('statut', 'Validée')->orWhere('statut', 'Livraison partielle')->whereNull('byvente')->where('type_commande_id', 2)->get();
                 $req = $request->statuts;
             }
         } else {
-            // $clients = Client::all();
-            // $zones = Zone::all();
             $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
             $commandeclients = CommandeClient::whereIn('statut', ['Non livrée', 'Livraison partielle'])->get();
             $req = 1;
@@ -190,10 +170,8 @@ class VenteController extends Controller
 
     public function store(Request $request)
     {
-        //  try {
         $req = NULL;
         if ($request->statuts == 1) {
-            //dd($request->statuts);
             if ($request->type_vente_id == 1) {
                 $validator = Validator::make($request->all(), [
                     'date' => ['required', 'before_or_equal:' . date('Y-m-d')],
@@ -202,8 +180,6 @@ class VenteController extends Controller
                     'type_vente_id' => ['required'],
                     'transport' => ['required'],
                     'ctl_payeur' => ['required'],
-                    //'nomPrenom'=>['required_if:clt_payeur,==,0'],
-                    //'telephone'=>['required_if:clt_payeur,==,0','integer']
                 ]);
             } else {
                 $validator = Validator::make($request->all(), [
@@ -410,7 +386,6 @@ class VenteController extends Controller
             $req = $vente->commandeclient->type_commande_id;
         }
 
-
         $redirectto = $request->redirectto;
         return view('ventes.edit', compact('vente', 'typecommandeclient', 'clients', 'commandeclients', 'zones', 'redirectto', 'req'));
     }
@@ -569,19 +544,10 @@ class VenteController extends Controller
                 $mvts = $regle->_mouvements;
 
                 foreach ($mvts as $mvt) {
-                    $compteClient = $mvt->compteClient;
-
-                    ###____
-                    $client = $compteClient->client;
-                    // $client->credit = $client->credit + $regle->montant;
-                    $client->debit = $client->debit - $regle->montant;
-                    $client->save();
-
                     ####____Suppression du Mouvement
                     $mvt->delete();
 
-                    ####___DESPORMAINS LA RETITUTION SE FAIT SEULEMENT QUAND IL Y A DE REGLEMENT SUR LA VENTE
-                    #####____ DATE DE MISE EN PLACE : 15 Octobre 2024
+                    ####___DESPORMAINS LA RESTITUTION SE FAIT SEULEMENT QUAND IL Y A DE REGLEMENT SUR LA VENTE
                     $venteDeleted->restituted = true;
                     $venteDeleted->save();
                 }
@@ -643,8 +609,6 @@ class VenteController extends Controller
             return redirect()->route('ventes.index', ['vente' => $vente->id]);
         }
         if ($vente->vendus()->sum('qteVendu') && $vente->vendus()->sum('qteVendu') == $vente->qteTotal) {
-            // $vente->update(['statut' => 'Vendue']);
-
             $vente->update(['statut' => 'Vendue', "validated_date" => now()]);
 
             CommandeClientTools::changeStatutCommande($vente->commandeclient);
@@ -756,14 +720,12 @@ class VenteController extends Controller
 
     public function askUpdate()
     {
-        // $ventes = Vente::where('statut', 'En attente de modification')->where('users', Auth::user()->id)->orderByDesc('date')->get();
         $ventes = Vente::where('statut', 'En attente de modification')->orderByDesc('date')->get();
         return view('ventes.askUpadate', compact('ventes'));
     }
 
     public function envoieComptabilite(Request $request)
     {
-        // dd($request->ventes);
         $ventes = explode(",", $request->ventes);
 
         ####____
@@ -782,8 +744,6 @@ class VenteController extends Controller
         }
 
         return redirect()->back()->with("message", "Envoie à la comptabilité effectuée avec succès!");
-
-        // return back();
     }
 
     public function venteAEnvoyerComptabiliser()
@@ -798,14 +758,6 @@ class VenteController extends Controller
 
         ##____
         $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
-        // if (IS_AIME_ACCOUNT($current) || IS_RODOLPHO_ACCOUNT($current)) {
-        // } 
-        // else {
-        //     ###___les users associés à ce representant
-        //     $representant_users =  User::where(["representent_id" => $user_representant->id])->pluck("id"); ## $user_representant->users;
-        //     ###___les ventes passées par les utilisateurs associés à ce representant
-        //     $AEnvoyers = Vente::whereIn("users", $representant_users)->orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
-        // }
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
@@ -820,8 +772,6 @@ class VenteController extends Controller
     {
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -838,8 +788,6 @@ class VenteController extends Controller
 
         $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
             ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -904,8 +852,6 @@ class VenteController extends Controller
     {
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -922,8 +868,6 @@ class VenteController extends Controller
 
         $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -954,8 +898,6 @@ class VenteController extends Controller
     {
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -972,8 +914,6 @@ class VenteController extends Controller
 
         $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -1026,8 +966,6 @@ class VenteController extends Controller
     {
         $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
-            // ->whereDate('ventes.created_at', '>=', $request->debut)
-            // ->whereDate('ventes.created_at', '<=', $request->fin)
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -1068,12 +1006,6 @@ class VenteController extends Controller
             $vente->user_traitement = Auth()->user()->id;
             $vente->traited_date = now();
             $vente->update();
-
-            // return redirect()->route('ventes.getVenteAtraiter', [
-            //     'debut' => session('debut_compta'),
-            //     'fin' => session('fin_compta')
-            // ]);
-
             return redirect()->route("ventes.getVenteAtraiter")->with("message", "Vente traitée avec succès!");
         } catch (\Throwable $th) {
             //throw $th;
@@ -1106,7 +1038,6 @@ class VenteController extends Controller
             ->with('produit', 'payeur')
             ->get();
 
-        //  $ventes = Vente::where('statut', 'Contrôller')->whereBetween('date_traitement',[$request->debut, $request->fin])->orderByDesc('code')->get();
         return redirect()->route('ventes.listeDesTraitementPeriode')->withInput()->with('resultat', ['ventes' => $ventes, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
 
@@ -1147,12 +1078,6 @@ class VenteController extends Controller
 
     public function postexport(Request $request)
     {
-        $ventes = Vente::all();
-        $export_comptabilite = DB::select("SELECT * FROM export_comptabilite");
-        // // dd($export_comptabilite);
-        // $_vente = Vente::findOrFail(1786);
-        // dd($_vente,collect($export_comptabilite)[0]);
-
         $comptabiliser = [];
         if ($request->fournisseur == "tous") {
             $comptabiliser =  DB::select(
@@ -1448,11 +1373,9 @@ class VenteController extends Controller
         ####____
         $programmation = Programmation::findOrFail($programmation_id);
         $pr_totalVendus = $programmation->vendus->sum("qteVendu"); ###Total vendu sur cette programmation
-        // dd($programmation->vendus->sum("qteVendu"));
 
         ###___Stock actuel du camion
         $current_stock = $programmation->qteprogrammer - ($pr_totalVendus - $qteVendu);
-        // dd($current_stock);
 
         if ($qteVendu > $current_stock) {
             return redirect()->back()->with("error", "La quantité entrée est supérieure au stock du camion choisi. Veuillez bien diminuer la quantité");
@@ -1519,7 +1442,6 @@ class VenteController extends Controller
         }
 
         ####___
-        // $venteUpdateDemands  = [];
         $venteUpdateDemands = UpdateVente::OrderBy("valide", "asc")->get();
 
         return view("ventes.venteUpdateDemand", compact("venteUpdateDemands"));
@@ -1545,10 +1467,7 @@ class VenteController extends Controller
             return redirect()->back()->with("error", "Cette vente ne vous appartient pas! Vous ne pouvez pas éffectuer cette opération");
         };
 
-        // ###____SI LA VENTE EST DEJA PASSEE A LA COMPTABILITE ON NE PEUT PLUS LA SUPPRIMER
-        // if ($vente->date_envoie_commercial || $vente->user_envoie_commercial) {
-        //     return redirect()->back()->with("error", "Désolé! Cette vente est déjà passée à la comptabilité! Vous ne pouvez plus la supprimer");
-        // }
+        ###____SI LA VENTE EST DEJA PASSEE A LA COMPTABILITE ON NE PEUT PLUS LA SUPPRIMER
 
         if ($request->method() == "GET") {
             ####______VOYONS SI CETTE DEMANDE A DEJA ETE FAITE PAR CE USER
@@ -1629,7 +1548,6 @@ class VenteController extends Controller
     public function venteDeleteValidation(Request $request)
     {
         if ($request->method() == "POST") {
-            // dd($request->demand);
             $demand = VenteDeleteDemand::find($request->demand);
             if (!$demand) {
                 return redirect()->back()->with("error", "Cette demande de modification n'existe pas!");
@@ -1638,13 +1556,11 @@ class VenteController extends Controller
             ###___MODIFICATION
             $demand->valide = 1;
             $demand->save();
-
             return redirect()->back()->with("message", "Demande de suppresion validée avec succès!");
         }
 
         ####___
         $venteDeleteDemands = VenteDeleteDemand::OrderBy("valide", "asc")->get();
-
         return view("ventes.venteDeleteDemand", compact("venteDeleteDemands"));
     }
 

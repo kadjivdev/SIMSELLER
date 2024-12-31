@@ -10,10 +10,10 @@ class TypeProduitController extends Controller
 {
     protected $typeproduits;
 
-    public function __construct(TypeProduit $typeproduits){
+    public function __construct(TypeProduit $typeproduits)
+    {
         $this->typeproduits = $typeproduits;
     }
-
 
     public function index()
     {
@@ -21,13 +21,10 @@ class TypeProduitController extends Controller
         return view('typeproduits.index', compact('typeproduits'));
     }
 
-
     public function create()
     {
         return  view('typeproduits.create');
     }
-
-
 
     public function store(StoreTypeProduitRequest $request)
     {
@@ -35,27 +32,21 @@ class TypeProduitController extends Controller
             'libelle' => strtoupper($request->libelle),
         ]);
 
-        if($typeproduits){
+        if ($typeproduits) {
             Session()->flash('message', 'Type produit ajouté avec succès!');
             return redirect()->route('typeproduits.index');
         }
     }
-
-
 
     public function show(TypeProduit $typeproduits)
     {
         //
     }
 
-
-
     public function edit(TypeProduit $typeproduit)
     {
         return  view('typeproduits.edit', compact('typeproduit'));
     }
-
-
 
     public function update(UpdateTypeProduitRequest $request, TypeProduit $typeproduit)
     {
@@ -63,33 +54,29 @@ class TypeProduitController extends Controller
             'libelle' => strtoupper($request->libelle),
         ]);
 
-        if($typeproduits){
+        if ($typeproduits) {
             Session()->flash('message', 'Type produit modifié avec succès!');
             return redirect()->route('typeproduits.index');
         }
     }
 
-
     public function delete(TypeProduit $typeproduit)
     {
         $ver = $typeproduit->produits()->get();
 
-        if(count($ver)>0){
-            Session()->flash('error', "Désolé! Le type de produit ".$typeproduit->libelle." est déjà lié à un produit, veuillez d'abord supprimé le produit.");
+        if (count($ver) > 0) {
+            Session()->flash('error', "Désolé! Le type de produit " . $typeproduit->libelle . " est déjà lié à un produit, veuillez d'abord supprimé le produit.");
             return redirect()->route('typeproduits.index');
-        }else{
+        } else {
             return  view('typeproduits.delete', compact('typeproduit'));
         }
-        
     }
-
-
 
     public function destroy(TypeProduit $typeproduit)
     {
         $typeproduits = $typeproduit->delete();
 
-        if($typeproduits){
+        if ($typeproduits) {
             Session()->flash('message', 'Type produit supprimé avec succès!');
             return redirect()->route('typeproduits.index');
         }

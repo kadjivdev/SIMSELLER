@@ -15,21 +15,16 @@ class InterlocuteurController extends Controller
         $this->interlocuteurs = $interlocuteurs;
     }
 
-
     public function index()
     {
         $interlocuteurs = $this->interlocuteurs->orderBy('nom')->get();
         return view('interlocuteurs.index', compact('interlocuteurs'));
     }
 
-
-
     public function create()
     {
         return view('interlocuteurs.create');
     }
-
-
 
     public function store(StoreInterlocuteurRequest $request)
     {
@@ -48,28 +43,20 @@ class InterlocuteurController extends Controller
         }
     }
 
-
-
     public function show(Interlocuteur $interlocuteurs)
     {
         //
     }
 
-
     public function edit($id)
     {
         $interlocuteurs = $this->interlocuteurs->findOrFail($id);
-
         return view('interlocuteurs.edit', compact('interlocuteurs'));
-
     }
-
-
 
     public function update(UpdateInterlocuteurRequest $request)
     {
         $interlocuteurs = $this->interlocuteurs->findOrFail($request->id);
-
         $interlocuteur = $interlocuteurs->update([
             'nom' => strtoupper($request->nom),
             'prenom' => ucwords($request->prenom),
@@ -85,16 +72,11 @@ class InterlocuteurController extends Controller
         }
     }
 
-
     public function delete($id)
     {
         $interlocuteurs = $this->interlocuteurs->findOrFail($id);
-
         return view('interlocuteurs.delete', compact('interlocuteurs'));
-
     }
-
-
 
     public function destroy($id)
     {

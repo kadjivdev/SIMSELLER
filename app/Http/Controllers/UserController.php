@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Mail\MessagePasseword;
 use App\Models\LogUser;
 use App\Models\Representant;
-use App\Models\UpdateVente;
 use App\Models\User;
 use App\Models\Zone;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -16,7 +14,6 @@ use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('admin');
@@ -26,14 +23,12 @@ class UserController extends Controller
     {
         $users = User::join('representants', 'representants.id', '=', 'representent_id')
             ->select('users.id', 'users.name', 'users.email', 'representants.nom', 'representants.prenom')->get();
-
         return view('users.index', compact('users'));
     }
 
     public function create()
     {
         $representents = Representant::all();
-
         return view('users.create', compact('representents'));
     }
 
@@ -44,7 +39,8 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => [
-                'required', 'confirmed',
+                'required',
+                'confirmed',
                 Password::min(8)
                     ->letters()
                     ->numbers()
@@ -60,10 +56,8 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-
         #3. Envoi du mail
         Mail::to($user)->queue(new MessagePasseword($request->password));
-
 
         if ($user) {
             Session()->flash('message', 'Utilisateur ajouté avec succès!');
@@ -87,7 +81,7 @@ class UserController extends Controller
     {
         $representents = Representant::all();
         $zones = Zone::all();
-        return view('users.edit', compact('user', 'representents',"zones"));
+        return view('users.edit', compact('user', 'representents', "zones"));
     }
 
 
@@ -127,7 +121,8 @@ class UserController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'email' => ['string', 'email', 'max:255', 'unique:users'],
                 'password' => [
-                    'required', 'confirmed',
+                    'required',
+                    'confirmed',
                     Password::min(8)
                         ->letters()
                         ->numbers()
@@ -155,14 +150,12 @@ class UserController extends Controller
             #3. Envoi du mail
             Mail::to($user)->queue(new MessagePasseword($request->password));
 
-
             if ($user) {
                 Session()->flash('message', 'Utilisateur modifié avec succès!');
                 return redirect()->route('users.index');
             }
         }
     }
-
 
     public function delete(User $user)
     {
@@ -179,9 +172,9 @@ class UserController extends Controller
     }
 
     ####___USER'S ACTIONS
-    function actions(Request $request,User $user) {
-        $actions = LogUser::orderBy("id","DESC")->get();
-        // dd($actions[0]->actor->name);
+    function actions(Request $request, User $user)
+    {
+        $actions = LogUser::orderBy("id", "DESC")->get();
         return view('users.actions', compact('actions'));
     }
 }

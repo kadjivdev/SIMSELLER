@@ -23,14 +23,11 @@ class CamionController extends Controller
         $this->chauffeurs = $chauffeurs;
     }
 
-
     public function index()
     {
         $camions = $this->camions::all();
         return view('camions.index', compact('camions'));
     }
-
-
 
     public function create()
     {
@@ -40,11 +37,8 @@ class CamionController extends Controller
         return view('camions.create', compact('chauffeurs', 'avaliseurs', 'marques'));
     }
 
-
-
     public function store(Request $request)
     {
-        //dd($request->all());
             $datas = $request->all();
             if($request->immatriculationTracteur)
                $datas['immatriculationTracteur'] = str_replace(' ','', $request->immatriculationTracteur);
@@ -108,7 +102,6 @@ class CamionController extends Controller
                 ]);
             }
 
-
             if($camions){
                 Session()->flash('message', 'Camion ajouté avec succès!');
                 return redirect()->route('camions.index');
@@ -119,8 +112,6 @@ class CamionController extends Controller
                 return redirect()->route('camions.index');
             }
     }
-
-
 
     public function show($id)
     {
@@ -154,18 +145,14 @@ class CamionController extends Controller
         $marques = Marque::all();
 
         return view('camions.edit', compact('camions', 'avaliseurs','chauffeurs', 'marques'));
-
     }
 
 
     public function addPhoto($id)
     {
         $camions = $this->camions->findOrFail($id);
-
         return view('camions.addPhoto', compact('camions'));
-
     }
-
 
     public function photo(Request $request)
     {

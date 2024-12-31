@@ -34,11 +34,11 @@ class AssuranceController extends Controller
         $visiteremorque = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', '>', date('Y-m-d'))->get();
         $visiteremorqueEncours = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', date('Y-m-d'))->get();
 
-        $statutAssur = AssuranceVisiteTools::getControleStat($assurances,$assuEncours);
-        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur,$visitetracteurEncours);
-        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque,$visiteremorqueEncours);
+        $statutAssur = AssuranceVisiteTools::getControleStat($assurances, $assuEncours);
+        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur, $visitetracteurEncours);
+        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque, $visiteremorqueEncours);
 
-        return view('assurances.index', compact('camions','statutAssur', 'visitetracteur','statutVisiteRemorque', 'statutVisiteTracteur', 'visiteremorque'));
+        return view('assurances.index', compact('camions', 'statutAssur', 'visitetracteur', 'statutVisiteRemorque', 'statutVisiteTracteur', 'visiteremorque'));
     }
 
 
@@ -56,20 +56,19 @@ class AssuranceController extends Controller
         $visiteremorque = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', '>', date('Y-m-d'))->get();
         $visiteremorqueEncours = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', date('Y-m-d'))->get();
 
-        $statutAssur = AssuranceVisiteTools::getControleStat($assurances,$assuEncours);
-        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur,$visitetracteurEncours);
-        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque,$visiteremorqueEncours);
+        $statutAssur = AssuranceVisiteTools::getControleStat($assurances, $assuEncours);
+        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur, $visitetracteurEncours);
+        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque, $visiteremorqueEncours);
         $compagnieassurances = CompagnieAssurance::all();
-        return view('assurances.create', compact('camions', 'statutAssur','statutVisiteRemorque', 'statutVisiteTracteur', 'visitetracteur', 'visiteremorque', 'compagnieassurances'));
-
+        return view('assurances.create', compact('camions', 'statutAssur', 'statutVisiteRemorque', 'statutVisiteTracteur', 'visitetracteur', 'visiteremorque', 'compagnieassurances'));
     }
 
 
 
     public function store(Request $request)
     {
-        if($request->document == NULL){
-            request() ->validate([
+        if ($request->document == NULL) {
+            request()->validate([
                 'camion_id' => ['required'],
                 'police' => ['required'],
                 'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFin)],
@@ -84,8 +83,8 @@ class AssuranceController extends Controller
                 'compagnie' => strtoupper($request->compagnie),
                 'camion_id' => $request->camion_id,
             ]);
-        }else{
-            request() ->validate([
+        } else {
+            request()->validate([
                 'camion_id' => ['required'],
                 'police' => ['required'],
                 'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFin)],
@@ -94,15 +93,14 @@ class AssuranceController extends Controller
                 'document' => ['required', 'file', 'mimes:pdf,docx,doc'],
             ]);
 
-            //dd($request->all());
-                /* Uploader les documents dans la base de données */
-                $filename = time().'.'.$request->document->extension();
+            /* Uploader les documents dans la base de données */
+            $filename = time() . '.' . $request->document->extension();
 
-                $file = $request->file('document')->storeAs(
-                    'documents',
-                    $filename,
-                    'public'
-                );
+            $file = $request->file('document')->storeAs(
+                'documents',
+                $filename,
+                'public'
+            );
 
             $assurances = $this->assurances::create([
                 'police' => strtoupper($request->police),
@@ -112,27 +110,23 @@ class AssuranceController extends Controller
                 'camion_id' => $request->camion_id,
                 'document' => $file,
             ]);
-
         }
 
-        if($assurances){
+        if ($assurances) {
             Session()->flash('message', 'Assurance ajoutée avec succès!');
-            return redirect()->route('assurances.index', ['id'=>$assurances->camion_id]);
+            return redirect()->route('assurances.index', ['id' => $assurances->camion_id]);
         }
     }
-
-
 
     public function show(Assurance $interlocuteurs)
     {
         //
     }
 
-
     public function edit($camion_id, $assurance_id)
     {
         $camions = $this->camions->orderByDesc('id')->findOrFail($camion_id);
-        $assurance = $camions->assurances()->where('id',$assurance_id)->orderByDesc('id')->first();
+        $assurance = $camions->assurances()->where('id', $assurance_id)->orderByDesc('id')->first();
 
         $assurances = $camions->assurances()->where('dateFin', '>', date('Y-m-d'))->get();
         $assuEncours = $camions->assurances()->where('dateFin', date('Y-m-d'))->get();
@@ -143,22 +137,22 @@ class AssuranceController extends Controller
         $visiteremorque = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', '>', date('Y-m-d'))->get();
         $visiteremorqueEncours = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', date('Y-m-d'))->get();
 
-        $statutAssur = AssuranceVisiteTools::getControleStat($assurances,$assuEncours);
-        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur,$visitetracteurEncours);
-        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque,$visiteremorqueEncours);
+        $statutAssur = AssuranceVisiteTools::getControleStat($assurances, $assuEncours);
+        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur, $visitetracteurEncours);
+        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque, $visiteremorqueEncours);
         $compagnieassurances = CompagnieAssurance::all();
-        return view('assurances.edit', compact('camions','statutAssur','statutVisiteRemorque', 'statutVisiteTracteur','assurance', 'assurance', 'assurances', 'visitetracteur', 'visiteremorque', 'compagnieassurances'));
+        return view('assurances.edit', compact('camions', 'statutAssur', 'statutVisiteRemorque', 'statutVisiteTracteur', 'assurance', 'assurance', 'assurances', 'visitetracteur', 'visiteremorque', 'compagnieassurances'));
     }
 
 
 
     public function update(Request $request)
     {
-        if($request->document == NULL){
-            request() ->validate([
+        if ($request->document == NULL) {
+            request()->validate([
                 'camion_id' => ['required'],
                 'police' => ['required'],
-                'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFin,$request->id)],
+                'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFin, $request->id)],
                 'dateFin' => ['required', 'after_or_equal:dateDebut', 'max:16'],
                 'compagnie' => ['required'],
             ]);
@@ -173,11 +167,11 @@ class AssuranceController extends Controller
                 'camion_id' => $request->camion_id,
                 'document' => $request->remoovdoc ? null : $assurances->document,
             ]);
-        }else{
-            request() ->validate([
+        } else {
+            request()->validate([
                 'camion_id' => ['required'],
                 'police' => ['required'],
-                'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFIn,$request->id)],
+                'dateDebut' => ['required', 'before_or_equal:dateFin', 'max:16', new DateAssuranceRule($request->camion_id, $request->dateFIn, $request->id)],
                 'dateFin' => ['required', 'after_or_equal:dateDebut', 'max:16'],
                 'compagnie' => ['required'],
                 'document' => ['required', 'file', 'mimes:pdf,docx,doc'],
@@ -185,15 +179,14 @@ class AssuranceController extends Controller
 
             $assurances = $this->assurances->findOrFail($request->id);
 
-            //dd($request->all());
-                /* Uploader les documents dans la base de données */
-                $filename = time().'.'.$request->document->extension();
+            /* Uploader les documents dans la base de données */
+            $filename = time() . '.' . $request->document->extension();
 
-                $file = $request->file('document')->storeAs(
-                    'documents',
-                    $filename,
-                    'public'
-                );
+            $file = $request->file('document')->storeAs(
+                'documents',
+                $filename,
+                'public'
+            );
 
             $assurance = $assurances->update([
                 'police' => strtoupper($request->police),
@@ -205,9 +198,9 @@ class AssuranceController extends Controller
             ]);
         }
 
-        if($assurance){
+        if ($assurance) {
             Session()->flash('message', 'Assurance modifiée avec succès!');
-            return redirect()->route('assurances.index', ['id'=>$assurances->camion_id]);
+            return redirect()->route('assurances.index', ['id' => $assurances->camion_id]);
         }
     }
 
@@ -227,12 +220,11 @@ class AssuranceController extends Controller
         $visiteremorque = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', '>', date('Y-m-d'))->get();
         $visiteremorqueEncours = $camions->visitetechniques()->where('libelle', 'VISITE TECHNIQUE REMORQUE')->where('dateFin', date('Y-m-d'))->get();
 
-        $statutAssur = AssuranceVisiteTools::getControleStat($assurancesChek,$assuEncours);
-        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur,$visitetracteurEncours);
-        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque,$visiteremorqueEncours);
+        $statutAssur = AssuranceVisiteTools::getControleStat($assurancesChek, $assuEncours);
+        $statutVisiteTracteur = AssuranceVisiteTools::getControleStat($visitetracteur, $visitetracteurEncours);
+        $statutVisiteRemorque = AssuranceVisiteTools::getControleStat($visiteremorque, $visiteremorqueEncours);
 
-        return view('assurances.delete', compact('camions','statutAssur','statutVisiteRemorque', 'statutVisiteTracteur', 'assurance', 'assurances', 'visitetracteur', 'visiteremorque'));
-
+        return view('assurances.delete', compact('camions', 'statutAssur', 'statutVisiteRemorque', 'statutVisiteTracteur', 'assurance', 'assurances', 'visitetracteur', 'visiteremorque'));
     }
 
 
@@ -241,9 +233,9 @@ class AssuranceController extends Controller
     {
         $assurances = $this->assurances->findOrFail($id);
         $assurance = $assurances->delete();
-        if($assurance){
+        if ($assurance) {
             Session()->flash('message', 'Assurance supprimée avec succès!');
-            return redirect()->route('assurances.index', ['id'=>$assurances->camion_id]);
+            return redirect()->route('assurances.index', ['id' => $assurances->camion_id]);
         }
     }
 }

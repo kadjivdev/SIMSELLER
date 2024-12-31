@@ -34,12 +34,9 @@ class CommanderController extends Controller
         //
     }
 
-
-
     public function store(Request $request, CommandeClient $commandeclient, Commander $commander = NULL)
     {
         try {
-
             if($commander){
                 if($request->remise == NULL){
                     $validator = Validator::make($request->all(), [
@@ -59,7 +56,6 @@ class CommanderController extends Controller
                     if($validator->fails()){
                         return redirect()->route('commandeclients.edit', ['commandeclient' => $commandeclient->id])->withErrors($validator->errors())->withInput();
                     }
-
 
                     $commanders = $commander->update([
                         'commande_client_id' => $commandeclient->id,

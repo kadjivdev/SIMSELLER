@@ -5,22 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Banque;
 use App\Models\BonCommande;
 use App\Models\Client;
-use App\Models\CommandeClient;
-use App\Models\Compte;
 use App\Models\CompteClient;
 use App\Models\DeletedVente;
 use App\Models\DetailBonCommande;
 use App\Models\Fournisseur;
-use App\Models\Mouvement;
 use App\Models\Produit;
 use App\Models\Programmation;
-use App\Models\User;
 use App\Models\Vendu;
 use App\Models\Vente;
 use App\Models\Reglement;
 use App\Models\Representant;
 use App\Models\Zone;
-use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -53,7 +48,6 @@ class EditionController extends Controller
                 }
                 return redirect()->route('edition.stock')->withInput()->with('resultat', ['type' => 1, 'programmations' => $newProgrammation, 'produit' => $produit, 'zone' => $zone, 'debut' => $request->debut, 'fin' => $request->fin]);
             }
-            // $detailboncommandes =DetailBonCommande::all()->pluck('id');
             $programmations = Programmation::where('statut', 'Livrer')->with('camion')->get();
             $newProgrammation = [];
             foreach ($programmations as $programmation) {
@@ -66,7 +60,6 @@ class EditionController extends Controller
             return redirect()->route('edition.stock')->withInput()->with('resultat', ['type' => 1, 'programmations' => $newProgrammation, 'produit' => $produit, 'zone' => $zone]);
         }
         if ($request->produit && !$request->zone) {
-
             if ($request->debut && $request->fin) {
                 $detailboncommandes = DetailBonCommande::where('produit_id', $request->produit)->pluck('id');
                 $programmations = Programmation::where('statut', 'Livrer')->whereBetween('dateprogrammer', [$request->debut, $request->fin])->whereIn('detail_bon_commande_id', $detailboncommandes)->with('camion')->get();
@@ -192,15 +185,10 @@ class EditionController extends Controller
 
     public function pointSolde()
     {
-        
         $clients = Client::all();
         $zones = Zone::all();
-        // $SommeCompte = CompteClient::all()->sum('solde');
         $reglements = Reglement::whereNotNull("vente_id")->sum('montant');
         $sommeVentes = Vente::all()->sum('montant');
-
-        // $credit = $clients->sum('credit');
-        // $debit = $clients->sum('debit');
 
         // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
         $credit = Reglement::where("for_dette",false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
@@ -394,7 +382,6 @@ class EditionController extends Controller
 
         // 
         return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'SommeCompte' => $SommeCompte, 'credit' => $credit, 'debit' => $debit]);
-        return view('editions.etatCompte', compact('clients', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes', 'zones'));
     }
 
     public function etatLivCde()
@@ -553,14 +540,12 @@ class EditionController extends Controller
         $reglements = $reglements->whereBetween('created_at', [$startDate, $endDate]);
 
         session()->put('result', true);
-
         return view('editions.etatreglementperiode', compact("reglements", 'startDate', 'endDate'));
     }
 
     public function etatReglementPeriodeRep()
     {
         $Rep = Representant::all();
-
         return view('editions.etatreglementperiodeRepre', compact('Rep'));
     }
 
@@ -568,8 +553,6 @@ class EditionController extends Controller
     {
         //Prévoir le validator
         $Rep  = Representant::find($request->zone);
-
-
         $request->validate([
             'debut' => ['required'],
             'fin' => ['required']
@@ -605,9 +588,9 @@ class EditionController extends Controller
         $nbre = count($reglements);
         return redirect()->route('edition.etatReglementperiodeRep')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'Rep' => $Rep, 'debut' => $request->debut, 'fin' => $request->fin]);
     }
+
     public function postEtatReglementPeriode(Request $request)
     {
-
         //Prévoir le validator
         $banque = Banque::find($request->banque);
         $zone = Zone::find($request->zone);
@@ -747,8 +730,6 @@ class EditionController extends Controller
                 ->orderByDesc('ventes.id')
                 ->get();
             $nbre = count($reglements);
-
-            // dd($reglements[0]);
             return redirect()->route('edition.etatReglementperiode')->withInput()->with('resultat', ['nbre' => $nbre, 'reglements' => $reglements, 'zone' => $zone, 'banque' => $banque, 'debut' => $request->debut, 'fin' => $request->fin]);
         }
     }
@@ -847,7 +828,6 @@ class EditionController extends Controller
                 ->get();
             return redirect()->route('edition.etatCaProgPeriode')->withInput()->with('resultat', ['programmations' => $programmations, 'debut' => $request->debut, 'fin' => $request->fin, 'charger' => $request->charger]);
         }
-        //dd($programmations);
     }
 
     public function etatLivraisonPeriode()
@@ -862,8 +842,6 @@ class EditionController extends Controller
             'debut' => ['required'],
             'fin' => ['required']
         ]);
-        $boncommandesV = BonCommande::whereIn('statut', ['Livrer'])->pluck('id');
-        $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
         $programmations = Programmation::where('programmations.statut', 'Livrer')->where('imprimer', '1')
             ->join('detail_bon_commandes', 'programmations.detail_bon_commande_id', '=', 'detail_bon_commandes.id')
             ->join('bon_commandes', 'detail_bon_commandes.bon_commande_id', '=', 'bon_commandes.id')
@@ -889,7 +867,6 @@ class EditionController extends Controller
     public function postVenteCamion(Request $request)
     {
         $ventes = Vente::find($request->id);
-
         $ventesCa = DB::select("
         SELECT
           `camions`.`immatriculationTracteur`,

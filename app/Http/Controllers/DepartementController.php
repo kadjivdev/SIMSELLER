@@ -10,22 +10,16 @@ use Illuminate\Support\Facades\Validator;
 
 class DepartementController extends Controller
 {
-
-
     public function index()
     {
         $departements = Departement::all();
-
         return view('departements.index', compact('departements'));
     }
-
-
 
     public function create()
     {
         //
     }
-
 
     public function store(Request $request)
     {
@@ -57,13 +51,10 @@ class DepartementController extends Controller
         }
     }
 
-
-
     public function show(Departement $departement)
     {
         //
     }
-
 
     public function edit(Departement $departement)
     {

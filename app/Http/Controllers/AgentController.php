@@ -83,17 +83,8 @@ class AgentController extends Controller
      */
     public function show(Agent $agent)
     {
-        //
-
         try {
-
-
-            /*  if(count($ver)>0){
-                Session()->flash('error', "Désolé! L'agent ".$agent->nom." ".$agent->prenom." est déjà lié à une zone, veuillez d'abord supprimé la zone.");
-                return redirect()->route('agents.index');
-            }else{ */
             return view('agents.delete', compact('agent'));
-            /* } */
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -157,14 +148,7 @@ class AgentController extends Controller
 
         try {
             $agent = Agent::find($id);
-            /*  $ver = $agent->id;
-            
-              if(count($ver)>0){
-                 Session()->flash('error', "Désolé! L'agent ".$agent->nom." ".$agent->prenom." est déjà lié à une zone, veuillez d'abord supprimé la zone.");
-                 return redirect()->route('agents.index');
-             }else{  */
             return view('agents.delete', compact('agent'));
-            /* }  */
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -177,7 +161,6 @@ class AgentController extends Controller
      */
     public function destroy(Agent $agent)
     {
-
         $agent = $agent->delete();
 
         if ($agent) {

@@ -125,14 +125,9 @@ class ControleVenteContreller extends Controller
         $message = "<p> Nous vous notifions que votre Réglement N° " . $reglement->code . "  a été rejeter par <b>" . Auth::user()->name . "</b>.
         <br> L'Observation du rejet est : <em style='color:red;'>" . $reglement->observation_validation . "</em>
         Merci de vous connecter pour effectuer le traitement.<br>
-        
-      
          </p>";
-        // $mail = new NotificationRejetReglement(['email'=>$desMail->email,'nom'=>$desMail->name],'Reglement n° '.$reglement->code.' du '.date_format(date_create($reglement->date),'d/m/Y'),$message,$vente,[$copieMail->email,env('GESTIONNAIRE_DIRECTION')]);
-        // Mail::send($mail);
         return redirect()->route('ctlventes.index')->with('message', 'Règlement rejeté');;
     }
-
 
     function destroy(Request $request, Reglement $reglement)
     {
@@ -140,9 +135,7 @@ class ControleVenteContreller extends Controller
             foreach ($reglement->_mouvements as $mvt) {
                 $mvt->delete();
             }
-
             $reglement->delete();
-
             return redirect()->route("ctlventes.index")->with("message", "Approvisionnement supprimé avec succès!");
         }
         return redirect()->route("ctlventes.index")->with("error", "Cet Approvisionnement n'existe pas!");

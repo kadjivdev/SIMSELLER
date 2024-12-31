@@ -114,7 +114,7 @@
                             <div class="row">
                                 <div class="col-sm-12 text-center">
                                     <h2>
-                                        SOLDE : {{number_format($client->credit-$client->debit,0,',',' ')}}
+                                        SOLDE : {{number_format($credit-$debit,0,',',' ')}}
                                     </h2>
                                     @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
                                     <a href="{{route('compteClient.appro',['client'=>$client->id])}}" class="float-right btn btn-primary">Approvisionner</a>

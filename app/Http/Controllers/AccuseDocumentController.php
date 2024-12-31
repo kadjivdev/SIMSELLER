@@ -14,12 +14,11 @@ use Illuminate\Support\Facades\Validator;
 
 class AccuseDocumentController extends Controller
 {
-
-    
     public function index(BonCommande $boncommandes)
     {
         return view('accusedocuments.index', compact('boncommandes'));
     }
+
     public function indexAll(Request $request)
     {
         $accuseDocuments ='';
@@ -39,8 +38,6 @@ class AccuseDocumentController extends Controller
         $typedocuments = TypeDocument::all();
         return view('accusedocuments.create', compact('boncommandes', 'typedocuments'));
     }
-
-
     
     public function store(Request $request, BonCommande $boncommande)
     {

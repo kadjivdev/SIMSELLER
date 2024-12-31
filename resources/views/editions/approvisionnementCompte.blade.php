@@ -88,11 +88,7 @@
                                                     <td class="text-center"><span class="badge bg-warning">{{$reglement->reference}} </span></td>
                                                     <td class="text-center">
                                                         <b>
-                                                            @if($reglement->_mouvements && $reglement->_mouvements->first()->compteClient)
-                                                            {{$reglement->_mouvements->first()?$reglement->_mouvements->first()->compteClient->client->raisonSociale:'---'}}
-                                                            @else
-                                                            ---
-                                                            @endif
+                                                            {{$reglement->client->raisonSociale}}
                                                         </b>
                                                     </td>
                                                     <!-- <td class="text-center">{{date_format(date_create($reglement->created_at),'d/m/Y H:i')}}</td> -->

@@ -2,17 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Compte;
 use App\Models\DetailRecu;
 use App\Models\EcheanceCredit;
-use App\Models\Parametre;
-use App\Models\Reglement;
-use App\Models\TypeDetailRecu;
 use App\Models\Vente;
-use App\Rules\ReglementMontantRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class EcheanceCreditController extends Controller
 {

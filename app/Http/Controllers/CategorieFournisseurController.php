@@ -8,13 +8,10 @@ use App\Http\Requests\UpdateCategorieFournisseurRequest;
 
 class CategorieFournisseurController extends Controller
 {
-
     protected $categoriefournisseurs;
-
     public function __construct(CategorieFournisseur $categoriefournisseurs){
         $this->categoriefournisseurs = $categoriefournisseurs;
     }
-
 
     public function index()
     {
@@ -22,13 +19,10 @@ class CategorieFournisseurController extends Controller
         return view('categoriefournisseurs.index', compact('categoriefournisseurs'));
     }
 
-
     public function create()
     {
         return  view('categoriefournisseurs.create');
     }
-
-
 
     public function store(StoreCategorieFournisseurRequest $request)
     {
@@ -42,14 +36,10 @@ class CategorieFournisseurController extends Controller
         }
     }
 
-
-
     public function show(CategorieFournisseur $categorieFournisseur)
     {
         //
     }
-
-
 
     public function edit($id)
     {
@@ -57,8 +47,6 @@ class CategorieFournisseurController extends Controller
 
         return  view('categoriefournisseurs.edit', compact('categoriefournisseurs'));
     }
-
-
 
     public function update(UpdateCategorieFournisseurRequest $request)
     {
@@ -74,15 +62,12 @@ class CategorieFournisseurController extends Controller
         }
     }
 
-
     public function delete($id)
     {
         $categoriefournisseurs = $this->categoriefournisseurs->findOrFail($id);
 
         return  view('categoriefournisseurs.delete', compact('categoriefournisseurs'));
     }
-
-
 
     public function destroy($id)
     {

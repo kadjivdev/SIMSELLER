@@ -2,21 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ReglementUploadJob;
-use App\Mail\NotificationValidationReglement;
-use App\Mail\SuspectMail;
 use App\Models\Client;
 use App\Models\Compte;
-use App\Models\CompteClient;
 use App\Models\DetailRecu;
 use App\Models\Mouvement;
 use App\Models\Parametre;
-use App\Models\Recu;
 use App\Models\Reglement;
 use App\Models\TypeDetailRecu;
 use App\Models\User;
 use App\Models\Vente;
-use App\Rules\ActionMontantDetailRecuRule;
 use App\Rules\ReglementMontantRule;
 use App\tools\ControlesTools;
 use Carbon\Carbon;
@@ -28,11 +22,6 @@ use Illuminate\Validation\Rule;
 
 class ReglementController extends Controller
 {
-    public function __construct()
-    {
-        // $this->middleware('vendeur')->only(['create', 'store', 'update', 'delete']);
-    }
-
     public function index(Vente $vente)
     {
         return view('reglements.index', compact('vente'));
@@ -66,7 +55,7 @@ class ReglementController extends Controller
             ####_____
 
             $cli = Client::findOrFail($vente->commandeclient->client->id);
-            $credit = $cli->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
+            $credit = $cli->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant");
             $debit = $cli->reglements->whereNotNull("vente_id")->sum("montant");
 
             $clientSolde = $credit - $debit;
@@ -133,14 +122,6 @@ class ReglementController extends Controller
                     'reglement_id' => $reglement->id,
                 ]);
 
-                if ($mouvement) {
-                    $compte = $mouvement->compteClient;
-
-                    $client = $compte->client;
-                    $client->debit = $client->debit + $request->montant;
-                    $client->update();
-                }
-
                 Session()->flash('message', 'Règlement effectué avec succès');
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
@@ -204,8 +185,6 @@ class ReglementController extends Controller
                         'montant' => ['required', new ReglementMontantRule($vente, $reglement)],
                         'compte_id' => ['required'],
                         'typedetailrecu_id' => ['required'],
-
-
                     ]);
 
                     if ($validator->fails()) {
@@ -341,11 +320,6 @@ class ReglementController extends Controller
                     'reglement_id' => $reglement->id,
                     'destroy' => true
                 ]);
-                /*  if($mouvement){
-                    $compte = $mouvement->compteClient;
-                    $compte->solde = $compte->solde + $reglement->montant;
-                    $compte->update();
-                } */
             }
 
             ControlesTools::generateLog($reglement, 'reglement', 'Suppression ligne');
@@ -367,8 +341,6 @@ class ReglementController extends Controller
         $reglements = $vente->reglements;
         if (Auth::user()->id != $vente->user->id) {
             Session()->flash('error', "Attention! Vous essayez de valider un règlement d'une vente qui ne vous appartient pas. Ce comportement sera notifié à l'administrateur.");
-            // $mail = new SuspectMail(['email' => env('ADMIN_SUSPECT')], "Validation du règlément d'un autre vendeur", Auth::user()->name . "Cherche à valider la vente d'un autre utilisateur " . $vente->user->name);
-            // Mail::send($mail);
             return redirect()->route('ventes.index');
         }
         DB::beginTransaction();
@@ -380,8 +352,6 @@ class ReglementController extends Controller
             DB::commit();
             $user = User::find(env('VALIDATEUR_ID'));
             Session()->flash('message', 'Règlement validé avec succès!');
-            // $mail = new NotificationValidationReglement(['email' => $user->email, 'nom' => $user->name], "Validation du règlément d'un autre vendeur", Auth::user()->name . "Cherche à valider la vente d'un autre utilisateur " . $vente->user->name, $vente);
-            // Mail::send($mail);
             return redirect()->route('ventes.index');
         } catch (\Exception $exception) {
             DB::rollBack();

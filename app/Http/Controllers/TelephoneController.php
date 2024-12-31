@@ -15,22 +15,17 @@ class TelephoneController extends Controller
         $this->telephones = $telephones;
     }
 
-    
     public function index()
     {
         $telephones = $this->telephones->orderBy('type')->get();
         return view('telephones.index', compact('telephones'));
     }
 
-
-    
     public function create()
     {
         return view('telephones.create');
     }
 
-
-    
     public function store(StoreTelephoneRequest $request)
     {
         $telephones = $this->telephones::create([
@@ -39,34 +34,26 @@ class TelephoneController extends Controller
             'fournisseur_id' => $request->fournisseur_id,
         ]);
 
-        if($telephones){
+        if ($telephones) {
             Session()->flash('message', 'Téléphone ajouté avec succès!');
             session()->flash('typeajout', 3);
-            return redirect()->route('fournisseurs.show', ['id'=>$telephones->fournisseur_id]);
+            return redirect()->route('fournisseurs.show', ['id' => $telephones->fournisseur_id]);
         }
     }
 
-
-    
     public function show(Telephone $telephones)
     {
         //
     }
 
-    
     public function edit($id)
     {
         $telephones = $this->telephones->findOrFail($id);
-
         return view('telephones.edit', compact('telephones'));
-
     }
 
-
-    
     public function update(UpdateTelephoneRequest $request)
     {
-    
         $telephones = $this->telephones->findOrFail($request->id);
 
         $telephone = $telephones->update([
@@ -74,31 +61,25 @@ class TelephoneController extends Controller
             'type' => $request->type,
             'fournisseur_id' => $request->fournisseur_id,
         ]);
-
-        if($telephone){
+        if ($telephone) {
             Session()->flash('message', 'Téléphone modifié avec succès!');
-            return redirect()->route('fournisseurs.show', ['id'=>$telephones->fournisseur_id]);
+            return redirect()->route('fournisseurs.show', ['id' => $telephones->fournisseur_id]);
         }
     }
-
 
     public function delete($id)
     {
         $telephones = $this->telephones->findOrFail($id);
-
         return view('telephones.delete', compact('telephones'));
-
     }
 
-
-    
     public function destroy($id)
     {
         $telephones = $this->telephones->findOrFail($id);
         $telephone = $telephones->delete();
-        if($telephone){
+        if ($telephone) {
             Session()->flash('message', 'Téléphone supprimé avec succès!');
-            return redirect()->route('fournisseurs.show', ['id'=>$telephones->fournisseur_id]);
+            return redirect()->route('fournisseurs.show', ['id' => $telephones->fournisseur_id]);
         }
     }
 }

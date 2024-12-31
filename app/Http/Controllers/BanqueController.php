@@ -10,14 +10,11 @@ use Illuminate\Validation\Rule;
 
 class BanqueController extends Controller
 {
-
     protected $banques;
-
     public function __construct(Banque $banques)
     {
         $this->banques = $banques;
     }
-
 
     public function index()
     {
@@ -25,18 +22,13 @@ class BanqueController extends Controller
         return view('banques.index', compact('banques'));
     }
 
-
-
     public function create()
     {
         return view('banques.create');
     }
 
-
-
     public function store(StoreBanqueRequest $request)
     {
-
         $banque = Banque::create([
             'sigle' => strtoupper($request->sigle),
             'raisonSociale' => strtoupper($request->raisonSociale),
@@ -52,23 +44,16 @@ class BanqueController extends Controller
         }
     }
 
-
-
     public function show(Banque $banque)
     {
         //
     }
 
-
     public function edit($id)
     {
         $banques = $this->banques->findOrFail($id);
-
         return view('banques.edit', compact('banques'));
-
     }
-
-
 
     public function update(Request $request, Banque $banque)
     {
@@ -99,19 +84,15 @@ class BanqueController extends Controller
 
     public function delete($id)
     {
-
         $banques = $this->banques->findOrFail($id);
         $compte = $banques->comptes->first();
         if($compte){
             Session()->flash('suppression', 'Attention vous ne pouvez pas supprimer la banque '.$banques->sigle);
             return redirect()->route('banques.index');
         }
-
         return view('banques.delete', compact('banques'));
 
     }
-
-
 
     public function destroy($id)
     {

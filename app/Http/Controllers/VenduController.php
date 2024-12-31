@@ -7,7 +7,6 @@ use App\Rules\CheckQuanteCde;
 use App\Rules\CheckQuantite;
 use App\Rules\CheckStock;
 use App\Rules\VenduDoublonProduitStokValide;
-use App\tools\CommandeClientTools;
 use Exception;
 use App\Models\Vendu;
 use App\Models\Vente;
@@ -17,7 +16,6 @@ use Illuminate\Http\Request;
 use App\Models\Programmation;
 use App\Models\CommandeClient;
 use App\Models\DetailBonCommande;
-use App\Models\UpdateVente;
 use App\tools\ControlesTools;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -70,7 +68,6 @@ class VenduController extends Controller
                 $bl = $_bl;
             }
         }
-
         return view('vendus.create', compact('vente', 'vendu', 'produits', 'qteTotal', 'totalVendu', "bl"));
     }
 
@@ -78,7 +75,6 @@ class VenduController extends Controller
     {
         try {
             $ver = Vente::where('id', $vente->id)->where('code', 'LIKE', 'VD%')->first();
-            
             if ($vendu) {
                 if ($request->remise == NULL) {
                     $validator = Validator::make($request->all(), [
@@ -258,6 +254,7 @@ class VenduController extends Controller
                     $vente->prix_Usine = $programmation->detailboncommande->pu;
                     $vente->montant = $somme + ($request->qteVendu * $request->transport);
                     $vente->update();
+                    
                     //Les programmation Conserner par une Ventes 
                     foreach ($vendus as $key => $vendu) {
                         $programmation = Programmation::find($vendu->programmation_id);

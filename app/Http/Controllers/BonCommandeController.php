@@ -20,13 +20,10 @@ use Illuminate\Validation\Rule;
 use App\Models\DetailBonCommande;
 use App\Models\Recu;
 use App\tools\ControlesTools;
-use Doctrine\DBAL\Driver\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
-//use App\Http\Requests\UpdateBonCommandeRequest;
 
 class BonCommandeController extends Controller
 {
@@ -59,7 +56,6 @@ class BonCommandeController extends Controller
                             $TotQte += $bc->detailboncommandes->first()->qteCommander;
                             $TotamlAmont += $bc->montant;
                         }
-                        // dd($TotQte, $TotamlAmont);
 
                         return view('boncommandes.index', compact('boncommandes', 'req'));
                     } else {
@@ -352,8 +348,6 @@ class BonCommandeController extends Controller
                             Session()->flash('error', 'Vous ne pouvez pas valider cette commande. le montant des versements ne correspond pas au montant de la commande');
                             return redirect()->route('boncommandes.index');
                         }
-                        // $sommeMontant contiendra la somme totale des montants dans le tableau $recu
-
                     }
 
                     $boncommande->statut = $request->statut;
@@ -412,7 +406,6 @@ class BonCommandeController extends Controller
             ->havingRaw('SUM(recus.montant) < bon_commandes.montant')
             ->select('bon_commandes.*', DB::raw('SUM(recus.montant) AS montant_payer'))->get();
 
-        dd($commandeReglementEnCour);
     }
 
     public function delete(BonCommande $boncommande)

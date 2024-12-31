@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\ClientOld;
@@ -19,17 +18,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class clientsController extends Controller
 {
     public function index(Request $request)
     {
         if ($request->search) {
-            // $clients = Client::where('raisonSociale', 'like', '%'. $request->search. '%')->paginate(1000);
             $clients = Client::where('raisonSociale', 'like', '%' . $request->search . '%')->get();
         } else {
-            // $clients = Client::orderBy('id','desc')->paginate(1000);          
             $clients = Client::orderBy('id', 'desc')->get();
         }
 
@@ -42,7 +38,6 @@ class clientsController extends Controller
 
         $zones = Zone::all();
         return view('client.index', compact('clients', "zones"));
-        // <!-- {{ $clients->links('pagination') }}  à ajouter à la fin du tableau pour affichage de la pagination laravel -->
     }
 
     ###_____CLIENTS ANCIENS
@@ -186,10 +181,7 @@ class clientsController extends Controller
             ->orderBy('portefeuilles.id', 'desc')
             ->get();
 
-
         // Parcours pour vérification de la date de cloture de l'agent.
-
-
         $date_exp_verif = DB::table('portefeuilles')
             ->select('*')
             ->where('portefeuilles.client_id', '=', $client->id)
@@ -287,15 +279,12 @@ class clientsController extends Controller
         $typeclients = TypeClient::all();
         $departements = Departement::all();
         $filleulFisc = Client::where('ifu', 0)->get();
-
         return view('client.edit', compact('client', 'typeclients', 'departements', 'filleulFisc'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
         try {
-
             $validator = Validator::make($request->all(), [
                 'logo' => ['nullable', 'image', 'mimes:jpg,bmp,png'],
                 'bordereau_receit' => ['required', 'file'],
@@ -365,7 +354,6 @@ class clientsController extends Controller
                 "departement_id" => $request->departement_id,
             ];
 
-            // dd($data);
             $client = Client::create($data);
 
             if ($request->agent_id != null) {
@@ -432,7 +420,6 @@ class clientsController extends Controller
             ]);
 
             if ($validator->fails()) {
-
                 return back()->withErrors($validator->errors())->withInput();
             }
 
@@ -487,9 +474,7 @@ class clientsController extends Controller
     public function destroy(Client $client)
     {
         $statuts = NULL;
-
         $clients = $client->delete();
-
         if ($clients) {
             Session()->flash('message', 'Client supprimé avec succès!');
             return redirect()->route('newclient.index', compact('statuts'));
@@ -515,7 +500,6 @@ class clientsController extends Controller
             ->where('commande_clients.client_id', $client->id)
             ->where('type_commandes.id', 1)
             ->select('ventes.code', 'ventes.date', 'ventes.montant', 'ventes.statut_reglement', 'ventes.remise', 'type_commandes.libelle', 'users.name', 'type_commandes.id')->get();
-        // dd($achatComptantSolde);
         return view('client.achatClient', compact('client', 'achatClients', 'achatComptantSolde'));
     }
 

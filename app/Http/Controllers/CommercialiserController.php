@@ -19,38 +19,27 @@ class CommercialiserController extends Controller
         $this->produits = $produits;
     }
 
-    
     public function index()
     {
         $banques = $this->commercialisers::all();
         return view('commercialisers.index', compact('commercialisers'));
     }
-
-
     
     public function create()
     {
         return view('banques.create');
     }
-
-
     
     public function store(StoreCommercialiserRequest $request)
     {
-
         $produits = $request->produit_id;
-
         Validator::make($produits, [
             'produit_id' => new commercialiserRule($request->fournisseur_id),
         ]);
 
-
         $fournisseurs = $this->fournisseurs->findOrFail($request->fournisseur_id);
-
         foreach($produits as $produit) {
-
             $commercialisers = $fournisseurs->produits()->attach([$produit ]);
-
         }
 
         if(!$commercialisers){
@@ -59,41 +48,26 @@ class CommercialiserController extends Controller
             return redirect()->route('fournisseurs.show', ['id'=>$fournisseurs->id]);
         }
     }
-
-
     
     public function show()
     {
         //
     }
 
-    
     public function edit($id)
     {
         $commercialisers = $this->commercialisers->findOrFail($id);
-
         return view('commercialisers.edit', compact('commercialisers'));
-
     }
-
-
     
-    public function update(UpdateCommercialiserRequest $request)
-    {
-
-    }
-
+    public function update(UpdateCommercialiserRequest $request){}
 
     public function delete($fournisseur_id, $produit_id)
     {
         $fournisseurs = $this->fournisseurs->findOrFail($fournisseur_id);
         $produits = $fournisseurs->produits()->findOrFail($produit_id);
-        //dd($fournisseurs, $produits);
         return view('commercialisers.delete', compact('fournisseurs', 'produits'));
-
     }
-
-
     
     public function destroy($fournisseur_id, $produit_id)
     {

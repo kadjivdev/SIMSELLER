@@ -101,7 +101,6 @@
                                                     </td>
                                                 </tr>
                                                 @endforeach
-
                                                 
                                             </tbody>
                                             <tfoot class="text-white text-center bg-gradient-gray-dark">

@@ -17,9 +17,7 @@ class PrixController extends Controller
     public function index()
     {
         $prixes = Prix::all();
-       
-
-        return view('prix.index', compact('prixes'));  
+        return view('prix.index', compact('prixes'));
     }
 
     /**
@@ -29,13 +27,9 @@ class PrixController extends Controller
      */
     public function create()
     {
-        //
         $zones = Zone::all();
         return view('prix.create', compact('zones'));
-
     }
-
-   
 
     /**
      * Store a newly created resource in storage.
@@ -50,16 +44,15 @@ class PrixController extends Controller
                 'datePriseEffet' => ['required'],
                 'prix' => ['required'],
                 'dateFin' => ['required'],
-               /*  'status' => ['required'], */
+                /*  'status' => ['required'], */
                 'zone_id' => ['required'],
             ]);
-            
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return redirect()->route('prix.create')->withErrors($validator->errors())->withInput();
             }
 
-            $prix = Prix::create([ 
+            $prix = Prix::create([
                 'datePriseEffet' => $request->datePriseEffet,
                 'prix' => $request->prix,
                 'dateFin' => $request->dateFin,
@@ -68,15 +61,14 @@ class PrixController extends Controller
                 'zone_id' => $request->zone_id,
             ]);
 
-            if($prix){
+            if ($prix) {
                 Session()->flash('message', 'Prix ajoutée avec succès!');
                 return redirect()->route('prix.index');
             }
-
         } catch (\Exception $e) {
-            if(env('APP_DEBUG') == TRUE){
+            if (env('APP_DEBUG') == TRUE) {
                 return $e;
-            }else{
+            } else {
                 Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
                 return redirect()->route('prix.index');
             }
@@ -102,11 +94,8 @@ class PrixController extends Controller
      */
     public function edit(Prix $prix)
     {
-        //
         $zones = Zone::all();
-    
-        return view('prix.edit', compact('prix','zones'));
-
+        return view('prix.edit', compact('prix', 'zones'));
     }
 
     /**
@@ -118,7 +107,6 @@ class PrixController extends Controller
      */
     public function update(Request $request, Prix $prix)
     {
-        
         try {
             $validator = Validator::make($request->all(), [
                 'datePriseEffet' => ['required'],
@@ -127,7 +115,7 @@ class PrixController extends Controller
                 /* 'status' => ['required'], */
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return redirect()->route('prix.create')->withErrors($validator->errors())->withInput();
             }
 
@@ -139,15 +127,14 @@ class PrixController extends Controller
                 'user_id' => auth()->user()->id,
             ]);
 
-            if($prixes){
+            if ($prixes) {
                 Session()->flash('message', 'Prix ajoutée avec succès!');
                 return redirect()->route('prix.index');
             }
-
         } catch (\Exception $e) {
-            if(env('APP_DEBUG') == TRUE){
+            if (env('APP_DEBUG') == TRUE) {
                 return $e;
-            }else{
+            } else {
                 Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
                 return redirect()->route('prix.index');
             }
@@ -161,17 +148,14 @@ class PrixController extends Controller
             if ($prix->status != 'actif') {
                 $ver = 1;
             }
-               
         }
-       
 
-        if($ver>0){
+        if ($ver > 0) {
             Session()->flash('error', "Désolé! Le prix ne peut être supprimé.");
             return redirect()->route('prix.index');
-        }else{
+        } else {
             return  view('prix.delete', compact('prix'));
         }
-
     }
 
     /**
@@ -183,40 +167,37 @@ class PrixController extends Controller
     public function destroy(Prix $prix)
     {
         $prixes = $prix->delete();
-
-        if($prixes){
+        if ($prixes) {
             Session()->flash('message', 'Prix supprimée avec succès!');
             return redirect()->route('prix.index');
         }
     }
 
-    public function status(Prix $prix){
+    public function status(Prix $prix)
+    {
         try {
-            if(($prix->datePriseEffet <= date('Y-m-d')) && ($prix->dateFin >= date('Y-m-d'))){
-               $verif = Prix::where('status','=','actif')->where('zone_id','=',$prix->zone_id)->first();
-               if ($verif) {
-                    $verif->update([                    
-                        'status' =>'inactif'                    
+            if (($prix->datePriseEffet <= date('Y-m-d')) && ($prix->dateFin >= date('Y-m-d'))) {
+                $verif = Prix::where('status', '=', 'actif')->where('zone_id', '=', $prix->zone_id)->first();
+                if ($verif) {
+                    $verif->update([
+                        'status' => 'inactif'
                     ]);
-               };
-               $prix->update([                    
-                'status' =>'actif'                    
+                };
+                $prix->update([
+                    'status' => 'actif'
                 ]);
                 return redirect()->route('prix.index');
-
-               
-            }else {
+            } else {
                 Session()->flash('error', 'Opps! Vous ne pouvez pas modifier ce  status car la Date d\'activiation n\'est pas atteint.');
                 return redirect()->route('prix.index');
             }
-        }  catch (\Exception $e) {
-            if(env('APP_DEBUG') == TRUE){
+        } catch (\Exception $e) {
+            if (env('APP_DEBUG') == TRUE) {
                 return $e;
-            }else{
+            } else {
                 Session()->flash('error', 'Opps! Enregistrement échoué. Veuillez contacter l\'administrateur système!');
                 return redirect()->route('prix.index');
             }
         }
-        
     }
 }

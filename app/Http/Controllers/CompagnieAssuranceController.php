@@ -14,17 +14,13 @@ class CompagnieAssuranceController extends Controller
     public function index()
     {
         $compagnieassurances = CompagnieAssurance::all(); 
-
         return view('compagnieassurances.index', compact('compagnieassurances'));
     }
-
 
     public function create()
     {
         return view('compagnieassurances.create');
     }
-
-
     
     public function store(Request $request)
     {
@@ -56,20 +52,15 @@ class CompagnieAssuranceController extends Controller
         }
     }
 
-
     public function show(CompagnieAssurance $compagineAssurance)
     {
         //
     }
 
-
-    
     public function edit(CompagnieAssurance $compagnieassurance)
     {
         return view('compagnieassurances.edit', compact('compagnieassurance'));
     }
-
-
     
     public function update(Request $request, CompagnieAssurance $compagnieassurance)
     {
@@ -100,7 +91,6 @@ class CompagnieAssuranceController extends Controller
             }
     }
 
-
     public function delete(CompagnieAssurance $compagnieassurance)
     {
         $ver = Assurance::where('compagnie', $compagnieassurance->libelle)->get();
@@ -111,14 +101,11 @@ class CompagnieAssuranceController extends Controller
         }else{
             return view('compagnieassurances.delete', compact('compagnieassurance'));
         }
-        
     }
-
 
     public function destroy(CompagnieAssurance $compagnieassurance)
     {
         $compagnieassurance = $compagnieassurance->delete();
-
         if($compagnieassurance){
             Session()->flash('message', 'Compagnie supprimée avec succès!');
             return redirect()->route('compagnieassurances.index');
