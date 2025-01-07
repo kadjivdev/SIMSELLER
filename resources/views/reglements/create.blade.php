@@ -51,6 +51,18 @@
                                         </div>
                                     </div>
                                 </div>
+                                @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists()==true || Auth::user()->roles()->where('libelle', 'SUPER REGLEMENT')->exists()==true)
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="debloc_dette" id="flexCheckDefault">
+                                            <label class="form-check-label" for="flexCheckDefault">
+                                                Déblocage de dette
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
                                 <div class="card-footer">
                                     <div id="spin" hidden>
                                         <i class="fa fa-spin fa-spinner fa-2x"></i>

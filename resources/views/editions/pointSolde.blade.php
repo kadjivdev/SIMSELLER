@@ -55,7 +55,7 @@
                                                 </option>
                                                 @endforeach
                                             </select> -->
-                                            <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }} >
+                                            <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>
                                                 <option class="" value="tous">Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
@@ -179,7 +179,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                
+
                                                 <div class="col-6">
                                                     <div class="info-box">
                                                         <span class="info-box-icon bg-dark" style="width: 50px!important;"><i class="bi bi-cash-coin"></i></span>
@@ -317,21 +317,36 @@
                                             @endforeach
                                         </tbody>
                                         <tfoot>
+
+                                        </tfoot>
+                                    </table>
+
+
+                                    <h5 class="">Les totaux</h5>
+                                    <table>
+                                        <thead class="text-white text-center bg-gradient-gray-dark">
                                             <tr>
-                                                <td colspan="6" class="font-weight-bold">Total</td>
-                                                <td class="text-right font-weight-bold">
+                                                <th>Quantite</th>
+                                                <th>Montant</th>
+                                                <th>Réglé</th>
+                                                <th>Reste</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td class="text-center font-weight-bold">
                                                     {{ number_format($qte, 0, ',', ' ') }}
                                                 </td>
-                                                <td class="text-right font-weight-bold">
+                                                <td class="text-center font-weight-bold">
                                                     {{ number_format($montant, 0, ',', ' ') }}
                                                 </td>
-                                                <td class="text-right font-weight-bold">
+                                                <td class="text-center font-weight-bold">
                                                     {{ number_format($regle, 0, ',', ' ') }}
                                                 </td>
-                                                <td id="Tr" colspan="2" class="text-left font-weight-bold">
+                                                <td id="Tr" class="text-center font-weight-bold">
                                                     {{ number_format($montant - $regle, 0, ',', ' ') }}
                                                 </td>
-                                                <input type="hidden" id="montant_regle" value="{{$montant - $regle}}">
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -424,7 +439,6 @@
 </div>
 @endsection
 
-
 @section('script')
 
 @if (session('resultat'))
@@ -449,7 +463,6 @@
         tdReste.on('change', function() {
             // Mettre la nouvelle valeur dans l'élément
             spanReste.html($(this));
-
         });
 
         var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())

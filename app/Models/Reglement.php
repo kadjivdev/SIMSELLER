@@ -27,7 +27,8 @@ class Reglement extends Model
         'client_id',
         "for_dette",
         "old_solde",
-        "clt"
+        "clt",
+        "debloc_dette"
     ];
 
     public function vente()
@@ -44,7 +45,7 @@ class Reglement extends Model
     {
         return $this->belongsTo(TypeDetailRecu::class, 'type_detail_recu_id', 'id');
     }
-    
+
     public function utilisateur()
     {
         return $this->belongsTo(User::class, 'user_id');

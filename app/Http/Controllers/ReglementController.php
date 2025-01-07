@@ -42,14 +42,22 @@ class ReglementController extends Controller
             count($reglmt) == 0 ? $reglmt = NULL : $reglmt = Reglement::find($reglmt[0]);
 
             ####____ VERIFIONS SI CE CLIENT AVAIT UNE ANCIENNE DETTE
-            if ($vente->commandeclient->client->debit_old) {
-                Session()->flash('error', "Veuillez d'abord regler l'ancienne dette de ce client");
-                return redirect()->route('reglements.index', ['vente' => $vente->id]);
+            if ($request->debloc_dette) {
+                if ($vente->commandeclient->client->debit_old) {
+                    Session()->flash('error', "Veuillez d'abord regler l'ancienne dette de ce client");
+                    return redirect()->route('reglements.index', ['vente' => $vente->id]);
+                }
             }
 
             ####____ VERIFIONS SI CETTE VENTE APPARTIENT AU USER CONNECTE
             if (auth()->user()->id != $vente->users) {
                 Session()->flash('error', 'Cette vente ne vous appartient pas!');
+                return redirect()->route('reglements.index', ['vente' => $vente->id]);
+            }
+
+            ####____
+            if ($vente->montant < $request->montant) {
+                Session()->flash('error', 'Le montant saisi ne doit pas depasser celui de mle vente à regler');
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);
             }
             ####_____
@@ -94,6 +102,7 @@ class ReglementController extends Controller
                 'type_detail_recu_id' => null,
                 'user_id' => auth()->user()->id,
                 'client_id' => $vente->commandeclient->client->id,
+                'debloc_dette' => $request->debloc_dette ? true : false,
             ]);
 
             if ($reglement) {
