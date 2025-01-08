@@ -124,7 +124,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     // Visite Technique router
 
     Route::prefix('fichiers')->group(function () {
-
         Route::controller(VisiteTechniqueController::class)->group(function () {
 
             Route::get('/camion/visitetechniques/index/{id}', 'index')->name('visitetechniques.index');
@@ -351,7 +350,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
     // Livraison router
     Route::prefix('livraisons')->group(function () {
-      
+
         Route::controller(LivraisonController::class)->group(function () {
 
             Route::get('/index', 'index')->name('livraisons.index');
@@ -405,7 +404,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/commanders/edit/{id}', 'edit')->name('commanders.edit');
 
             Route::post('/commanders/destroy/{id}', 'destroy')->name('commanders.destroy');
-
         });
     });
 
@@ -422,7 +420,6 @@ Route::middleware(['auth', 'pwd'])->group(function () {
             Route::get('/detailboncommandes/edit/{id}', 'edit')->name('detailboncommandes.edit');
 
             Route::get('/detailboncommandes/delete/{id}', 'delete')->name('detailboncommandes.delete');
-
         });
     });
 
