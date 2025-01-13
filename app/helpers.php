@@ -59,6 +59,15 @@ function IS_HIPLYTE_ACCOUNT($user)
     return false;
 }
 
+function IS_DJIBRIL_ACCOUNT($user)
+{
+    if ($user->id == 6) {
+        return true;
+    }
+
+    return false;
+}
+
 function IsThisVenteUpdateDemandeOnceMade($vente)
 {
     $demand = $vente->_updateDemandes->last();
@@ -129,7 +138,6 @@ function GetVenteUpdatedDate($vente)
 
     return null;
 }
-
 
 ###############======== DELETE VENTE ===========#########
 function IsThisVenteDeleteDemandeOnceMade($vente)

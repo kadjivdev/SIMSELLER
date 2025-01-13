@@ -33,9 +33,10 @@ class ControleVenteContreller extends Controller
             $request->session()->flash("search", ["debut" => $request->debut, "fin" => $request->fin]);
         }
 
-        ####____ ON RECUPERE LES REGLEMENTS NON VALIDES
-        // $reglements = $reglements->orderBy("statut", 0);
-        // $reglements = $reglements->get();
+        ####____ POUR DJIBRIL, ON RECUPERE LES REGLEMENTS NON VALIDES
+        if (IS_DJIBRIL_ACCOUNT(Auth::user())) {
+            $reglements = $reglements->where("statut", 0);
+        }
 
         ####____
         return view('ctlventes.index', compact('reglements', 'users'));
