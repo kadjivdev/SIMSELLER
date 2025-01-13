@@ -270,12 +270,12 @@
                                         <td class="text-center">
                                             <a class="btn btn-success float-md-right text-white btn-sm" href="{{ $reglement->document}}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>
                                         </td>
-                                        <!-- @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists()) -->
+                                        <!-- if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists()) -->
                                         <td class="text-right">
                                             <a class="btn btn-warning btn-sm" href="#" data-bs-toggle="modal" onclick="showUpdateModal({{$reglement->id,$reglement->document}})" data-bs-target="#updateAppro">
                                                 <i class="bi bi-pencil"></i></a>
                                         </td>
-                                        <!-- @endif -->
+                                        <!-- endif -->
                                     </tr>
                                     @endforeach
                                 </tbody>

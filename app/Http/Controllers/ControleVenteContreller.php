@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\NotificationRejetReglement;
 use App\Models\DetteReglement;
 use App\Models\Reglement;
 use App\Models\User;
-use App\Models\Vente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +14,7 @@ class ControleVenteContreller extends Controller
     {
         // REGLEMENTS PAS ENCORE VALIDES
         $users = User::all();
-        $reglements = Reglement::whereNull("vente_id")->orderBy("id", "desc")->get();
+        $reglements = Reglement::whereNull("vente_id")->orderBy("statut","asc")->get();
 
         #####____
         if (Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) {
@@ -36,7 +34,8 @@ class ControleVenteContreller extends Controller
         }
 
         ####____ ON RECUPERE LES REGLEMENTS NON VALIDES
-        $reglements = $reglements->where("statut", "<>", 1);
+        // $reglements = $reglements->orderBy("statut", 0);
+        // $reglements = $reglements->get();
 
         ####____
         return view('ctlventes.index', compact('reglements', 'users'));

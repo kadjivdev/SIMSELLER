@@ -90,6 +90,8 @@
                             @php($debit = session('resultat') ? session('resultat')['debit']: $debit)
                             @php($solde = $credit-$debit)
 
+                            @php($realSolde = ($sommeVentes - $reglements)-$solde)
+
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="info-box">
@@ -126,11 +128,25 @@
                                         <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
                                             <span class="info-box-text">SOLDE</span>
-                                            <span class="info-box-number">{{number_format($solde, '0', '', ' ')}}</span>
+                                            <span class="info-box-number" id="solde">{{number_format($solde, '0', '', ' ')}}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() == true || Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists() == true)
+                            <div class="row d-flex">
+                                <div class="col-4">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">SOLDE REEL</span>
+                                            <span class="info-box-number" id="realSolde">{{number_format($realSolde, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
 
                             @if(!session('resultat'))
                             <div class="row bg-dark pt-3">
@@ -447,6 +463,10 @@
         // Récupérer les éléments
         var tdReste = $('#Tr');
         var spanReste = $('#reste');
+
+        var spanSolde = $('#solde');
+        var spanRealSolde = $('#realSolde');
+
         var totalDu = $('#totalDu');
         var debit_old = $('#debit_old');
 
@@ -465,8 +485,15 @@
             spanReste.html($(this));
         });
 
+        // console.log(Number(spanReste.text().replace(/\s+/g, '')))
+
         var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
         totalDu.html(sommDu ? sommDu : "00")
+
+        var realSolde_amount = Number(spanReste.text().replace(/\s+/g, '')) - Number(spanSolde.text().replace(/\s+/g, ''))
+
+        var __ = new Intl.NumberFormat().format(realSolde_amount)
+        spanRealSolde.html(__ ? __ : "00")
     });
 
     $(function() {

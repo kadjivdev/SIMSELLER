@@ -26,7 +26,7 @@
                     <div class="card">
                         <!-- /.card-header -->
                         <div class="card-body">
-                            
+
                             <!-- FILTRE -->
                             <form method="post" id="form_bc" action="{{route('ctlventes.index')}}">
                                 @csrf
@@ -80,14 +80,13 @@
                             @if(session("search"))
                             <div class="alert bg-info"> Liste des reglements du <span class="badge bg-warning">{{session("search")["debut"]}} </span> au <span class="badge bg-warning">{{session("search")["fin"]}} </span> </div>
                             @endif
-
                             <br><br>
-                            <!-- <a class="btn btn-success btn-block btn-sm m-3 col-4" href="{{route('ctlventes.reglementSurCompte')}}">Contrôler Règlement Sur Compte Client</a> -->
 
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                 <thead class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
                                         <th>Code</th>
+                                        <th>Statut</th>
                                         <th>Date</th>
                                         <th>Montant</th>
                                         <th>Référence</th>
@@ -103,8 +102,15 @@
                                 </thead>
                                 <tbody>
                                     @foreach($reglements as $reglement)
-                                    <tr class=" {{ $reglement->observation_validation != NULL ? 'bg-warning':''  }} ">
+                                    <tr class=" {{ ($reglement->observation_validation != NULL && $reglement->observation_validation != 'RAS') ? 'bg-warning':''  }} ">
                                         <td class="text-center"><span class="badge bg-warning">{{$reglement->code}} </span></td>
+                                        <td class="text-center">
+                                            @if($reglement->statut==1)
+                                            <span class="badge bg-success">Validé</span>
+                                            @else
+                                            <span class="badge bg-danger">Non validé</span>
+                                            @endif
+                                        </td>
                                         <td>{{date_format(date_create($reglement->date),'d/m/Y')}}</td>
                                         <td class="text-center"><span class="badge bg-success">{{number_format($reglement->montant,0,',',' ')}}</td>
                                         <td class="text-center"><span class="badge bg-dark"> {{$reglement->reference}}</span> </td>
@@ -137,6 +143,7 @@
                                             <span class="badge bg-danger">Non</span>
                                             @endif
                                         </td>
+
                                         @if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists())
                                         <td class="text-center">
                                             @if(!$reglement->observation_validation)
@@ -152,6 +159,7 @@
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
                                         <th>Code</th>
+                                        <th>Statut</th>
                                         <th>Date</th>
                                         <th>Montant</th>
                                         <th>Référence</th>
@@ -189,7 +197,7 @@
             "autoWidth": false,
             "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
-                [0, 'desc']
+                [1, 'asc']
             ],
             "pageLength": 15,
             language: {
