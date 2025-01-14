@@ -14,9 +14,10 @@ class ControleVenteContreller extends Controller
     {
         // REGLEMENTS PAS ENCORE VALIDES
         $users = User::all();
-        $reglements = Reglement::whereNull("vente_id")->orderBy("statut","asc")->get();
+        $reglements = Reglement::whereNull("vente_id")->orderBy("statut", "asc")->get();
 
-        #####____
+        #####____UN ADMINISTRATEUR & UN CONTROLLEUR PEUVENT VOIR TOUT LES REGLEMENTS, 
+        #####____ MAIS UN VENDEUR NE PEUT QUE VOIR LES REGLEMENTS EN SON NOM
         if (Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) {
             $reglements = $reglements->where("user_id", Auth::user()->id);
         }
@@ -33,8 +34,9 @@ class ControleVenteContreller extends Controller
             $request->session()->flash("search", ["debut" => $request->debut, "fin" => $request->fin]);
         }
 
-        ####____ POUR DJIBRIL, ON RECUPERE LES REGLEMENTS NON VALIDES
-        if (IS_DJIBRIL_ACCOUNT(Auth::user())) {
+        ####____ POUR DJIBRIL 1 MR AIME, ON RECUPERE LES REGLEMENTS NON VALIDES
+        $user = Auth::user();
+        if (IS_DJIBRIL_ACCOUNT($user) || IS_AIME_ACCOUNT($user)) {
             $reglements = $reglements->where("statut", 0);
         }
 
