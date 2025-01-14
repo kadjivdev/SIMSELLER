@@ -50,24 +50,21 @@ class ReglementController extends Controller
             }
 
             ####____ VERIFIONS SI CETTE VENTE APPARTIENT AU USER CONNECTE
-            if (auth()->user()->id != $vente->users) {
-                Session()->flash('error', 'Cette vente ne vous appartient pas!');
-                return redirect()->route('reglements.index', ['vente' => $vente->id]);
-            }
-
-            ####____
-            if ($vente->montant < $request->montant) {
-                Session()->flash('error', 'Le montant saisi ne doit pas depasser celui de mle vente à regler');
-                return redirect()->route('reglements.index', ['vente' => $vente->id]);
-            }
-            ####_____
 
             $cli = Client::findOrFail($vente->commandeclient->client->id);
             $credit = $cli->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant");
             $debit = $cli->reglements->whereNotNull("vente_id")->sum("montant");
 
             $clientSolde = $credit - $debit;
+            $reste_vente = $vente->montant - $vente->reglements()->sum('montant');
 
+            ####____
+            if ($reste_vente < $request->montant) {
+                Session()->flash('error', 'Le montant saisi ne doit pas depasser celui du reste de la vente à regler');
+                return redirect()->route('reglements.index', ['vente' => $vente->id]);
+            }
+
+            ####_____
             if ($clientSolde < $request->montant) {
                 Session()->flash('error', 'Le solde du client est insuffisant!');
                 return redirect()->route('reglements.index', ['vente' => $vente->id]);

@@ -487,13 +487,15 @@
 
         // console.log(Number(spanReste.text().replace(/\s+/g, '')))
 
-        var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
-        totalDu.html(sommDu ? sommDu : "00")
+        // var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
+        var sommDu = Number(spanReste.text().replace(/\s+/g, '')) + Number(debit_old.val())
+        var __sommDu = new Intl.NumberFormat().format(sommDu)
+        totalDu.html(__sommDu ? __sommDu : "00")
 
         var realSolde_amount = Number(spanReste.text().replace(/\s+/g, '')) - Number(spanSolde.text().replace(/\s+/g, ''))
 
-        var __ = new Intl.NumberFormat().format(realSolde_amount)
-        spanRealSolde.html(__ ? __ : "00")
+        var __realeSold = new Intl.NumberFormat().format(realSolde_amount)
+        spanRealSolde.html(__realeSold ? __realeSold : "00")
     });
 
     $(function() {
