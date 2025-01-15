@@ -337,8 +337,6 @@
                 $('#champ1').removeAttr('hidden')
                 $('#champ').removeAttr('hidden')
             })
-
-           
         }
         else {
             $('#chauffeur_0').attr('selected', 'true');

@@ -33,7 +33,6 @@
                             @csrf
                             <div class="card-body">
                                 <div class="row">
-
                                     @if ($programmation)
                                     <input type="hidden" class="form-control form-control-sm text-center" name="statut" value="{{ $programmation->statut }}" style="text-transform: uppercase" autofocus>
                                     <div class="col-sm-3">
@@ -340,6 +339,7 @@
         </div>
     </section>
 </div>
+
 <div class="modal fade" id="modal-sm">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">

@@ -31,7 +31,7 @@ class ProgrammationController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['superviseur'])->only([]);
+        // $this->middleware(['superviseur'])->only([]);
     }
 
     public function index(Request $request)
@@ -157,6 +157,7 @@ class ProgrammationController extends Controller
                     Session()->flash('alert', 'Veuillez remplir tous les champs.');
                     return redirect()->route('programmations.create', ['detailboncommande' => $detailboncommande->id])->withErrors($validator->errors())->withInput();;
                 }
+
                 $historique = [];
                 if ($programmation->historique) {
                     $historique = json_decode($programmation->historique);
@@ -181,7 +182,6 @@ class ProgrammationController extends Controller
                     'observation' => $request->observation,
                 ]);
 
-
                 if ($programmation) {
                     if (floatval($detailboncommande->qteCommander) == floatval((collect($detailboncommande->programmations->where('statut', 'Valider'))->sum('qteprogrammer')))) {
                         $boncommande = $detailboncommande->boncommande;
@@ -192,7 +192,6 @@ class ProgrammationController extends Controller
                     return redirect()->route('programmations.create', ['detailboncommande' => $detailboncommande->id])->withErrors($validator->errors())->withInput();
                 }
             } else {
-
                 $validator = Validator::make($request->all(), [
                     'dateprogrammer' => ['required'],
                     'qteprogrammer' => ['required', new QteProgrammationRule($detailboncommande)],
