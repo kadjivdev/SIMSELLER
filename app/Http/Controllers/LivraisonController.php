@@ -343,6 +343,7 @@ class LivraisonController extends Controller
                     Session()->flash('message', 'Livraison commande modifiée avec succès.');
                     return redirect()->route('livraisons.index', ['programmation' => $programmation->id]);
                 }
+
             } else {
                 $validator = Validator::make($request->all(), [
                     'bl' => ['required', 'string', 'max:255', new BonLivRule($programmation)],
@@ -351,7 +352,6 @@ class LivraisonController extends Controller
                     'document' => ['required', 'file', 'mimes:pdf,docx,doc,jpg,jpeg'],
                 ]);
                 if ($bordereauLivraison != $request->bl) {
-
                     Session()->flash('error', 'Vous devez revoir le bordereau de livraison.');
                     return redirect()->route('livraisons.index', ['programmation' => $programmation->id]);
                 }
@@ -387,6 +387,7 @@ class LivraisonController extends Controller
                         $statut = 'Livrer';
                         BonCommandeTools::statutUpdate($boncommande, $statut);
                     }
+
                     Session()->flash('message', 'Livraison commande modifiée avec succès.');
                     return redirect()->route('livraisons.index', ['programmation' => $programmation->id]);
                 }
