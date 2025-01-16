@@ -226,12 +226,12 @@ class EditionController extends Controller
             if ($request->client == "tous") {
                 $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
                     ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
-                    ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
+                    // ->join('zones', 'commande_clients.zone_id', '=', 'zones.id')
 
                     // SEULE LES VENTES VALIDE SONT RECUPERES
                     ->where('valide', true)
 
-                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone', 'zones.libelle as Zlibelle')
+                    ->select('ventes.*', 'clients.raisonSociale', 'clients.telephone')
                     ->orderByDesc('ventes.code')
                     ->get();
             } else {

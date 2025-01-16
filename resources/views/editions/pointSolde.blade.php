@@ -299,7 +299,7 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $item->typeVente->libelle }}</td>
-                                                <td>{{ $item->Zlibelle }}</td>
+                                                <td>{{ $item->commandeclient->zone->libelle }}</td>
                                                 <td>{{ number_format($item->qteTotal, '0', '', ' ') }}</td>
                                                 <td class="text-right font-weight-bold">
                                                     {{ number_format($item->montant, '0', '', ' ') }}
