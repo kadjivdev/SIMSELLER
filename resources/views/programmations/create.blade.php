@@ -258,6 +258,7 @@
                                                     </td>
                                                     <td class="text-center">
                                                         <textarea name="" rows="1" class="form-control" id="" disabled>{{ $programmation->observation?$programmation->observation:"---" }}</textarea>
+                                                        
                                                     </td>
                                                     @if ($programmation->detailboncommande->boncommande->status !='livrer')
                                                     <td class="text-center">
@@ -265,15 +266,9 @@
                                                         <span id="annuler-{{ $programmation->id }}"> <a class="btn btn-primary btn-sm" title="Annuler une programmation" href="{{ route('programmations.show', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id, 'total' => $total]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
                                                         </span>
                                                         @endif
-
+                                                        
                                                         @if ($programmation->statut == 'Valider' && !$programmation->bl && !$programmation->bl_gest && !$programmation->dateSortie)
-                                                        <!-- @if ($programmation->imprimer)
-                                                                       <span id="annuler-{{ $programmation->id }}"> <a class="btn btn-primary btn-sm"
-                                                                           title="Annuler une programmation"
-                                                                           href="{{ route('programmations.show', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id, 'total' => $total]) }}"><i
-                                                                                    class="fa-regular fa-rectangle-xmark"></i></a>
-                                                                      </span>
-                                                                    @endif -->
+
                                                         @if (!$programmation->imprimer)
                                                         <a class="btn btn-warning btn-sm" href="{{ route('programmations.create', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id]) }}">
                                                             <i class="fa-solid fa-pen-to-square"></i></a>
@@ -401,6 +396,7 @@
         });
     }
 </script>
+
 <script>
     function selectDefaultDriver() {
         if ($('#camion').val()) {
@@ -422,6 +418,7 @@
         }
     }
 </script>
+
 <script>
     $(function() {
         @if(session('message') || $programmation || $errors)

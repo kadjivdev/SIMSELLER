@@ -50,10 +50,19 @@
 
                 @if ((Auth::user()->roles()->where('libelle', ['CONTROLEUR DE BON DE COMMANDE'])->exists()) || Auth::user()->roles()->where('libelle', ['ADMINISTRATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists())
                 <li class="nav-item">
-                    <a href="{{ route('boncommandes.index') }}" class="nav-link {{ (request()->is('boncommandes/*')) ? 'active' : '' }}">
+                    <a href="{{ route('boncommandes.index') }}" class="nav-link {{ (request()->is('boncommandes')) ? 'active' : '' }}">
                         <i class="nav-icon fas fa-solid fa-cart-shopping"></i>
                         <p>
                             Bon de Commande
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('detailrecus.details') }}" class="nav-link {{ (request()->is('boncommandes/recus/detailrecus')) ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-list "></i>
+                        <p>
+                            Détails reçus
                         </p>
                     </a>
                 </li>

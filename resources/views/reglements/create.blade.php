@@ -25,8 +25,14 @@
                 <div class="col-md-2"></div>
                 <div class="col-md-8">
                     <div class="card card-secondary">
-                        <div class="card-header">
+                       
+                        @php
+                        $credit = $vente->commandeclient->client->reglements->where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
+                        $debit = $vente->commandeclient->client->reglements->whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant")
+                        @endphp
+                        <div class="card-header d-flex justify-content-between">
                             <h3 class="card-title">Nouveau Règlement </h3>
+                            <p class="">Solde du client : <span class="badge bg-success">{{number_format(($credit - $debit), '0', '', ' ')}} fcfa</span> </p>
                         </div>
                         <form method="POST" id="reglement" action="{{ route('reglements.store', ['vente'=>$vente->id]) }}" enctype="multipart/form-data">
                             @csrf

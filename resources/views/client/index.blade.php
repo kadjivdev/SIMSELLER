@@ -122,53 +122,35 @@
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
                                         <th>Zone</th>
-                                        <th>IFU</th>
+                                        <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
-                                        <th>Crédit</th>
                                         <th>Appro</th>
-                                        <th>Diff 1</th>
                                         <th>Reglé</th>
-                                        <th>Diff 2</th>
+                                        <th>Solde</th>
+                                        <th>Etat</th>
                                         <th>MAJ</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @if ($clients->count() > 0)
-
                                     @foreach ($clients as $client)
+
+                                    @php($credit=$client->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant"))
+                                    @php($debit=$client->reglements->whereNotNull("vente_id")->sum("montant"))
                                     <tr>
                                         <td>{{ $loop->index +1 }}</td>
                                         <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }}</td>
                                         <td class="text-center"><span class="badge bg-warning">{{GetClientZone($client)}}</span></td>
+                                        <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif   </span></td>
 
-                                        <td class="ml-5 pr-5">{{ $client->ifu }}</td>
                                         <td class="ml-5 pr-5">{{ $client->telephone }}</td>
-                                        <td class="ml-5 pr-5 text-center">
-                                            <a href="{{ route('newclient.eligible', ['client' => $client->id]) }}"
-                                                class="btn ">
-                                                @if ($client->statutCredit == 1)
-                                                <span class="badge bg-success">Eligible</span>
-                                                @else
-                                                <span class="badge bg-secondary">Non Eligible</span>
-                                                @endif
-                                            </a>
-                                        </td>
-
-                                        <td class="">{{$client->credit}} </td>
-                                        <td class="">
-                                            {{$client->credit==$client->reglements->whereNull("vente_id")->sum("montant")?'':"diff1"}}
-                                        </td>
-
-                                        <td class="">{{$client->debit}} </td>
-                                        <td class="">
-                                            @if(($client->credit<$client->debit) && $client->credit!=0 && $client->debit!=0 )
-                                                Diff2
-                                                @endif
-                                        </td>
+                                        <td class="text-center"><span class="badge bg-warning">{{number_format($credit, '0', '', ' ')}} FCFA</span> </td>
+                                        <td class="text-center"><span class="badge bg-info"> {{number_format($debit, '0', '', ' ')}} FCFA</span></td>
+                                        <td class="text-center"><span class="badge bg-success"> {{number_format($credit-$debit, '0', '', ' ')}} FCFA</span></td>
+                                        <td class="text-center"><span class="badge bg-success">{{($credit-$debit)>0?"SOLD_EXIST":''}}</span></td>
 
                                         <td class="text-center">
-                                            <!--<a class="btn btn-success btn-sm" href="#"><i class="fa-regular fa-eye"></i></a>-->
                                             <a class="btn btn-secondary btn-sm"
                                                 href="{{ route('newclient.show', ['client' => $client->id]) }}"><i
                                                     class="fa-solid fa-eye"></i></a>
@@ -208,15 +190,14 @@
                                                         Commande</a>
 
                                                     <!-- if(!Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) -->
-                                                    <a class="dropdown-item" target="_blank"
+                                                    <!-- <a class="dropdown-item" target="_blank"
                                                         href="{{ route('newclient.reglement', ['client' => $client->id]) }}"><i
                                                             class="nav-icon fa-solid fa-money-check-dollar"></i>
-                                                        Règler dette</a>
+                                                        Règler dette</a> -->
 
                                                     <button class="btn btn-sm btn-warning" target="_blank" data-bs-toggle="modal" data-bs-target="#affect_to_zone" onclick="affectToZone({{$client->id}})"><i class="bi bi-link"></i> Affecter à une zone</button>
                                                     @endif
                                                     @endif
-
                                                 </div>
                                             </div>
                                         </td>
@@ -229,13 +210,12 @@
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
                                         <th>Zone</th>
-                                        <th>IFU</th>
+                                        <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
-                                        <th>Crédit</th>
                                         <th>Appro</th>
-                                        <th>Diff 1</th>
                                         <th>Reglé</th>
-                                        <th>Diff 2</th>
+                                        <th>Solde</th>
+                                        <th>Etat</th>
                                         <th>MAJ</th>
                                         <th>Action</th>
                                     </tr>
@@ -300,13 +280,12 @@
         })
     }
 
-
     $(function() {
         $("#example1").DataTable({
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print","csv","excel"],
+            "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
                 [0, 'asc']
             ],

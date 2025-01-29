@@ -45,8 +45,4 @@ class User extends Authenticatable
         return $this->hasMany(Prix::class,'users');
     }
 
-    ####____USER'S ACTIONS
-    public function actions() : HasMany {
-        return $this->hasMany(LogUser::class,"user_id");
-    }
 }

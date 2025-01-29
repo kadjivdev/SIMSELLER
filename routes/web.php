@@ -49,9 +49,12 @@ use App\Http\Controllers\CommandeClientController;
 use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
-use App\Models\Mouvement;
-use App\Models\Reglement;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\Programmation;
+
+// use App\Models\Client;
+// use App\Models\Mouvement;
+// use App\Models\Reglement;
+// use Illuminate\Database\Eloquent\Collection;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,22 +67,16 @@ use Illuminate\Database\Eloquent\Collection;
 |
 */
 
-
-#####================#######
-
-Route::get('/regulation', function () {
-    Reglement::where('client_id', 1432)->whereNull('vente_id')
-        ->chunkById(200, function (Collection $reglement) {
-            $reglement->each->update(['client_id' => 1511, 'clt' => 1511]);
-        }, column: 'id');
-
-    $mouvements = Mouvement::where('compteClient_id', 1432)->get();
-    foreach ($mouvements as $m) {
-        $m->update(['compteClient_id' => 1511]);
-    }
-    return "transfert éffectué avec succès!";
+Route::get("/bl-verification/{bl}", function ($bl) {
+    $bls = Programmation::where("bl", $bl)->orWhere("bl_gest", $bl)->get();
+    return response()->json(
+        [
+            "bls" => $bls,
+        ]
+    );
 });
 
+#####================#######
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -668,6 +665,8 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     Route::prefix('boncommandes')->group(function () {
 
         Route::controller(DetailRecuController::class)->group(function () {
+
+            Route::get('/recus/detailrecus', 'details')->name('detailrecus.details');
 
             Route::get('/recus/detailrecus/index/{recu}', 'index')->name('detailrecus.index');
 

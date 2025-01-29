@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Recu;
 use App\Models\Parametre;
 use App\Models\BonCommande;
+use App\Models\DetailRecu;
 use App\Rules\ActionMontantRule;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

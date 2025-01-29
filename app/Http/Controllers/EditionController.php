@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Banque;
 use App\Models\BonCommande;
 use App\Models\Client;
-use App\Models\CompteClient;
 use App\Models\DeletedVente;
 use App\Models\DetailBonCommande;
 use App\Models\Fournisseur;
@@ -191,7 +190,7 @@ class EditionController extends Controller
         $sommeVentes = Vente::all()->sum('montant');
 
         // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
-        $credit = Reglement::where("for_dette",false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
+        $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
         $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
 
         $credit_old = $clients->sum('credit_old');
@@ -212,7 +211,7 @@ class EditionController extends Controller
         }
 
         ###___
-        $credit = $client->reglements->where("for_dette",false)->whereNull("vente_id")->sum("montant");
+        $credit = $client->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant");
         $debit = $client->reglements->whereNotNull("vente_id")->sum("montant");
 
         $ventesDleted = $client->_deletedVentes;
@@ -304,7 +303,7 @@ class EditionController extends Controller
             $_montant = $montant + $item->montant;
             $_regle = $regle + $item->reglements()->sum('montant');
         }
-
+        
         #####____
         return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
     }
@@ -313,13 +312,16 @@ class EditionController extends Controller
     {
         $clients = Client::all();
         $zones = Zone::all();
-        $SommeCompte = CompteClient::all()->sum('solde');
-        $reglements = Reglement::all()->sum('montant');
+        $reglements = Reglement::whereNotNull("vente_id")->sum('montant');
         $sommeVentes = Vente::all()->sum('montant');
-        $credit = $clients->sum('credit');
-        $debit = $clients->sum('debit');
 
-        return view('editions.etatCompte', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'SommeCompte', 'sommeVentes'));
+        // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
+        $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
+        $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
+
+        $sommeVentes = Vente::all()->sum('montant');
+        
+        return view('editions.etatCompte', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'sommeVentes'));
     }
 
     public function postetatCompte(Request $request)
@@ -328,60 +330,20 @@ class EditionController extends Controller
         if (!$request->zone) {
             $clients = Client::all();
             $zones = Zone::all();
-            $SommeCompte = CompteClient::all()->sum('solde');
-            $reglements = Reglement::all()->sum('montant');
-            $sommeVentes = Vente::all()->sum('montant');
         } else {
             $zone = Zone::find($request->zone);
             $clients = Client::where('departement_id', $zone->departement_id)->get();
-
-            $compteClients = [];
-            $reglement_amonts = [];
-            $vente_amonts = [];
-
-            foreach ($clients as $key => $client) {
-
-                ###____SOMECOMPTE
-                foreach ($client->compteClients as $key => $compteClient) {
-                    array_push($compteClients, $compteClient->solde);
-                }
-
-                ###_____VENTES
-                foreach ($client->commandeclients as $key => $commande) {
-                    $vente = $commande->vente;
-
-                    if ($vente) {
-                        array_push($vente_amonts, $vente->montant);
-                    }
-                }
-
-                ###_____REGLEMENTS
-                foreach ($client->commandeclients as $key => $commande) {
-                    $rgls = $commande->vente->reglements;
-
-                    if ($rgls) {
-                        foreach ($rgls as $key => $reglement) {
-                            array_push($reglement_amonts, $reglement->montant);
-                        }
-                    }
-                }
-            }
-
-            ###___
-            $zones = Zone::all();
-            $SommeCompte = array_sum($compteClients);
-            $reglements = array_sum($reglement_amonts);
-            $sommeVentes = array_sum($vente_amonts);
         }
 
         ###____
-        $credit = $clients->sum('credit');
-        $debit = $clients->sum('debit');
+        $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
+        $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
 
         Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => Zone::all()]);
 
         // 
-        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'SommeCompte' => $SommeCompte, 'credit' => $credit, 'debit' => $debit]);
+
+        return redirect()->route('edition.etatCompte')->withInput()->with('resultat', ['type' => 1, 'clients' => $clients, 'credit' => $credit, 'debit' => $debit]);
     }
 
     public function etatLivCde()

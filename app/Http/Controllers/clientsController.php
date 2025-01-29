@@ -11,7 +11,6 @@ use App\Models\DetteReglement;
 use App\Models\Porteuille;
 use App\Models\TypeClient;
 use App\Models\TypeDetailRecu;
-use App\Models\User;
 use App\Models\Vente;
 use App\Models\Zone;
 use Illuminate\Http\Request;
@@ -24,9 +23,13 @@ class clientsController extends Controller
     public function index(Request $request)
     {
         if ($request->search) {
-            $clients = Client::where('raisonSociale', 'like', '%' . $request->search . '%')->get();
+            $clients = Client::where('raisonSociale', 'like', '%' . $request->search . '%')
+                ->with("_Zone")
+                ->get();
         } else {
-            $clients = Client::orderBy('id', 'desc')->get();
+            $clients = Client::orderBy('id', 'desc')
+                ->with("_Zone")
+                ->get();
         }
 
         // UN AGENT NE VERA QUE LES CLIENTS SE TROUVANT DANS LA ZONE DE SON REPRESENTANT

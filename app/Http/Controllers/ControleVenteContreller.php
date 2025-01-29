@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetteReglement;
 use App\Models\Reglement;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -57,6 +56,13 @@ class ControleVenteContreller extends Controller
 
     public function validerApprovisionnement(Reglement $reglement)
     {
+        // LE MONTANT DE REMBOURSEMENT NE DOIS PAS DEPPASSER LA DETTE EN QUESTION
+        if ($reglement->_clt->debit_old && $reglement->for_dette) {
+            if (-$reglement->_clt->debit_old < $reglement->montant) {
+                return redirect()->back()->with('error', 'Le montant du règlement ne doit pas dépasser la dette à regler!');
+            }
+        }
+
         // $vente = Vente::find($reglement->vente->id);
         $reglement->statut = 1;
         $reglement->observation_validation = 'RAS';
@@ -77,13 +83,6 @@ class ControleVenteContreller extends Controller
         // Mise à jour compte client
         $client = $reglement->client;
 
-        // pour un reglement de dette ancienne, on ne credite pas le compte du client
-        if ($client->debit_old && $reglement->for_dette) {
-            $client->credit = $client->credit + 0;
-        } else {
-            $client->credit = $client->credit + $reglement->montant;
-        }
-
         #####===== REVERSEMENT DE L'ANCIEN SOLDE ======####
         if ($client->credit_old && $reglement->old_solde) {
             $client->credit_old = $client->credit_old - $reglement->montant;
@@ -93,20 +92,6 @@ class ControleVenteContreller extends Controller
 
         #####===== SI C'EST UN APPROVISIONNEMENT POUR REGLER UNE ANCIENNE DETTE ======####
         if ($client->debit_old && $reglement->for_dette) {
-            $data = [
-                'reference' => strtoupper($reglement->reference),
-                'date' => $reglement->date,
-                'montant' => $reglement->montant,
-                'document' => $reglement,
-                'compte' => $reglement->compte_id,
-                'type_detail_recu' => $reglement->type_detail_recu_id,
-                'operator' => auth()->user()->id,
-                'client' => $client->id,
-                'reglement_id' => $reglement->id,
-            ];
-
-            DetteReglement::create($data);
-
             ###___ACTUALISATION DU DEBIT_OLD DU CLIENT
             $client->debit_old = $client->debit_old + $reglement->montant;
             $client->save();

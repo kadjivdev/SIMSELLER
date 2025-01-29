@@ -51,36 +51,32 @@
 
                             <!--  -->
                             <div class="row text-center">
-                                <!-- CREDIT -->
-                                <div class="col-md-3 col-sm-6 col-12">
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-danger"><i class="bi bi-dash-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">DEBIT</span>
+                                            <span class="info-box-number">{{number_format($debit, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-secondary"><i class="bi bi-plus-circle-fill"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">CREDIT</span>
+                                            <span class="info-box-number">{{number_format($credit, '0', '', ' ')}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-success"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">CREDIT</span>
-                                            <span class="info-box-number">{{number_format($__credit, '0', '', ' ') }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- DEBIT -->
-                                <div class="col-md-3 col-sm-6 col-12">
-                                    <div class="info-box">
-                                        <span class="info-box-icon bg-danger"><i class="fas fa-hand-holding-usd"></i></span>
-                                        <div class="info-box-content">
-                                            <span class="info-box-text">DEBIT</span>
-                                            <span class="info-box-number">{{number_format($__debit, '0', '', ' ') }}</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <!-- SOLDE -->
-                                <div class="col-md-3 col-sm-6 col-12">
-                                    <div class="info-box">
-                                        <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
-                                        <div class="info-box-content">
                                             <span class="info-box-text">SOLDE</span>
-                                            <span class="info-box-number">{{$__credit-$__debit }}</span>
+                                            <span class="info-box-number" id="solde">{{number_format($__credit-$__debit, '0', '', ' ') }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -113,14 +109,11 @@
                                             </tr>
                                         </thead>
                                         <tbody class="table-body">
-                                            @php($solde = 0)
-                                            @php($credit = 0)
-                                            @php($debit = 0)
                                             @foreach (session('resultat')['clients'] as $key => $item)
                                             <tr>
-                                                @php($solde = $solde + ((count($item->compteClients) > 0)?$item->compteClients[0]->solde:0))
-                                                @php($credit = $credit + $item->credit)
-                                                @php($debit = $debit + $item->debit)
+                                                @php($credit = $item->reglements->where("for_dette",false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant"))
+                                                @php($debit = $item->reglements->whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant"))
+                                                @php($solde = $credit-$debit)
                                                 <td>{{ ++$key }}</td>
 
                                                 <td>{{ $item->raisonSociale }} ({{ $item->telephone }})</td>
@@ -130,7 +123,7 @@
                                                     {{ number_format($item->debit, '0', '', ' ') }}
                                                 </td>
                                                 <td class="text-right font-weight-bold bg-primary">
-                                                    {{ number_format($item->credit - $item->debit, '0', '', ' ') }}
+                                                    {{ number_format($solde, '0', '', ' ') }}
                                                 </td>
                                             </tr>
                                             @endforeach

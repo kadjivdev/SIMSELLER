@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Zone extends Model
@@ -11,7 +12,9 @@ class Zone extends Model
     use HasFactory;
 
     protected $fillable = [
-        'libelle','representant_id', 'departement_id',
+        'libelle',
+        'representant_id',
+        'departement_id',
     ];
 
     public function representant()
@@ -39,7 +42,13 @@ class Zone extends Model
         return $this->hasMany(Prix::class);
     }
 
-    public function _Clients() : HasMany {
-        return $this->hasMany(Client::class,"zone_id");
+    public function _Clients(): HasMany
+    {
+        return $this->hasMany(Client::class, "zone_id");
+    }
+
+    public function user($zoneId)
+    {
+        return User::where("zone_id", $zoneId)->first();
     }
 }

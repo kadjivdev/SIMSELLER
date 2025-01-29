@@ -2,6 +2,7 @@
 
 use App\Models\Client;
 use App\Models\TypeCommande;
+use App\Models\User;
 use App\Models\Vente;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat\Wizard\Number;
 
@@ -289,4 +290,11 @@ function Somm($a, $b)
 {
     // dd($a,$b);
     return number_format($a + $b, '0', '', ' ');
+}
+
+###___
+function GetUserByZoneId($zoneId)
+{
+    $user = User::where("zone_id", $zoneId)->first();
+    return $user ? $user->name : '';
 }

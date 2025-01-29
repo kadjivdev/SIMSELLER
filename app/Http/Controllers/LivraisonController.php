@@ -133,6 +133,7 @@ class LivraisonController extends Controller
                     $programmations = $programmations->where('zone_id', $user->zone_id);
             }
         }
+
         return view('livraisons.index', compact('programmations', 'req'));
     }
 
@@ -236,6 +237,7 @@ class LivraisonController extends Controller
             else
                 $programmations = $programmations->whereIn('zone_id', $zones->pluck('id'));
         }
+
         return view('livraisons.indexPartielle', compact('programmations', 'req'));
     }
 
@@ -343,7 +345,6 @@ class LivraisonController extends Controller
                     Session()->flash('message', 'Livraison commande modifiée avec succès.');
                     return redirect()->route('livraisons.index', ['programmation' => $programmation->id]);
                 }
-
             } else {
                 $validator = Validator::make($request->all(), [
                     'bl' => ['required', 'string', 'max:255', new BonLivRule($programmation)],
@@ -463,6 +464,7 @@ class LivraisonController extends Controller
      * @param  \App\Models\Programmation  $programmation
      * @return \Illuminate\Http\Response
      */
+    
     public function edit(Programmation $programmation)
     {
         //

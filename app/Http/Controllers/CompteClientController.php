@@ -248,14 +248,16 @@ class CompteClientController extends Controller
 
             if ($reglement->for_dette) {
                 ###____suppression du reglement de dette attaché
-                $reglement->_DetteReglement->delete();
+                if ($reglement->_DetteReglement) {
+                    $reglement->_DetteReglement->delete();
+                }
             }
             ###____
             $reglement->delete();
         }
 
         if ($mouvement) {
-            Session()->flash('message', 'Approvisionnement Modifier  avec succès');
+            Session()->flash('message', 'Approvisionnement supprimé  avec succès');
             return redirect()->route('compteClient.show', ['client' => $client->id]);
         }
     }

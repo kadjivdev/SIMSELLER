@@ -140,7 +140,7 @@
                                     <div class="info-box">
                                         <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">SOLDE REEL</span>
+                                            <span class="info-box-text">DETTE REEL</span>
                                             <span class="info-box-number" id="realSolde">{{number_format($realSolde, '0', '', ' ')}}</span>
                                         </div>
                                     </div>
@@ -189,9 +189,9 @@
                                                         <div class="info-box-content">
                                                             <span class="info-box-text">Il nous devait:</span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['debit_old'], '0', '', ' ')}}</span>
-                                                            @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                                            <!-- @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                                                             <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success"><i class="bi bi-list-ul"></i> Reglements</a>
-                                                            @endif
+                                                            @endif -->
                                                         </div>
                                                     </div>
                                                 </div>
@@ -485,17 +485,17 @@
             spanReste.html($(this));
         });
 
-        // console.log(Number(spanReste.text().replace(/\s+/g, '')))
-
-        // var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
-        var sommDu = Number(spanReste.text().replace(/\s+/g, '')) + Number(debit_old.val())
-        var __sommDu = new Intl.NumberFormat().format(sommDu)
-        totalDu.html(__sommDu ? __sommDu : "00")
-
         var realSolde_amount = Number(spanReste.text().replace(/\s+/g, '')) - Number(spanSolde.text().replace(/\s+/g, ''))
 
         var __realeSold = new Intl.NumberFormat().format(realSolde_amount)
         spanRealSolde.html(__realeSold ? __realeSold : "00")
+        // console.log(Number(spanReste.text().replace(/\s+/g, '')))
+
+        // var sommDu = Number($("#montant_regle").val()) + Number(debit_old.val())
+        var sommDu = (realSolde_amount < 0 ? 0 : realSolde_amount) + Number(debit_old.val())
+        var __sommDu = new Intl.NumberFormat().format(sommDu)
+        totalDu.html(__sommDu ? __sommDu : "00")
+
     });
 
     $(function() {

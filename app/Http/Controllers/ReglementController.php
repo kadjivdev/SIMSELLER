@@ -41,8 +41,9 @@ class ReglementController extends Controller
 
             count($reglmt) == 0 ? $reglmt = NULL : $reglmt = Reglement::find($reglmt[0]);
 
-            ####____ VERIFIONS SI CE CLIENT AVAIT UNE ANCIENNE DETTE
-            if ($request->debloc_dette) {
+            // SI C'EST PAS POUR CONTOURNER L'ANCIENNE DETTE
+            if (!$request->debloc_dette) {
+                ####____ ON VERIFIE SI CE CLIENT AVAIT UNE ANCIENNE DETTE
                 if ($vente->commandeclient->client->debit_old) {
                     Session()->flash('error', "Veuillez d'abord regler l'ancienne dette de ce client");
                     return redirect()->route('reglements.index', ['vente' => $vente->id]);

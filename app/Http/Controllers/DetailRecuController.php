@@ -20,6 +20,13 @@ class DetailRecuController extends Controller
     {
         return view('detailrecus.index', compact('recu'));
     }
+    
+    public function details(Request $request)
+    {
+        $recuDetails = DetailRecu::with("recu")->get();
+        return view('detailrecus.recus-details', compact('recuDetails'));
+    }
+
 
     public function create(Recu $recu)
     {

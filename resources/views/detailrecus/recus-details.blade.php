@@ -1,201 +1,100 @@
 @extends('layouts.app')
+
 @section('content')
 <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
     <section class="content-header">
         <div class="container-fluid">
-            <div class="row mb-2">
+            <div class="row">
                 <div class="col-sm-6">
-                    <h1>VENTES EN ATTENTES DE MODIFICATION </h1>
+                    <h1 class="pb-3">Détails Reçus</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Acceuil</a></li>
-                        <li class="breadcrumb-item active">Listes des ventes en attente de modification</li>
+                        <li class="breadcrumb-item"><a href="{{ route('welcome') }}">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="#">Bon commande</a></li>
+                        <li class="breadcrumb-item active">Détail de tous les reçus</li>
                     </ol>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        @if($message = session('message'))
-                        <div class="alert alert-success alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{ $message }}
-                        </div>
-                        @endif
-                        @if($message = session('error'))
-                        <div class="alert alert-danger alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                            <h5><i class="icon fas fa-check"></i> Alert!</h5>
-                            {{ $message }}
-                        </div>
-                        @endif
-
                         <!-- /.card-header -->
                         <div class="card-body">
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                 <thead class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
+                                        <th>#</th>
+                                        <th>Reçu numéro</th>
+                                        <th>Reçu libellé</th>
                                         <th>Code</th>
-                                        <th>Code Commande</th>
-                                        <th>Code Pro</th>
-                                        <th>Bl_guest/Bl</th>
+                                        <th>Référence</th>
+                                        <th>Document</th>
                                         <th>Date</th>
-                                        <th>Client</th>
-                                        <th>PU</th>
-                                        <th>Qté</th>
                                         <th>Montant</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
-                                        <th>Zone</th>
-                                        @endif
-                                        <th>Statut</th>
-                                        <th>Utilisateur</th>
-                                        <th>Actualisation</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if ($ventes->count() > 0)
-                                    <?php $compteur = 1; ?>
-                                    @foreach($ventes as $vente)
+                                    @foreach($recuDetails as $detail)
                                     <tr>
-                                        <td>{{ $vente->code }}</td>
-                                        <td class="text-center"> <span class="badge bg-warning">{{ $vente->vendus->first()?$vente->vendus->first()->programmation->code:"---" }} </span> </td>
-                                        <td>{{!$vente->commandeclient->byvente ?  $vente->commandeclient->code : '' }}</td>
-                                        <td>
-                                            @foreach ( $vente->vendus as $vendu )
-                                            <span class="badge bg-dark">{{ $vendu->programmation->bl_gest?$vendu->programmation->bl_gest:'--'}} / {{$vendu->programmation->bl?$vendu->programmation->bl:'--'}}</span>
-                                            @endforeach
-                                        </td>
-                                        <td class="text-center">{{ date('d/m/Y', strtotime($vente->date)) }}</td>
-                                        <td class="pl-2">
-                                            {{ $vente->commandeclient->client->raisonSociale }}
-                                        </td>
-                                        <td class="text-right pr-3">{{ number_format($vente->pu,2,","," ") }}</td>
-                                        <td class="text-right pr-3">{{ number_format($vente->qteTotal,2,","," ") }}</td>
-                                        <td class="text-right pr-3">{{ number_format($vente->montant,2,","," ") }}</td>
-                                        @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
-                                        <td class="pl-2">{{-- {{ $vente->commandeclient->zone->libelle }} --}} </td>
-                                        @endif
-                                        @if ($vente->statut == 'Vendue')
-                                        @if(($vente->montant-$vente->remise) - $vente->reglements->sum('montant') == 0)
-                                        <td class="text-center"><span class="badge badge-success">Soldé</span></td>
-                                        @elseif( $vente->reglements->sum('montant') > 0)
-                                        <td class="text-center"><span class="badge badge-warning">Solde en cours</span></td>
-                                        @else
-                                        <td class="text-center"><span class="badge badge-success">{{ $vente->statut }}</span></td>
-                                        @endif
-                                        @elseif ($vente->statut == 'Annulée')
-                                        <td class="text-center"><span class="badge badge-danger">{{ $vente->statut }}</span></td>
-                                        @else
-                                        <td class="text-center"><span class="badge badge-info">{{ $vente->statut }}</span></td>
-                                        @endif
-                                        <td>{{ $vente->user?$vente->user->name:"---" }}</td>
-                                        <td class="text-center">
-                                            @if($vente->users == auth()->user()->id)
-                                            @if ($vente->statut == 'Vendue')
-                                            <a class="btn btn-primary btn-sm" href="{{ route('ventes.show', ['vente'=>$vente->id]) }}"><i class="fa fa-print"></i></a>
-                                            @if(false)
-                                            <a class="btn btn-info btn-sm" href="{{ route('ventes.invalider', ['vente'=>$vente->id]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
-                                            @endif
-                                            @elseif($vente->statut == 'Préparation' || $vente->statut == 'En attente de modification')
-                                            @if($vente->vendus->count() > 0)
-                                            <a class="btn btn-success btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Valider"><i class="fa-solid fa-check"></i></a>
-                                            @endif
-                                            <a class="btn btn-secondary btn-sm" href="{{ route('vendus.create', ['vente'=>$vente->id]) }}" title="Ajouter Détails Vente"><i class="fa-solid fa-circle-plus"></i></a>
-                                            <!--<a class="btn btn-success btn-sm" href=""><i class="fa-solid fa-circle-check"></i></a>-->
-                                            <!--<a class="btn btn-warning btn-sm" href="{{ route('ventes.edit', ['vente'=>$vente->id, 'statuts'=>$vente->commandeclient->type_commande_id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>-->
-                                            {{-- <a class="btn btn-danger btn-sm" href="{{ route('ventes.delete', ['vente'=>$vente->id]) }}"><i class="fa-solid fa-trash-can"></i></a> --}}
-                                            @else
-                                            @endif
-                                            @else
-                                            ---
-                                            @endif
-                                        </td>
-
-                                        {{-- <td class="text-center">
-                                                        @if ($vente->statut == 'Vendue')
-                                                            <div class="dropdown">
-                                                                <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown">
-                                                                    Actions<i class="dw dw-more"></i>
-                                                                </button>
-                                                                <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
-                                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement <span class="badge badge-info">{{$vente->reglements ? count($vente->reglements):0}}</span></a>
-                                        @if($vente->type_vente_id == 2)
-                                        <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
-                                        @endif
-                                        <!--<a class="dropdown-item" href=""><i class="fa-solid fa-industry"></i> Chantiers</a> -->
+                                        <td>{{ $loop->index + 1 }}</td>
+                                        <td>{{ $detail->recu->numero }}</td>
+                                        <td>{{ $detail->recu->libelle }}</td>
+                                        <td>{{ $detail->code }}</td>
+                                        <td>{{ $detail->reference }}</td>
+                                        <td>@if($detail->document)<a class="btn btn-success text-white btn-sm float-right" href="{{ $detail->document?asset('storage/'.$detail->document):'' }}" target="_blank"><i class="fa-solid fa-file-pdf"></i></a>@endif</td>
+                                        <td class="text-center">{{ $detail->date?date_format(date_create($detail->date), 'd/m/Y'):'' }}</td>
+                                        <td class="text-right">{{ number_format($detail->montant,2,","," ") }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot class="text-white text-center bg-gradient-gray-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Reçu numéro</th>
+                                        <th>Reçu libellé</th>
+                                        <th>Code</th>
+                                        <th>Référence</th>
+                                        <th>Document</th>
+                                        <th>Date</th>
+                                        <th>Montant</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
+                        <!-- /.card-body -->
                     </div>
-                    @endif
-                    </td> --}}
-                    </tr>
-                    @endforeach
-                    @endif
-                    </tbody>
-                    <tfoot class="text-white text-center bg-gradient-gray-dark">
-                        <tr>
-                            <th>Code</th>
-                            <th>Code Commande</th>
-                            <th>Code Pro</th>
-                            <th>Bl_guest/Bl</th>
-                            <th>Date</th>
-                            <th>Client</th>
-                            <th>PU</th>
-                            <th>Qté</th>
-                            <th>Montant</th>
-                            @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
-                            <th>Zone</th>
-                            @endif
-                            <th>Statut</th>
-                            <th>Utilisateur</th>
-                            <th>Actualisation</th>
-                        </tr>
-                    </tfoot>
-                    </table>
+                    <!-- /.card -->
                 </div>
-                <!-- /.card-body -->
+                <!-- /.col -->
             </div>
-            <!-- /.card -->
+            <!-- /.row -->
         </div>
-        <!-- /.col -->
-</div>
-<!-- /.row -->
-</div>
-<!-- /.container-fluid -->
-</section>
-<!-- /.content -->
+        <!-- /.container-fluid -->
+    </section>
 </div>
 @endsection
 
 @section('script')
+
 <script>
     $(function() {
         $("#example1").DataTable({
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            "buttons": ["pdf", "print"],
+            "buttons": ["pdf", "print", "csv", "excel"],
             "order": [
-                [0, 'desc']
+                [0, 'asc']
             ],
             "pageLength": 15,
-            "columnDefs": [{
-                    "targets": 8,
-                    "orderable": false
-                },
-                {
-                    "targets": 9,
-                    "orderable": false
-                }
-
-            ],
+            
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
                 "lengthMenu": "Afficher _MENU_ éléments",
