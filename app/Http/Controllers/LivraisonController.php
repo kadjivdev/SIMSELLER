@@ -633,8 +633,8 @@ class LivraisonController extends Controller
         $message_html = "Vous avez reçu le transfert d'une programmation.";
         $lienAction = route('programmations.index');
 
-        $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programmation->avaliseur->email ? [$programmation->avaliseur->email] : [], $programme, $lienAction);
-        Mail::send($mail);
+        // $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programmation->avaliseur->email ? [$programmation->avaliseur->email] : [], $programme, $lienAction);
+        // Mail::send($mail);
 
         //Notification zone source
         $zone = Zone::find($programme->zone_id);
@@ -646,8 +646,8 @@ class LivraisonController extends Controller
         $subject = 'ANNULATION PAR TRANSFERT DE LA PROGRAMMATION DU ' . date_format(date_create($programme->dateprogrammer), 'd/m/Y');
         $message_html = "Nous vous informons que le programme ci-dessous a été transferé de votre zone. .";
         $lienAction = route('programmations.index');
-        $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programme->avaliseur->email ? [$programme->avaliseur->email] : [], $programme, $lienAction);
-        Mail::send($mail);
+        // $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programme->avaliseur->email ? [$programme->avaliseur->email] : [], $programme, $lienAction);
+        // Mail::send($mail);
         return redirect()->back()->with("message", 'Programme transferé avec succès!');
     }
 
