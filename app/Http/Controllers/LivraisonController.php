@@ -464,7 +464,7 @@ class LivraisonController extends Controller
      * @param  \App\Models\Programmation  $programmation
      * @return \Illuminate\Http\Response
      */
-    
+
     public function edit(Programmation $programmation)
     {
         //
@@ -508,18 +508,20 @@ class LivraisonController extends Controller
     public function transfertLivraison(Request $request)
     {
         $programmation = Programmation::find($request->prog);
-        $user = Auth::user();
-        $gestionnaire = Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists();
-        if (!$gestionnaire) {
-            $mail = new SuspectMail(['email' => env("ADMIN_SUSPECT")], "TENTATIVE DE TRANSFERT", "L'utilisateur " . Auth::user()->name . " a tenté un transfert alors qu'il n'est pas autoriser");
-            Mail::send($mail);
-            session()->flash("error", "Vous n'êtes pas autorisé à effectuer cette action. Votre comportement sera notifier à l'administrateur.");
-            return back();
-        }
+        // $user = Auth::user();
+        // $gestionnaire = Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists();
+        // if (!$gestionnaire) {
+        //     $mail = new SuspectMail(['email' => env("ADMIN_SUSPECT")], "TENTATIVE DE TRANSFERT", "L'utilisateur " . Auth::user()->name . " a tenté un transfert alors qu'il n'est pas autoriser");
+        //     Mail::send($mail);
+        //     session()->flash("error", "Vous n'êtes pas autorisé à effectuer cette action. Votre comportement sera notifier à l'administrateur.");
+        //     return back();
+        // }
+
         if (($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == false) || ($programmation->vendus->sum('qteVendu') > 0 && $programmation->cloture == null)) {
             session()->flash("message", "Vous n'êtes pas autorisé à effectuer le transfert d'un camion qui est en déjà en cours de vente.");
             return back();
         }
+
         //Constitution de table de transfert
         $transfert = [];
         if ($programmation->transfert) {
@@ -534,6 +536,7 @@ class LivraisonController extends Controller
             'observation' => $request->observation,
             'compteur' => count($transfert)
         ];
+
         $transfert = json_encode($transfert);
         $programme = $programmation;
         $programmation->update([
@@ -541,6 +544,7 @@ class LivraisonController extends Controller
             'transfert' => $transfert,
             'cloture' => false
         ]);
+
         //Notification zone destination
         $zoneDest = Zone::find($request->zone_id);
         $destinataire = [
@@ -550,8 +554,9 @@ class LivraisonController extends Controller
         $subject = 'TRANSFERT PROGRAMMATION DU ' . date_format(date_create($programme->dateprogrammer), 'd/m/Y');
         $message_html = "Vous avez reçu le transfert d'une programmation.";
         $lienAction = route('programmations.index');
-        $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programmation->avaliseur->email ? [$programmation->avaliseur->email] : [], $programme, $lienAction);
-        Mail::send($mail);
+
+        // $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programmation->avaliseur->email ? [$programmation->avaliseur->email] : [], $programme, $lienAction);
+        // Mail::send($mail);
 
         //Notification zone source
         $zone = Zone::find($programme->zone_id);
@@ -563,8 +568,8 @@ class LivraisonController extends Controller
         $subject = 'ANNULATION PAR TRANSFERT DE LA PROGRAMMATION DU ' . date_format(date_create($programme->dateprogrammer), 'd/m/Y');
         $message_html = "Nous vous informons que le programme ci-dessous a été transferé de votre zone. .";
         $lienAction = route('programmations.index');
-        $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programme->avaliseur->email ? [$programme->avaliseur->email] : [], $programme, $lienAction);
-        Mail::send($mail);
+        // $mail = new NotificateurProgrammationMail($destinataire, $subject, $message_html, $programme->avaliseur->email ? [$programme->avaliseur->email] : [], $programme, $lienAction);
+        // Mail::send($mail);
 
         return redirect()->route('livraisons.getSuivicamion', [
             'debut' => session('debut'),
@@ -591,12 +596,12 @@ class LivraisonController extends Controller
         $user = Auth::user();
         $gestionnaire = Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists();
 
-        if (!$gestionnaire) {
-            $mail = new SuspectMail(['email' => env("ADMIN_SUSPECT")], "TENTATIVE DE TRANSFERT", "L'utilisateur " . Auth::user()->name . " a tenté un transfert alors qu'il n'est pas autoriser");
-            Mail::send($mail);
-            session()->flash("error", "Vous n'êtes pas autorisé à effectuer cette action. Votre comportement sera notifier à l'administrateur.");
-            return back();
-        }
+        // if (!$gestionnaire) {
+        //     $mail = new SuspectMail(['email' => env("ADMIN_SUSPECT")], "TENTATIVE DE TRANSFERT", "L'utilisateur " . Auth::user()->name . " a tenté un transfert alors qu'il n'est pas autoriser");
+        //     Mail::send($mail);
+        //     session()->flash("error", "Vous n'êtes pas autorisé à effectuer cette action. Votre comportement sera notifier à l'administrateur.");
+        //     return back();
+        // }
 
         //Constitution de table de transfert
         $transfert = [];
