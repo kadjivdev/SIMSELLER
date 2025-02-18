@@ -58,13 +58,13 @@
                         <!-- /.col -->
                     </div>
                 </form>
-                <p class="mb-4 mt-4 text-center">
+                <!-- <p class="mb-4 mt-4 text-center">
                     @if (Route::has('password.request'))
                     <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('password.request') }}">
                         {{ __('Mot de passe oublié') }}
                     </a>
                     @endif
-                </p>
+                </p> -->
             </div>
             <!-- /.card-body -->
         </div>

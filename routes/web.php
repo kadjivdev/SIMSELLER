@@ -49,7 +49,10 @@ use App\Http\Controllers\CommandeClientController;
 use App\Http\Controllers\CommanderController;
 use App\Http\Controllers\MarqueController;
 use App\Http\Controllers\VenduController;
+use App\Models\Client;
+use App\Models\LogUser;
 use App\Models\Programmation;
+// use App\Models\Reglement;
 
 // use App\Models\Client;
 // use App\Models\Mouvement;
@@ -64,9 +67,38 @@ use App\Models\Programmation;
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
 | contains the "web" middleware group. Now create something great!
-|
 */
 
+// REVERSEMENT DES APPROVISIONNEMENTS D'UN COMPTE SUR UN AUTRE
+Route::get("/regulation", function () {
+    $client_to_reverse = Client::find(1920); ## compte à reverser
+    $client_to_receive = Client::find(847); ## compte à recevoir
+
+    $reglements = $client_to_reverse->reglements->where("for_dette", false)->whereNull("vente_id");
+    // dd($reglements);
+    $compte = $client_to_receive->compteClients->first();
+    foreach ($reglements as $reglement) {
+        // Mise à jour du mouvement attaché au reglement en question
+        $mvt = $reglement->_mouvements->first();
+        if ($mvt && $compte) {
+            $mvt->compteClient_id = $compte->id;
+            $mvt->update();
+        }
+        $reglement->update(["client_id" => $client_to_receive->id, "clt" => $client_to_receive->id]);
+    }
+    return "cool ...";
+});
+
+Route::get("/find", function () {
+    $res = LogUser::where(["table_name" => "reglement", "user_id" => 6])->get();
+    return response()->json(
+        [
+            "res" => $res,
+        ]
+    );
+});
+
+// VERIFICATION D4eXISTANCE DE BL
 Route::get("/bl-verification/{bl}", function ($bl) {
     $bls = Programmation::where("bl", $bl)->orWhere("bl_gest", $bl)->get();
     return response()->json(
@@ -1333,4 +1365,5 @@ Route::middleware(['auth', 'pwd'])->group(function () {
     });
     Route::get('test-mail', [VenteController::class, 'testMail']);
 });
+
 require __DIR__ . '/auth.php';

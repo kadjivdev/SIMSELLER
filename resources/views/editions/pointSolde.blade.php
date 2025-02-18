@@ -59,7 +59,7 @@
                                                 <option class="" value="tous">Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
-                                                    {{ $client->raisonSociale }}
+                                                    {{ $client->raisonSociale }} ({{$client->id}})
                                                 </option>
                                                 @endforeach
                                             </select>

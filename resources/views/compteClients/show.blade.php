@@ -1,4 +1,5 @@
 @extends('layouts.app')
+
 @section('content')
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -97,6 +98,7 @@
             </div>
         </div><!-- /.container-fluid -->
     </section>
+
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -151,7 +153,7 @@
                                         <th>Pour dette</th>
                                         <th>Reversement</th>
                                         <th>Preuve</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
                                         <th>Action</th>
                                         @endif
                                     </tr>
@@ -207,7 +209,7 @@
                                         <th>Pour dette</th>
                                         <th>Reversement</th>
                                         <th>Preuve</th>
-                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['GESTION CLIENT'])->exists())
                                         <th>Action</th>
                                         @endif
                                     </tr>
@@ -239,9 +241,9 @@
                                         <th>Pour dette</th>
                                         <th>Reversement</th>
                                         <th>Preuve</th>
-                                        <!-- @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
+                                        @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                                         <th>Action</th>
-                                        <!-- @endif -->
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -362,7 +364,6 @@
 <script>
     // GESTION DE LA MODIFICATION DES APPROVISIONNMENTS
     function showUpdateModal(approId, document) {
-
         axios.get("{{env('APP_BASE_URL')}}reglement/approvisionnement/" + approId)
             .then(function(response) {
                 var data = response.data
@@ -385,11 +386,7 @@
                     $('#validUpdateBtn').removeAttr("hidden")
                 }
 
-                // window.location.reload()
-                // Afficher un message de succès
-                // alert("Approvisionnement validé avec succès!")
-            })
-            .catch(function(error) {
+            }).catch(function(error) {
                 
                 // window.location.reload()
                 // Afficher un message de succès
