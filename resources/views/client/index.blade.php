@@ -144,7 +144,12 @@
                                         <td>
                                             @if($client->commandeclients()->count()==0 && $client->debit_old)
                                             <span class="badge bg-dark">CLIENT_BEF ({{$client->debit_old}})</span>
+                                            @endif <br>
+
+                                            @if($client->commandeclients()->count()==0 && !$client->debit_old)
+                                            <span class="badge bg-dark">CLIENT_INACTIF </span>
                                             @endif
+
                                         </td>
                                         <td class="text-center"><span class="badge bg-warning">{{GetClientZone($client)}}</span></td>
                                         <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif </span></td>
@@ -154,7 +159,7 @@
                                         <td class="text-center"><span class="badge bg-info"> {{number_format($debit, '0', '', ' ')}} FCFA</span></td>
                                         <td class="text-center"><span class="badge bg-success"> {{number_format($credit-$debit, '0', '', ' ')}} FCFA</span></td>
                                         <td class="text-center"><span class="badge bg-success">{{($credit-$debit)>0?"SOLD_EXIST":''}}</span></td>
-                                        
+
                                         <td class="text-center">
                                             <a class="btn btn-secondary btn-sm"
                                                 href="{{ route('newclient.show', ['client' => $client->id]) }}"><i
