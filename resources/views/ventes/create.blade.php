@@ -40,6 +40,7 @@
                                 </form>
                             </div>
                         </div>
+
                         <form method="post" action="{{route('ventes.store')}}" id="saveVente">
                             @csrf
                             <div class="card-body">
@@ -67,8 +68,16 @@
                                             <select onchange="selectDefaultDriver()" id="client" class="form-control form-control-sm select2" id="client_id" name="client_id" style="width: 100%;" @if($vente)onchange="editClient('{{$vente->client_id}}')" @endif>
                                                 <option class="text-center" selected disabled>** choisissez un client **</option>
                                                 @foreach($clients as $client)
-                                                <option value="{{$client->id}}" data-fiscal="{{ $client->filleulFisc ? true : false }}" @if ($vente) @if (old('client_id')) {{old('client_id')==$client->id?'selected':''}} @else {{$vente->commandeclient->client_id==$client->id?'selected':''}} @endif @else {{old('client_id')==$client->id?'selected':''}} @endif>
+                                                <option value="{{$client->id}}"
+                                                    data-fiscal="{{ $client->filleulFisc ? true : false }}"
+                                                    @if($client->commandeclients()->count()==0 && $client->debit_old) disabled @endif
+                                                    @if ($vente) @if (old('client_id')) {{old('client_id')==$client->id?'selected':''}} @else {{$vente->commandeclient->client_id==$client->id?'selected':''}} @endif @else {{old('client_id')==$client->id?'selected':''}} @endif
+                                                    >
                                                     {{ $client->raisonSociale }}
+
+                                                    @if($client->commandeclients()->count()==0 && $client->debit_old)
+                                                    <span class="badge bg-dark">(BEF)</span>
+                                                    @endif
                                                 </option>
                                                 @endforeach
                                             </select>
@@ -291,37 +300,35 @@
 
 
 @section('script')
-    <script>
-        $(document).ready(function (){
-            selectDefaultDriver("@if(@old('type_vente_id')) {{@old('type_vente_id')}} @elseif($vente) {{$vente->type_vente_id}} @endif")
-            filleulTypeCheck();
-            $("#saveVente").submit(function (){
-                $('#action').attr('hidden','hidden');
-                $('#loaderSave').removeAttr('hidden');
-            })
+<script>
+    $(document).ready(function() {
+        selectDefaultDriver("@if(@old('type_vente_id')) {{@old('type_vente_id')}} @elseif($vente) {{$vente->type_vente_id}} @endif")
+        filleulTypeCheck();
+        $("#saveVente").submit(function() {
+            $('#action').attr('hidden', 'hidden');
+            $('#loaderSave').removeAttr('hidden');
         })
-    </script>
-<script> 
-
-    function selectDefaultDriver(old=null){
-        if($('#client').val() || $('#commande_client_id').val()) {
-            $('#champ').attr('hidden','hidden');
-            $('#champ1').attr('hidden','hidden');
+    })
+</script>
+<script>
+    function selectDefaultDriver(old = null) {
+        if ($('#client').val() || $('#commande_client_id').val()) {
+            $('#champ').attr('hidden', 'hidden');
+            $('#champ1').attr('hidden', 'hidden');
             $('#loader').removeAttr('hidden')
             $('#loader1').removeAttr('hidden')
             $('#typecommande option').removeAttr('selected');
             $('#typecommande').empty();
-            axios.get("{{env('APP_BASE_URL')}}commandeclients/typecommande/" + $('#client').val()+'/'+$('#commande_client_id').val()).then((response) => {
+            axios.get("{{env('APP_BASE_URL')}}commandeclients/typecommande/" + $('#client').val() + '/' + $('#commande_client_id').val()).then((response) => {
                 var typecommandes = response.data;
                 $('#typecommande').append("<option selected disabled>Choisissez le type commande</option>");
                 for (var i = 0; i < typecommandes.length; i++) {
                     var val = typecommandes[i].id;
                     var text = typecommandes[i].libelle;
-                    if(old == val){
-                        $('#typecommande').append("<option value="+ val +" selected>" + text + "</option>");
-                    }
-                    else{
-                        $('#typecommande').append("<option value="+ val +">" + text + "</option>");
+                    if (old == val) {
+                        $('#typecommande').append("<option value=" + val + " selected>" + text + "</option>");
+                    } else {
+                        $('#typecommande').append("<option value=" + val + ">" + text + "</option>");
                     }
                 }
 
@@ -331,45 +338,45 @@
                 $('#loader1').attr('hidden', 'hidden');
                 $('#champ').removeAttr('hidden')
                 $('#champ1').removeAttr('hidden')
-            }).catch(()=>{
+            }).catch(() => {
                 $('#loader').attr('hidden', 'hidden');
                 $('#loader1').attr('hidden', 'hidden');
                 $('#champ1').removeAttr('hidden')
                 $('#champ').removeAttr('hidden')
             })
-        }
-        else {
+        } else {
             $('#chauffeur_0').attr('selected', 'true');
             $('.select2').select2()
         }
 
     }
-    function cmdeSelected($client){
+
+    function cmdeSelected($client) {
 
     }
-    function typeSelected(){
-        if($('#typecommande').val() == 2){
+
+    function typeSelected() {
+        if ($('#typecommande').val() == 2) {
             $('#echeance').removeAttr('disabled');
             $('#r-echeance').removeAttr('hidden');
-        }
-        else {
-            $('#echeance').attr('disabled',true);
-            $('#r-echeance').attr('hidden',true);
+        } else {
+            $('#echeance').attr('disabled', true);
+            $('#r-echeance').attr('hidden', true);
         }
     }
-    function filleulTypeCheck(){
+
+    function filleulTypeCheck() {
         let fi = $("#ctl_payeur");
         let det = $("#detailFilleul");
         let np = $("#nomPrenom");
         let tel = $("#telephone");
-        if(fi.val()){
-            if(fi.val() == 0){
+        if (fi.val()) {
+            if (fi.val() == 0) {
                 det.removeAttr('hidden');
-                np.attr('required',true);
-                tel.attr('required',true);
-            }
-            else {
-                det.attr('hidden',true)
+                np.attr('required', true);
+                tel.attr('required', true);
+            } else {
+                det.attr('hidden', true)
                 np.removeAttr('required');
                 tel.removeAttr('required');
             }
@@ -377,24 +384,21 @@
     }
 </script>
 
-    <script>
-        function editClient(oldClient){
-            if($('#client_id').val() != oldClient){
-                $('#confirmation_msg').removeAttr('hidden');
-                //$('#confirmation').attr('required','required');
-            }
-            else {
-                $('#confirmation_msg').attr('hidden','hidden');
-                $('#confirmation').removeAttr('required');
-            }
+<script>
+    function editClient(oldClient) {
+        if ($('#client_id').val() != oldClient) {
+            $('#confirmation_msg').removeAttr('hidden');
+            //$('#confirmation').attr('required','required');
+        } else {
+            $('#confirmation_msg').attr('hidden', 'hidden');
+            $('#confirmation').removeAttr('required');
         }
-    </script>
+    }
+</script>
 
-    <script>
-        function submitStatuts()
-        {
-            $('#statutsForm').submit();
-        }
-
-    </script>
+<script>
+    function submitStatuts() {
+        $('#statutsForm').submit();
+    }
+</script>
 @endsection

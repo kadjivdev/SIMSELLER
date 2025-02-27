@@ -121,6 +121,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
+                                        <th>Statut</th>
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
@@ -135,21 +136,25 @@
                                 <tbody>
                                     @if ($clients->count() > 0)
                                     @foreach ($clients as $client)
-
                                     @php($credit=$client->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant"))
                                     @php($debit=$client->reglements->whereNotNull("vente_id")->sum("montant"))
                                     <tr>
                                         <td>{{ $loop->index +1 }}</td>
                                         <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }}</td>
+                                        <td>
+                                            @if($client->commandeclients()->count()==0 && $client->debit_old)
+                                            <span class="badge bg-dark">CLIENT_BEF ({{$client->debit_old}})</span>
+                                            @endif
+                                        </td>
                                         <td class="text-center"><span class="badge bg-warning">{{GetClientZone($client)}}</span></td>
-                                        <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif   </span></td>
+                                        <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif </span></td>
 
                                         <td class="ml-5 pr-5">{{ $client->telephone }}</td>
                                         <td class="text-center"><span class="badge bg-warning">{{number_format($credit, '0', '', ' ')}} FCFA</span> </td>
                                         <td class="text-center"><span class="badge bg-info"> {{number_format($debit, '0', '', ' ')}} FCFA</span></td>
                                         <td class="text-center"><span class="badge bg-success"> {{number_format($credit-$debit, '0', '', ' ')}} FCFA</span></td>
                                         <td class="text-center"><span class="badge bg-success">{{($credit-$debit)>0?"SOLD_EXIST":''}}</span></td>
-
+                                        
                                         <td class="text-center">
                                             <a class="btn btn-secondary btn-sm"
                                                 href="{{ route('newclient.show', ['client' => $client->id]) }}"><i
@@ -185,16 +190,6 @@
                                                     <a class="dropdown-item" href="{{ route('newclient.achatClient', ['client' => $client->id]) }}"><i
                                                             class="nav-icon fa-solid fa-bag-shopping"></i>
                                                         Achat</a>
-                                                    <a class="dropdown-item" href=""><i
-                                                            class="nav-icon fas fa-solid fa-basket-shopping"></i>
-                                                        Commande</a>
-
-                                                    <!-- if(!Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() && !Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()) -->
-                                                    <!-- <a class="dropdown-item" target="_blank"
-                                                        href="{{ route('newclient.reglement', ['client' => $client->id]) }}"><i
-                                                            class="nav-icon fa-solid fa-money-check-dollar"></i>
-                                                        Règler dette</a> -->
-
                                                     <button class="btn btn-sm btn-warning" target="_blank" data-bs-toggle="modal" data-bs-target="#affect_to_zone" onclick="affectToZone({{$client->id}})"><i class="bi bi-link"></i> Affecter à une zone</button>
                                                     @endif
                                                     @endif
@@ -209,6 +204,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
+                                        <th>Status</th>
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>

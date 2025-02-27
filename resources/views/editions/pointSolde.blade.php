@@ -47,15 +47,8 @@
                                     <div class="col-4">
                                         <div class="form-group">
                                             <label for="">Clients</label>
-                                            <!-- <select id="client" class="form-control form-control-sm select2" name="client">
-                                                <option class="" value="" selected>Tous</option>
-                                                @foreach ($clients as $client)
-                                                <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
-                                                    {{ $client->raisonSociale }}
-                                                </option>
-                                                @endforeach
-                                            </select> -->
-                                            <select id="client" class="form-control form-control-sm select2" name="client" required {{ old('client') == $client->id ? 'selected' : '' }}>
+
+                                            <select id="client" class="form-control form-control-sm select2" name="client" required }}>
                                                 <option class="" value="tous">Tous les clients</option>
                                                 @foreach ($clients as $client)
                                                 <option value="{{ $client->id }}" {{ old('client') == $client->id ? 'selected' : '' }}>
@@ -140,7 +133,7 @@
                                     <div class="info-box">
                                         <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">DETTE REEL</span>
+                                            <span class="info-box-text">DETTE REELLE</span>
                                             <span class="info-box-number" id="realSolde">{{number_format($realSolde, '0', '', ' ')}}</span>
                                         </div>
                                     </div>
@@ -189,9 +182,7 @@
                                                         <div class="info-box-content">
                                                             <span class="info-box-text">Il nous devait:</span>
                                                             <span class="info-box-number">{{number_format(session('resultat')['client']['debit_old'], '0', '', ' ')}}</span>
-                                                            <!-- @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
-                                                            <a target="_blank" href="{{route('newclient.reglement',session('resultat')['client']['id'])}}" style="border-radius:5px" class="p-1 bg-success"><i class="bi bi-list-ul"></i> Reglements</a>
-                                                            @endif -->
+
                                                         </div>
                                                     </div>
                                                 </div>
@@ -218,8 +209,10 @@
                                     <div class="info-box">
                                         <div class="info-box-content text-white bg-black">
                                             <strong class="info-box-text">Il nous doit au total: </strong>
+                                            @if(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() == true || Auth::user()->roles()->where('libelle', 'CONTROLEUR')->exists() == true)
                                             <input type="hidden" id="debit_old" value="{{-session('resultat')['client']['debit_old']}}">
                                             <span class="info-box-number" style="font-size: large" id="totalDu"></span>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -329,7 +322,6 @@
                                                     <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$item])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement {{$item->id}} <span class="badge badge-info">{{$item->reglements ? count($item->reglements):0}}</span></a>
                                                 </td>
                                             </tr>
-
                                             @endforeach
                                         </tbody>
                                         <tfoot>
