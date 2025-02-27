@@ -103,6 +103,7 @@
                                 <thead class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
                                         <th>Code</th>
+                                        <th>Reference</th>
                                         <th>Date</th>
                                         <th>Fournisseur</th>
                                         <th>Quantité</th>
@@ -130,6 +131,11 @@
                                     <?php $MontantTotal = $MontantTotal + $boncommande->montant; ?>
                                     <tr>
                                         <td>{{ $boncommande->code }}</td>
+                                        <td class="text-center"> 
+                                            @foreach($boncommande->recus as $recu)
+                                            <span class="badge bg-dark w-100"> {{$recu->reference}} </span> 
+                                            @endforeach
+                                        </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($boncommande->dateBon)) }}</td>
                                         <td class="pl-2">{{ $boncommande->fournisseur->sigle }}</td>
                                         <td class="pl-2 qte">{{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}}</td>
