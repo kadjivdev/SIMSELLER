@@ -142,12 +142,12 @@
                                         <td>{{ $loop->index +1 }}</td>
                                         <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }}</td>
                                         <td>
-                                            @if($client->commandeclients()->count()==0 && $client->debit_old)
+                                            @if($client->Is_Bef())
                                             <span class="badge bg-dark">CLIENT_BEF ({{$client->debit_old}})</span>
                                             @endif <br>
 
-                                            @if($client->commandeclients()->count()==0 && !$client->debit_old)
-                                            <span class="badge bg-dark">CLIENT_INACTIF </span>
+                                            @if($client->Is_Inactif())
+                                            <span class="badge bg-dark">CLIENT_INACTIF</span>
                                             @endif
 
                                         </td>

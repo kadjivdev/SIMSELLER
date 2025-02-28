@@ -2,16 +2,39 @@
 
 namespace App\Models;
 
+use Hamcrest\Type\IsBoolean;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
 
 class Client extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'code', 'civilite', 'nom', 'prenom', 'photo', 'sigle', 'raisonSociale', 'logo', 'telephone', 'parent', 'numerocompte', 'email', 'adresse', 'domaine', 'statutCredit', 'sommeil', 'type_client_id', 'agent_id', 'credit', 'filleulFisc', 'departement_id', 'bordereau_receit'
+        'code',
+        'civilite',
+        'nom',
+        'prenom',
+        'photo',
+        'sigle',
+        'raisonSociale',
+        'logo',
+        'telephone',
+        'parent',
+        'numerocompte',
+        'email',
+        'adresse',
+        'domaine',
+        'statutCredit',
+        'sommeil',
+        'type_client_id',
+        'agent_id',
+        'credit',
+        'filleulFisc',
+        'departement_id',
+        'bordereau_receit'
     ];
 
     public function typeclient()
@@ -31,7 +54,7 @@ class Client extends Model
 
     public function vente()
     {
-        return $this->hasMany(Vente::class,"client_id");
+        return $this->hasMany(Vente::class, "client_id");
     }
 
     public function commandeclients()
@@ -65,8 +88,19 @@ class Client extends Model
         return $this->hasMany(DeletedVente::class, 'ctl_payeur');
     }
 
-    public function reglements():HasMany
+    public function reglements(): HasMany
     {
         return $this->hasMany(Reglement::class, 'client_id');
+    }
+
+    // 
+    public function  Is_Bef()
+    {
+        return $this->commandeclients()->count() == 0 && $this->debit_old;
+    }
+
+    public function  Is_Inactif()
+    {
+        return $this->commandeclients()->count() == 0 && !$this->debit_old && $this->created_at < "2024-12-31";
     }
 }

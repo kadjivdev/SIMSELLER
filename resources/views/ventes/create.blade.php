@@ -70,17 +70,17 @@
                                                 @foreach($clients as $client)
                                                 <option value="{{$client->id}}"
                                                     data-fiscal="{{ $client->filleulFisc ? true : false }}"
-                                                    @if($client->commandeclients()->count()==0 && $client->debit_old) disabled @endif
-                                                    @if($client->commandeclients()->count()==0 && !$client->debit_old) disabled @endif
+                                                    @if($client->Is_Bef()) disabled @endif
+                                                    @if($client->Is_Inactif()) disabled @endif
                                                     @if ($vente) @if (old('client_id')) {{old('client_id')==$client->id?'selected':''}} @else {{$vente->commandeclient->client_id==$client->id?'selected':''}} @endif @else {{old('client_id')==$client->id?'selected':''}} @endif
                                                     >
                                                     {{ $client->raisonSociale }}
 
-                                                    @if($client->commandeclients()->count()==0 && $client->debit_old)
+                                                    @if($client->Is_Bef())
                                                     <span class="badge bg-dark">(BEF)</span>
                                                     @endif
 
-                                                    @if($client->commandeclients()->count()==0 && !$client->debit_old)
+                                                    @if($client->Is_Inactif())
                                                     <span class="badge bg-dark">(INACTIF)</span>
                                                     @endif
                                                 </option>

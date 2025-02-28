@@ -479,7 +479,7 @@
 
         var realSolde_amount = Number(spanReste.text().replace(/\s+/g, '')) - Number(spanSolde.text().replace(/\s+/g, ''))
 
-        var __realeSold = new Intl.NumberFormat().format(realSolde_amount)
+        var __realeSold = new Intl.NumberFormat().format(realSolde_amount<0?00:realSolde_amount)
         spanRealSolde.html(__realeSold ? __realeSold : "00")
         // console.log(Number(spanReste.text().replace(/\s+/g, '')))
 
