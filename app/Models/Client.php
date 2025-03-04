@@ -96,11 +96,11 @@ class Client extends Model
     // 
     public function  Is_Bef()
     {
-        return $this->commandeclients()->count() == 0 && $this->debit_old;
+        return $this->commandeclients()->count() == 0 && $this->debit_old && $this->id != 1518;
     }
 
     public function  Is_Inactif()
     {
-        return $this->commandeclients()->count() == 0 && !$this->debit_old && $this->created_at < "2024-12-31";
+        return $this->commandeclients()->count() == 0 && !$this->debit_old && $this->created_at < "2024-12-31" && $this->id != 1518;
     }
 }

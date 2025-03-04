@@ -52,6 +52,9 @@ use App\Http\Controllers\VenduController;
 use App\Models\Client;
 use App\Models\LogUser;
 use App\Models\Programmation;
+use App\Models\Vendu;
+use App\Models\Vente;
+
 // use App\Models\Reglement;
 
 // use App\Models\Client;
@@ -71,8 +74,9 @@ use App\Models\Programmation;
 
 // REVERSEMENT DES APPROVISIONNEMENTS D'UN COMPTE SUR UN AUTRE
 Route::get("/regulation", function () {
-    $client_to_reverse = Client::find(1920); ## compte à reverser
-    $client_to_receive = Client::find(847); ## compte à recevoir
+    return Vendu::where("vente_id",10991)->get();
+    $client_to_reverse = Client::find(1529); ## compte à reverser
+    $client_to_receive = Client::find(2080); ## compte à recevoir
 
     $reglements = $client_to_reverse->reglements->where("for_dette", false)->whereNull("vente_id");
     // dd($reglements);
@@ -86,7 +90,7 @@ Route::get("/regulation", function () {
         }
         $reglement->update(["client_id" => $client_to_receive->id, "clt" => $client_to_receive->id]);
     }
-    return "cool ...";
+    return "Reversement effectué avec succès ...";
 });
 
 Route::get("/find", function () {

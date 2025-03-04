@@ -133,7 +133,12 @@
 
                                         <td class="text-right">{{ number_format($programmation->qteprogrammer,2,","," ") }}</td>
                                         <td class="text-right">{{ number_format($programmation->qtelivrer,2,","," ") }}</td>
-                                        <td class="text-right">{{ number_format($programmation->vendus->sum('qteVendu'),2,","," ") }}</td>
+                                        <td class="text-right">
+                                            @foreach($programmation->vendus as $vendu)
+                                            <strong>{{$vendu->qteVendu}}</strong> ;
+                                            @endforeach
+                                            {{ number_format($programmation->vendus->sum('qteVendu'),2,","," ") }}
+                                        </td>
 
                                         <!-- <td class="text-right text-danger font-weight-bolder">{{number_format(($programmation->qteprogrammer-$programmation->qtelivrer),2,","," ")}}</td> -->
                                         <td class="text-right text-danger font-weight-bolder">{{number_format(($programmation->qteprogrammer - $programmation->vendus->sum('qteVendu')),2,","," ")}}</td>

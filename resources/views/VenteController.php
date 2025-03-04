@@ -437,7 +437,6 @@ class _VenteController extends Controller
     {
         try {
             $data = $request->all();
-            dd($data);
             $vente->update($data);
         } catch (\Throwable $th) {
             //throw $th;

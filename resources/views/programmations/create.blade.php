@@ -283,7 +283,6 @@
                                                         @endif
                                                     </td>
                                                     @endif
-
                                                 </tr>
                                                 {{-- @include('programmations.modalSortie') --}}
 

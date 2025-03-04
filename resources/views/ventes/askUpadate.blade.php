@@ -58,6 +58,7 @@
                                         <th>Statut</th>
                                         <th>Utilisateur</th>
                                         <th>Actualisation</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -118,59 +119,56 @@
                                             ---
                                             @endif
                                         </td>
-
-                                        {{-- <td class="text-center">
-                                                        @if ($vente->statut == 'Vendue')
-                                                            <div class="dropdown">
-                                                                <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown">
-                                                                    Actions<i class="dw dw-more"></i>
-                                                                </button>
-                                                                <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
-                                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement <span class="badge badge-info">{{$vente->reglements ? count($vente->reglements):0}}</span></a>
-                                        @if($vente->type_vente_id == 2)
-                                        <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
+                                        <td class="text-center">
+                                            @if ($vente->statut == 'Vendue')
+                                            <div class="dropdown">
+                                                <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown">
+                                                    Actions<i class="dw dw-more"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
+                                                    <a class="dropdown-item" href="{{route('reglements.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Règlement <span class="badge badge-info">{{$vente->reglements ? count($vente->reglements):0}}</span></a>
+                                                    @if($vente->type_vente_id == 2)
+                                                    <a class="dropdown-item" href="{{route('echeances.index',['vente'=>$vente])}}"><i class="fa-solid fa-file-invoice-dollar"></i> Échéancier <span class="badge badge-info">{{$vente->echeances ? count($vente->echeances):0}}</span></a>
+                                                    @endif
+                                                    <a class="dropdown-item" href=""><i class="fa-solid fa-industry"></i> Chantiers</a>
+                                                </div>
+                                            </div>
+                                            @endif
+                                            <a class="dropdown-item" href="{{route('ventes.delete',$vente->id)}}"><i class="fa-solid fa-industry"></i>Supprimer</a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                    @endif
+                                </tbody>
+                                <tfoot class="text-white text-center bg-gradient-gray-dark">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Code Commande</th>
+                                        <th>Code Pro</th>
+                                        <th>Bl_guest/Bl</th>
+                                        <th>Date</th>
+                                        <th>Client</th>
+                                        <th>PU</th>
+                                        <th>Qté</th>
+                                        <th>Montant</th>
+                                        @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
+                                        <th>Zone</th>
                                         @endif
-                                        <!--<a class="dropdown-item" href=""><i class="fa-solid fa-industry"></i> Chantiers</a> -->
+                                        <th>Statut</th>
+                                        <th>Utilisateur</th>
+                                        <th>Actualisation</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
-                    @endif
-                    </td> --}}
-                    </tr>
-                    @endforeach
-                    @endif
-                    </tbody>
-                    <tfoot class="text-white text-center bg-gradient-gray-dark">
-                        <tr>
-                            <th>Code</th>
-                            <th>Code Commande</th>
-                            <th>Code Pro</th>
-                            <th>Bl_guest/Bl</th>
-                            <th>Date</th>
-                            <th>Client</th>
-                            <th>PU</th>
-                            <th>Qté</th>
-                            <th>Montant</th>
-                            @if(Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
-                            <th>Zone</th>
-                            @endif
-                            <th>Statut</th>
-                            <th>Utilisateur</th>
-                            <th>Actualisation</th>
-                        </tr>
-                    </tfoot>
-                    </table>
                 </div>
                 <!-- /.card-body -->
             </div>
             <!-- /.card -->
         </div>
-        <!-- /.col -->
-</div>
-<!-- /.row -->
-</div>
-<!-- /.container-fluid -->
-</section>
-<!-- /.content -->
+    </section>
 </div>
 @endsection
 
@@ -186,16 +184,7 @@
                 [0, 'desc']
             ],
             "pageLength": 15,
-            "columnDefs": [{
-                    "targets": 8,
-                    "orderable": false
-                },
-                {
-                    "targets": 9,
-                    "orderable": false
-                }
 
-            ],
             language: {
                 "emptyTable": "Aucune donnée disponible dans le tableau",
                 "lengthMenu": "Afficher _MENU_ éléments",
