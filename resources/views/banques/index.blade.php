@@ -60,10 +60,10 @@
                                             <th>E-mail</th>
                                             <th>Interlocuteur</th>
                                             <th>Adresse</th>
-                                            @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                                            <!-- if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
                                             <th>Actualisation</th>
                                             <th>Action</th>
-                                            @endif
+                                            <!-- endif -->
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -79,7 +79,7 @@
                                                     <td>{{ $banque->interlocuteur }}</td>
                                                     <td>{{ $banque->adresse }}</td>
                                                     
-                                                    @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                                                    <!-- if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
                                                     <td class="text-center">
                                                         <!--<a class="btn btn-success btn-sm" href="#"><i class="fa-regular fa-eye"></i></a>-->
                                                         <a class="btn btn-warning btn-sm" href="{{ route('banques.edit', ['id'=>$banque->id]) }}"><i class="fa-solid fa-pen-to-square"></i></a>
@@ -96,7 +96,7 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    @endif
+                                                    <!-- endif -->
 
                                                 </tr>
                                             @endforeach
@@ -112,10 +112,10 @@
                                             <th>Interlocuteur</th>
                                             <th>Adresse</th>
                                             
-                                            @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))
+                                            <!-- if(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) -->
                                             <th>Actualisation</th>
                                             <th>Action</th>
-                                            @endif
+                                            <!-- endif -->
                                         </tr>
                                         </tfoot>
                                     </table>
@@ -141,18 +141,7 @@
                 "buttons": ["pdf", "print"],
                 "order": [[0, 'asc']],
                 "pageLength": 15,
-                "columnDefs": [
-
-
-                    {
-                        "targets": 7,
-                        "orderable": false
-                    },
-                    {
-                        "targets": 8,
-                        "orderable": false
-                    }
-                ],
+                
                 language:{
                     "emptyTable": "Aucune donnée disponible dans le tableau",
                     "lengthMenu": "Afficher _MENU_ éléments",

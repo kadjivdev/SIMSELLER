@@ -172,6 +172,7 @@
                                         </td>
                                         @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists() == true || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() == true)
                                         <td class="text-center p-2">
+                                            <a class="btn btn-success btn-sm btn-xs" title="Livraison de produit" href="{{ route('livraisons.create', ['programmation'=>$programmation->id]) }}"><i class="fa-solid fa-truck-arrow-right"></i></a>
 
                                             @if($programmation->transfert || $programmation->cloture == True)
                                             @if(Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists() || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists())
