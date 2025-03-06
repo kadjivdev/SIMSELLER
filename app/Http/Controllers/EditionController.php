@@ -20,6 +20,11 @@ use Illuminate\Support\Facades\DB;
 
 class EditionController extends Controller
 {
+    function __construct()
+    {
+        ini_set("max_execution_time", 3600);
+    }
+
     public function pointStock()
     {
         $produits = Produit::all();
@@ -303,7 +308,7 @@ class EditionController extends Controller
             $_montant = $montant + $item->montant;
             $_regle = $regle + $item->reglements()->sum('montant');
         }
-        
+
         #####____
         return redirect()->route('edition.solde')->withInput()->with('resultat', ['type' => 1, 'ventes' => $ventes, 'client' => $client, '_client' => $_client, 'zone' => $zone, 'credit' => $credit, 'debit' => $debit, 'reglements' => $reglements, "_sommeVentes" => $_sommeVentes, "_montant" => $_montant, "_regle" => $_regle, "ventesDleted" => $ventesDleted]);
     }
@@ -320,7 +325,7 @@ class EditionController extends Controller
         $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
 
         $sommeVentes = Vente::all()->sum('montant');
-        
+
         return view('editions.etatCompte', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'sommeVentes'));
     }
 
