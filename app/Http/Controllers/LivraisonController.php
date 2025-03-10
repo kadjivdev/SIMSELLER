@@ -135,7 +135,7 @@ class LivraisonController extends Controller
         }
 
         $programmations = $programmations->filter(function (Programmation $programmation) {
-            $stockExiste = $programmation->qteprogrammer > $programmation->vendus->sum('qteVendu');
+            $stockExiste = $programmation->qteprogrammer > $programmation->vendus()->sum('qteVendu');
             return $stockExiste;
         });
 

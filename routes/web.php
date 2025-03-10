@@ -322,7 +322,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
             Route::get('/index', 'index')->name('boncommandes.index');
 
-            Route::get('/create/{boncommandes?}', '_create')->name('boncommandes.create');
+            Route::get('/create/{boncommandes?}', 'create')->name('boncommandes.create');
 
             Route::post('/store/{boncommandes?}', 'store')->where(['boncommande' => '[0-9]+'])->name('boncommandes.store');
 

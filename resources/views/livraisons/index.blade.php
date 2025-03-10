@@ -136,7 +136,9 @@
                                         <td class="text-right">
                                             @foreach($programmation->vendus as $vendu)
                                             <strong>{{$vendu->qteVendu}}</strong> ;
-                                            @endforeach
+                                            @endforeach 
+
+                                            <hr>
                                             {{ number_format($programmation->vendus->sum('qteVendu'),2,","," ") }}
                                         </td>
 
