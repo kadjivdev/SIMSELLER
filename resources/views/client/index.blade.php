@@ -139,7 +139,7 @@
                                     @php($credit=$client->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant"))
                                     @php($debit=$client->reglements->whereNotNull("vente_id")->sum("montant"))
                                     <tr>
-                                        <td>{{ $loop->index +1 }}</td>
+                                        <td>{{ $loop->index +1 }} ({{$client->id}})</td>
                                         <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }}</td>
                                         <td>
                                             @if($client->Is_Bef())
