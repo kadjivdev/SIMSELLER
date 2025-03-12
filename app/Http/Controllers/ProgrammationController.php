@@ -110,7 +110,6 @@ class ProgrammationController extends Controller
                 $detailboncommandes = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->orderByDesc('id')->get();
             }
         }
-        $programmation = Programmation::findOrFail(3843);
         $req = $request->statuts;
         return view('programmations.index', compact('detailboncommandes', 'req'));
     }
@@ -383,6 +382,11 @@ class ProgrammationController extends Controller
 
     public function postEditionProgramme(Request $request)
     {
+        // dd($request->debut, $request->fin);
+        // $bon = BonCommande::where("code","BCI-0531")->first();
+        // $pro = $bon->detailboncommandes[0]->programmations->whereBetween("dateprogrammer",[$request->debut,$request->fin]);
+        // dd($pro->pluck("code"));
+
         $programmes = DB::select("
             SELECT
                 dateprogrammer,
@@ -405,7 +409,7 @@ class ProgrammationController extends Controller
             AND dateprogrammer BETWEEN  ? AND ? 
             AND programmations.statut <> 'Annuler'
             AND programmations.imprimer IS NULL
-        ", [$request->fournisseur, $request->debut, $request->fin]);
+            ", [$request->fournisseur, $request->debut, $request->fin]);
         $fournisseur = Fournisseur::find($request->fournisseur);
         session(['fournisseur' => $fournisseur]);
         $lien = route('programmations.postImpression', ['debut' => $request->debut, 'fin' => $request->fin, 'fournisseur' => $fournisseur->id]);
@@ -470,7 +474,7 @@ class ProgrammationController extends Controller
     {
         $entreprise = Entreprise::find(1);
         $qrcode = base64_encode(QrCode::format('svg')->size(70)->errorCorrection('H')->generate($debut . ',' . $fournisseur->raisonSocial . ',' . md5($fournisseur->id)));
-        $formater = new \NumberFormatter("fr", \NumberFormatter::SPELLOUT);
+        // $formater = new \NumberFormatter("fr", \NumberFormatter::SPELLOUT);
         $dateFormater = strftime('%A %d %B %Y', date_create(date('Y-m-d'))->format('U'));
         $date = date('Y-m-d');
 
@@ -499,7 +503,7 @@ class ProgrammationController extends Controller
             AND DATE(programmations.updated_at) = ?
         ", [$fournisseur->id, $debut, $fin, $date]);
 
-        $pdf = PDF::loadView('programmations.pdfEdition', compact('debut', 'fin', 'fournisseur', 'programmes', 'entreprise', 'dateFormater', 'formater', 'qrcode'));
+        $pdf = PDF::loadView('programmations.pdfEdition', compact('debut', 'fin', 'fournisseur', 'programmes', 'entreprise', 'dateFormater', 'qrcode'));
         return $pdf->stream('programme.pdf');
     }
 }

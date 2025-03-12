@@ -41,117 +41,17 @@ class BonCommandeController extends Controller
 
     public function index(Request $request)
     {
-        if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() == true) {
-            if ($request->statuts) {
-                if ($request->statuts == 1) {
-
-                    if ($request->debut && $request->fin) {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                        $req = $request->all();
-
-                        $TotamlAmont = 0;
-                        $TotQte = 0;
-
-                        foreach ($boncommandes as $bc) {
-                            $TotQte += $bc->detailboncommandes->first()->qteCommander;
-                            $TotamlAmont += $bc->montant;
-                        }
-
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    } else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->get();
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    }
-                } elseif ($request->statuts == 2) {
-                    if ($request->debut && $request->fin) {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->whereBetween('dateBon', [$request->debut, $request->fin])->where('statut', 'Livrer')->get();
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    } else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Livrer')->get();
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    }
-                } elseif ($request->statuts == 3) {
-                    if ($request->debut && $request->fin) {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    } else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Valider')->get();
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    }
-                } elseif ($request->statuts == 4) {
-                    if ($request->debut && $request->fin) {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    } else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Programmer')->get();
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    }
-                } elseif ($request->statuts == 5) {
-                    if ($request->debut && $request->fin) {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                        $req = $request->all();
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    } else {
-                        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->get();
-                        $req = $request->statuts;
-                        return view('boncommandes.index', compact('boncommandes', 'req'));
-                    }
-                }
-            } else {
-                if ($request->debut && $request->fin) {
-                    $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                    $req = $request->all();
-                    return view('boncommandes.index', compact('boncommandes', 'req'));
-                } else {
-
-                    $boncommandes = BonCommande::orderBy('code', 'desc')->get();
-                    $req = $request->statuts;
-
-                    return view('boncommandes.index', compact('boncommandes', 'req'));
-                }
-            }
-        }
-
-        if (Auth::user()->roles()->where('libelle', 'VALIDATEUR')->exists() == true) {
-            if ($request->debut && $request->fin) {
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')
-                    ->whereBetween('dateBon', [$request->debut, $request->fin])
-                    ->get();
-                $req = $request->all();
-                return view('boncommandes.index', compact('boncommandes', 'req'));
-            } else {
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', 'Préparation')->get();
-                return view('boncommandes.index', compact('boncommandes'));
-            }
-        }
-
-        if (Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists() == true) {
-            if ($request->debut && $request->fin) {
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->whereBetween('dateBon', [$request->debut, $request->fin])->get();
-                $req = $request->all();
-                return view('boncommandes.index', compact('boncommandes', 'req'));
-            } else {
-                $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '<>', ['Valider'])->where('statut', '<>', ['Livrer'])->where('statut', '<>', ['Programmer'])->get();
-                $req = $request->all();
-                return view('boncommandes.index', compact('boncommandes'));
-            }
-        }
+        // bons en préparation
+        $pre_boncommandes = BonCommande::orderBy('code', 'desc')->where("statut", 'Préparation')->get();
 
         if ($request->debut && $request->fin) {
-            $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->get();
+            $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->where('statut', '!=', 'Préparation')->get();
             $req = $request->all();
-            return view('boncommandes.index', compact('boncommandes', 'req'));
+            return view('boncommandes.index', compact('boncommandes', 'req', 'pre_boncommandes'));
         }
 
-        $boncommandes = BonCommande::orderBy('code', 'desc')->get();
-        return view('boncommandes.index', compact('boncommandes'));
+        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '!=', 'Préparation')->get();
+        return view('boncommandes.index', compact('boncommandes', 'pre_boncommandes'));
     }
 
     public function create(Request $request, BonCommande $boncommandes = NULL)
@@ -184,7 +84,6 @@ class BonCommandeController extends Controller
                     return redirect()->route('boncommandes.create', ['boncommandes' => $boncommandes])->withErrors($validator->errors())->withInput();
                 }
 
-
                 $boncommande = $boncommandes->update([
                     'code' => $request->code,
                     'dateBon' => $request->dateBon,
@@ -193,7 +92,6 @@ class BonCommandeController extends Controller
                     'fournisseur_id' => $request->fournisseur_id,
                     'users' => Auth::user()->name,
                 ]);
-
 
                 if ($boncommande) {
                     BonCommandeTools::ajusterProduitFournisseur($boncommandes);
@@ -217,7 +115,6 @@ class BonCommandeController extends Controller
                 $parametre = Parametre::where('id', env('PARAMETRE'))->first();
                 $code = $format . str_pad($parametre->valeur, 4, "0", STR_PAD_LEFT);
 
-
                 $boncommandes = BonCommande::create([
                     'code' => $code,
                     'dateBon' => $request->dateBon,
@@ -238,7 +135,6 @@ class BonCommandeController extends Controller
                     $parametre = $parametres->update([
                         'valeur' => $valeur,
                     ]);
-
 
                     if ($parametre) {
                         Session()->flash('message', 'Bon de commande ajouté avec succès!');
@@ -405,7 +301,6 @@ class BonCommandeController extends Controller
             ->groupBy('bon_commandes.id')
             ->havingRaw('SUM(recus.montant) < bon_commandes.montant')
             ->select('bon_commandes.*', DB::raw('SUM(recus.montant) AS montant_payer'))->get();
-
     }
 
     public function delete(BonCommande $boncommande)

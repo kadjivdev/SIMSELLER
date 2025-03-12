@@ -193,7 +193,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Code</th>
-                                                    <th>Date</th>
+                                                    <th>Date(m/d/Y)</th>
                                                     <th>Camion</th>
                                                     <th>Chauffeur</th>
                                                     <th>Avaliseur</th>
@@ -216,7 +216,7 @@
                                                     <td>{{ $compteur++ }}</td>
                                                     <td class="text-center">{{ $programmation->code }}</td>
                                                     <td class="text-center">
-                                                        {{ date_format(date_create($programmation->dateprogrammer), 'd/m/Y') }}
+                                                        {{ date_format(date_create($programmation->dateprogrammer), 'm/d/Y') }}
                                                     </td>
                                                     <td>{{ $programmation->camion->immatriculationTracteur }}
                                                         ({{ $programmation->camion->marque->libelle }})
@@ -255,10 +255,14 @@
                                                         @elseif($programmation->statut == 'Livrer')
                                                         <span class="badge badge-primary">{{ $programmation->statut }}</span>
                                                         @endif
+
+                                                        @if($programmation->imprimer)
+                                                        <span class="badge badge-primary">Imprimée</span>
+                                                        @endif
                                                     </td>
                                                     <td class="text-center">
                                                         <textarea name="" rows="1" class="form-control" id="" disabled>{{ $programmation->observation?$programmation->observation:"---" }}</textarea>
-                                                        
+
                                                     </td>
                                                     @if ($programmation->detailboncommande->boncommande->status !='livrer')
                                                     <td class="text-center">
@@ -266,7 +270,7 @@
                                                         <span id="annuler-{{ $programmation->id }}"> <a class="btn btn-primary btn-sm" title="Annuler une programmation" href="{{ route('programmations.show', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id, 'total' => $total]) }}"><i class="fa-regular fa-rectangle-xmark"></i></a>
                                                         </span>
                                                         @endif
-                                                        
+
                                                         @if ($programmation->statut == 'Valider' && !$programmation->bl && !$programmation->bl_gest && !$programmation->dateSortie)
 
                                                         @if (!$programmation->imprimer)
