@@ -100,7 +100,6 @@ class LivraisonController extends Controller
                 }
             }
         } else {
-
             if ($request->debut && $request->fin) {
                 $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer'])->pluck('id');
                 $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
@@ -114,6 +113,7 @@ class LivraisonController extends Controller
                     ->where('statut', 'Valider')->where('imprimer', '1')->orWhere('statut', 'Livrer')->orderByDesc('code')->get();
             }
         }
+
         $req = $request->all();
 
         // ON AFFICHE TOUTES LES LIVRAISONS POUR LES COMPTES *AIME & CHRISTIAN*
@@ -133,6 +133,122 @@ class LivraisonController extends Controller
                     $programmations = $programmations->where('zone_id', $user->zone_id);
             }
         }
+
+        $programmations = $programmations->filter(function (Programmation $programmation) {
+            $stockExiste = $programmation->qteprogrammer > $programmation->vendus()->sum('qteVendu');
+            return $stockExiste;
+        });
+
+        return view('livraisons.index', compact('programmations', 'req'));
+    }
+
+    public function _index(Request $request)
+    {
+        $user = Auth::user();
+        $repre = $user->representant;
+        $zones = $repre->zones;
+
+        //
+        $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer'])->pluck('id');
+        $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
+
+        $programmations = collect();
+        Programmation::whereIn('detail_bon_commande_id', $detailboncommande)->where('imprimer', '1')->orderByDesc('code')->chunk(100, function ($chunk) use (&$programmations) {
+            $programmations = $programmations->merge($chunk);
+        });
+
+
+        if ($request->statuts) {
+            if ($request->statuts == 1) {
+                if ($request->debut && $request->fin) {
+
+                    $programmations = $programmations
+                        ->where('statut', 'Valider')->where('statut', 'Livrer')
+                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                } else {
+                    $programmations = $programmations
+                        ->where('statut', 'Valider')->where('statut', 'Livrer');
+                }
+            } elseif ($request->statuts == 2) {
+                if ($request->debut && $request->fin) {
+                    $programmations = $programmations
+                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->where('statut', 'Livrer')->where('transfert', NULL);
+                } else {
+                    $programmations = $programmations
+                        ->where('statut', 'Livrer')->where('transfert', NULL);
+                }
+            } elseif ($request->statuts == 3) {
+                if ($request->debut && $request->fin) {
+                    $programmations = $programmations
+                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->where('statut', 'Valider');
+                } else {
+                    $programmations = $programmations
+                        ->where('statut', 'Valider');
+                }
+            } elseif ($request->statuts == 4) {
+                if ($request->debut && $request->fin) {
+                    $programmations = $programmations
+                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->where('statut', 'Livrer')->where('statut', 'Livrer')
+                        ->where('transfert', '<>', NULL);
+                } else {
+                    $programmations = $programmations
+                        ->where('statut', 'Livrer')->where('transfert', '<>', NULL);
+                }
+            } elseif ($request->statuts == 5) {
+                if ($request->debut && $request->fin) {
+                    $programmations = $programmations
+                        ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                        ->where('statut', 'Annuler');
+                } else {
+                    $programmations = $programmations
+                        ->where('statut', 'Annuler');
+                }
+            }
+        } else {
+
+            if ($request->debut && $request->fin) {
+                $programmationsVal = $programmations
+                    ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                    ->where('statut', 'Valider');
+                $programmationsLiv = $programmations
+                    ->whereBetween('dateprogrammer', [$request->debut, $request->fin])
+                    ->where('statut', 'Livrer');
+
+                $programmations = $programmationsVal->merge($programmationsLiv);
+            } else {
+                $programmationsVal = $programmations
+                    ->where('statut', 'Valider');
+                $programmationsLiv = $programmations
+                    ->where('statut', 'Livrer');
+
+                $programmations = $programmationsVal->merge($programmationsLiv);
+            }
+        }
+        $req = $request->all();
+
+        dd($programmations);
+
+        // ON AFFICHE TOUTES LES LIVRAISONS POUR LES COMPTES *AIME & CHRISTIAN*
+        if (!IS_AIME_ACCOUNT($user) && !IS_CHRISTIAN_ACCOUNT($user)) {
+            if (Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()) {
+                if ($request->debut && $request->fin)
+                    $programmations = $programmations->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                else
+                    $programmations = $programmations;
+            }
+
+            if (Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()) {
+                // LE VENDEUR NE VERRA DESORMAIS QUE LES LIVRAISONS DE SA ZONE
+                if ($request->debut && $request->fin)
+                    $programmations = $programmations->where('zone_id', $user->zone_id)->whereBetween('dateprogrammer', [$request->debut, $request->fin]);
+                else
+                    $programmations = $programmations->where('zone_id', $user->zone_id);
+            }
+        }
+
 
         $programmations = $programmations->filter(function (Programmation $programmation) {
             $stockExiste = $programmation->qteprogrammer > $programmation->vendus()->sum('qteVendu');

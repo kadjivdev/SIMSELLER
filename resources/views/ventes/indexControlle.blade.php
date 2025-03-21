@@ -187,7 +187,6 @@
                                     </tr>
                                 </tfoot>
                             </table>
-                            {{ $ventes->links('pagination') }}
 
                             <div class="row">
                                 <div class="col-12">

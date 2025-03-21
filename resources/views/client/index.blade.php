@@ -135,12 +135,13 @@
                                 </thead>
                                 <tbody>
                                     @if ($clients->count() > 0)
+
                                     @foreach ($clients as $client)
                                     @php($credit=$client->reglements->where("for_dette", false)->whereNull("vente_id")->sum("montant"))
                                     @php($debit=$client->reglements->whereNotNull("vente_id")->sum("montant"))
                                     <tr>
-                                        <td>{{ $loop->index +1 }} ({{$client->id}})</td>
-                                        <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }}</td>
+                                        <td>{{ $loop->index +1 }}</td>
+                                        <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }} ({{$client->id}})</td>
                                         <td>
                                             @if($client->Is_Bef())
                                             <span class="badge bg-dark">CLIENT_BEF ({{$client->debit_old}})</span>
@@ -203,6 +204,7 @@
                                         </td>
                                     </tr>
                                     @endforeach
+
                                     @endif
                                 </tbody>
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">

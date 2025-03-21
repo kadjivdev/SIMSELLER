@@ -22,14 +22,16 @@ class clientsController extends Controller
 {
     public function index(Request $request)
     {
+        $clients = collect();
+
         if ($request->search) {
-            $clients = Client::where('raisonSociale', 'like', '%' . $request->search . '%')
-                ->with("_Zone")
-                ->get();
+            Client::with("_Zone")->where('raisonSociale', 'like', '%' . $request->search . '%')->chunk(100, function ($chunk) use (&$clients, $request) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
         } else {
-            $clients = Client::orderBy('id', 'desc')
-                ->with("_Zone")
-                ->get();
+            Client::chunk(100, function ($chunk) use (&$clients) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
         }
 
         // UN AGENT NE VERA QUE LES CLIENTS SE TROUVANT DANS LA ZONE DE SON REPRESENTANT

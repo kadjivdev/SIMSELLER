@@ -189,10 +189,22 @@ class EditionController extends Controller
 
     public function pointSolde()
     {
-        $clients = Client::all();
+        //clients
+        $clients = collect();
+        Client::with("_Zone")->chunk(100, function ($chunk) use (&$clients) {
+            $clients = $clients->merge($chunk); //merge the chunk
+        });
+
         $zones = Zone::all();
+
+        //ventes
+        $ventes = collect();
+        Vente::chunk(100, function ($chunk) use (&$ventes) {
+            $ventes = $ventes->merge($chunk);
+        });
+
+        $sommeVentes = $ventes->sum('montant');
         $reglements = Reglement::whereNotNull("vente_id")->sum('montant');
-        $sommeVentes = Vente::all()->sum('montant');
 
         // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
         $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
@@ -315,36 +327,57 @@ class EditionController extends Controller
 
     public function etatCompte()
     {
-        $clients = Client::all();
+        //clients
+        $clients = collect();
+        Client::with("_Zone")->chunk(100, function ($chunk) use (&$clients) {
+            $clients = $clients->merge($chunk); //merge the chunk
+        });
+
         $zones = Zone::all();
-        $reglements = Reglement::whereNotNull("vente_id")->sum('montant');
-        $sommeVentes = Vente::all()->sum('montant');
+
+        //reglements
+        $reglements = collect();
+        Reglement::whereNotNull("vente_id")->chunk(100, function ($chunk) use (&$clients) {
+            $clients = $clients->merge($chunk); //merge the chunk
+        });
+        $reglements = $reglements->sum('montant');
+
+        //ventes
+        $ventes = collect();
+        Vente::chunk(100, function ($chunk) use (&$ventes) {
+            $ventes = $ventes->merge($chunk);
+        });
+        $sommeVentes = $ventes->sum('montant');
 
         // LES REGLEMENTS SUR LE COMPTE DES CLIENTS
         $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
         $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
-
-        $sommeVentes = Vente::all()->sum('montant');
 
         return view('editions.etatCompte', compact('clients', 'zones', 'credit', 'debit', 'reglements', 'sommeVentes'));
     }
 
     public function postetatCompte(Request $request)
     {
+        //clients
+        $clients = collect();
+        Client::with("_Zone")->chunk(100, function ($chunk) use (&$clients) {
+            $clients = $clients->merge($chunk); //merge the chunk
+        });
+
+        $zones = Zone::all();
         ###___
         if (!$request->zone) {
-            $clients = Client::all();
-            $zones = Zone::all();
+            $clients = $clients;
         } else {
             $zone = Zone::find($request->zone);
-            $clients = Client::where('departement_id', $zone->departement_id)->get();
+            $clients = $clients->where('departement_id', $zone->departement_id);
         }
 
         ###____
         $credit = Reglement::where("for_dette", false)->whereNull("vente_id")->whereNotNull("client_id")->sum("montant");
         $debit = Reglement::whereNotNull("vente_id")->whereNotNull("client_id")->sum("montant");
 
-        Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => Zone::all()]);
+        Session('resultat', ['type' => 1, 'clients' => $clients, 'zone' => $zones]);
 
         // 
 

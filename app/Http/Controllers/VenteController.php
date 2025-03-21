@@ -54,26 +54,22 @@ class VenteController extends Controller
             $commandeclients = $commandeclients->pluck('id');
         }
 
+        $ventes = collect();
+        Vente::whereIn('commande_client_id', $commandeclients)->orderByDesc('code')->chunk(100, function ($chunk) use (&$ventes, $request) {
+            $ventes = $ventes->merge($chunk); //merge the chunk
+        });
+
         if (in_array(1, $roles) || in_array(2, $roles) || in_array(5, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles)) {
             $user = Auth::user();
             if ($user->id == 11) {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)
-                    ->where('statut', '<>', 'En attente de modification')->where("users", $user->id)
-                    ->orderByDesc('code')
-                    ->lazy(200);
+                $ventes = $ventes->where('statut', '<>', 'En attente de modification')->where("users", $user->id);
             } else {
-                $ventes = Vente::whereIn('commande_client_id', $commandeclients)
-                    ->where('statut', '<>', 'En attente de modification')
-                    ->orderByDesc('code')
-                    ->lazy(200);
+                $ventes = $ventes->where('statut', '<>', 'En attente de modification');
             }
         } elseif (in_array(3, $roles)) {
-            $ventes = Vente::whereIn('commande_client_id', $commandeclients)
-                ->where('statut', '<>', 'Contrôller')
+            $ventes = $ventes->where('statut', '<>', 'Contrôller')
                 ->where('statut', '<>', 'En attente de modification')
-                ->where('users', Auth::user()->id)
-                ->orderByDesc('date')
-                ->lazy(200);
+                ->where('users', Auth::user()->id);
         }
 
         return view('ventes.index', compact('ventes'));
@@ -81,14 +77,19 @@ class VenteController extends Controller
 
     public function indexCreate(Request $request)
     {
+        $ventes = collect();
         if ($request->method() == 'GET') {
             $date = date('Y-m-d');
-            $ventes = Vente::whereDate('created_at', $date)->orderBy('created_at', 'DESC')->get();
+            Vente::whereDate('created_at', $date)->orderBy('created_at', 'DESC')->chunk(100, function ($chunk) use (&$ventes) {
+                $ventes = $ventes->merge($chunk); //merge the chunk
+            });
         } else {
             ##___POST METHOD
             $debut = $request->debut;
             $fin = $request->fin;
-            $ventes = Vente::whereBetween("created_at", [$debut, $fin])->orderBy('created_at', 'DESC')->get();
+            Vente::whereBetween("created_at", [$debut, $fin])->orderBy('created_at', 'DESC')->chunk(100, function ($chunk) use (&$ventes) {
+                $ventes = $ventes->merge($chunk); //merge the chunk
+            });
         }
         // 
         return view('ventes.indexCreate', compact('ventes'));
@@ -98,15 +99,23 @@ class VenteController extends Controller
     {
         $roles = Auth::user()->roles()->pluck('id')->toArray();
 
+        $ventes = collect();
+
         if ($request->filtre) {
             ####___FILTRAGE
-            $ventes = Vente::whereBetween('ventes.created_at', [$request->debut, $request->fin])->where('statut', '<>', 'En attente de modification')->orderBy('date', 'DESC')->paginate(1000);
+            Vente::whereBetween('ventes.created_at', [$request->debut, $request->fin])->where('statut', '<>', 'En attente de modification')->orderBy('date', 'DESC')->chunk(100, function ($chunk) use (&$ventes, $request) {
+                $ventes = $ventes->merge($chunk); //merge the chunk
+            });
         } else {
             # code...
             if (in_array(1, $roles) || in_array(2, $roles) || in_array(8, $roles) || in_array(9, $roles) || in_array(10, $roles) || in_array(11, $roles))
-                $ventes = Vente::where('statut', '=', 'Contrôller')->orderBy('date', 'ASC')->paginate(1000);
+                Vente::where('statut', '=', 'Contrôller')->orderBy('date', 'ASC')->chunk(100, function ($chunk) use (&$ventes) {
+                    $ventes = $ventes->merge($chunk); //merge the chunk
+                });
             elseif (in_array(3, $roles))
-                $ventes = Vente::where('statut', '=', 'Contrôller')->where('users', Auth::user()->id)->orderByDesc('date')->paginate(1000);
+                Vente::where('statut', '=', 'Contrôller')->where('users', Auth::user()->id)->orderByDesc('date')->chunk(100, function ($chunk) use (&$ventes) {
+                    $ventes = $ventes->merge($chunk); //merge the chunk
+                });
         }
 
         return view('ventes.indexControlle', compact('ventes'));
@@ -139,11 +148,18 @@ class VenteController extends Controller
 
         $zones = $repre->zones;
 
+        //
+        $clients = collect();
+
         if ($repre->nom == 'DIRECTION') {
             $zones = Zone::all();
-            $clients = Client::all();
+            Client::chunk(100, function ($chunk) use (&$clients) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
         } else {
-            $clients = Client::where("zone_id", [$user->zone_id])->get();
+            Client::where("zone_id", [$user->zone_id])->chunk(100, function ($chunk) use (&$clients) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
         }
 
         if ($request->statuts) {
@@ -371,16 +387,20 @@ class VenteController extends Controller
         $user = User::find(Auth::user()->id);
         $repre = $user->representant;
         $zones = $repre->zones;
+
+        $clients = collect();
+        Client::chunk(100, function ($chunk) use (&$clients) {
+            $clients = $clients->merge($chunk); //merge the chunk
+        });
+
         if ($repre->nom == 'DIRECTION') {
             $zones = Zone::all();
         }
         if ($vente->commandeclient->type_commande_id == 1) {
-            $clients = Client::all();
             $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
             $commandeclients = CommandeClient::whereIn('statut', ['Non livrée', 'Livraison partielle'])->get();
             $req = $vente->commandeclient->type_commande_id;
         } else {
-            $clients = Client::all();
             $typecommandeclient = TypeCommande::where('libelle', 'COMPTANT')->first();
             $commandeclients = CommandeClient::where('statut', 'Non livrée')->orWhere('statut', 'Livraison partielle')->where('type_commande_id', 2)->get();
             $req = $vente->commandeclient->type_commande_id;
@@ -757,7 +777,10 @@ class VenteController extends Controller
         }
 
         ##____
-        $AEnvoyers = Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->get();
+        $AEnvoyers = collect();
+        Vente::orderBy('id', 'desc')->whereIn('statut', ['Vendue', 'Contrôller', 'Soldé'])->where('date_envoie_commercial', NULL)->where("users", "!=", $current->id)->chunk(100, function ($chunk) use (&$AEnvoyers) {
+            $AEnvoyers = $AEnvoyers->merge($chunk); //merge the chunk
+        });
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
@@ -770,8 +793,13 @@ class VenteController extends Controller
 
     public function postVenteAComptabiliser(Request $request)
     {
-        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
-            ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+        $AComptabilisers = collect();
+        Vente::where('date_envoie_commercial', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            ->chunk(100, function ($chunk) use (&$AComptabilisers) {
+                $AComptabilisers = $AComptabilisers->merge($chunk); //merge the chunk
+            });
+
+        $AComptabilisers =  $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -786,8 +814,7 @@ class VenteController extends Controller
             ->orderBy('date', 'DESC')
             ->get();
 
-        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
-            ->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+        $AComptabilisersAdjeOla = $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -836,7 +863,6 @@ class VenteController extends Controller
             ->orderBy('date', 'DESC')
             ->get();
 
-
         if ($request->debut && $request->fin) {
             session(["search" => true]);
             session(["debut" => $request->debut]);
@@ -850,8 +876,14 @@ class VenteController extends Controller
 
     public function postVenteATraiter(Request $request)
     {
-        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
+        $AComptabilisers = collect();
+        Vente::where('date_envoie_commercial', '<>', NULL)
             ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            ->chunk(100, function ($chunk) use (&$AComptabilisers) {
+                $AComptabilisers = $AComptabilisers->merge($chunk); //merge the chunk
+            });
+
+        $AComptabilisers =  $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -866,8 +898,8 @@ class VenteController extends Controller
             ->orderBy('date', 'DESC')
             ->get();
 
-        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
-            ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+
+        $AComptabilisersAdjeOla = $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -896,8 +928,14 @@ class VenteController extends Controller
 
     public function postVenteTotaux(Request $request)
     {
-        $AComptabilisers =  Vente::where('date_envoie_commercial', '<>', NULL)
-            ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+        $AComptabilisers = collect();
+        Vente::where('date_envoie_commercial', '<>', NULL)
+            ->where('date_traitement', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+            ->chunk(100, function ($chunk) use (&$AComptabilisers) {
+                $AComptabilisers = $AComptabilisers->merge($chunk); //merge the chunk
+            });
+
+        $AComptabilisers = $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)
@@ -912,8 +950,7 @@ class VenteController extends Controller
             ->orderBy('date', 'DESC')
             ->get();
 
-        $AComptabilisersAdjeOla = Vente::where('date_envoie_commercial', '<>', NULL)
-            ->where('date_traitement', '<>', NULL)->whereIn('ventes.statut', ['Vendue', 'Contrôller', 'Soldé'])
+        $AComptabilisersAdjeOla = $AComptabilisers
 
             ###__on recherche desormais via la date de validation
             ->whereDate('ventes.validated_date', '>=', $request->debut)

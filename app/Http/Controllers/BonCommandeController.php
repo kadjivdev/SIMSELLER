@@ -42,15 +42,16 @@ class BonCommandeController extends Controller
     public function index(Request $request)
     {
         // bons en préparation
-        $pre_boncommandes = BonCommande::orderBy('code', 'desc')->where("statut", 'Préparation')->get();
+        $pre_boncommandes = BonCommande::orderBy('code', 'desc')->whereIn("statut", ['Préparation', 'En attente de validation','Envoyé'])->get();
+        $query = BonCommande::orderBy('code', 'desc')->whereNotIn("statut", ['Préparation', 'En attente de validation','Envoyé']);
 
         if ($request->debut && $request->fin) {
-            $boncommandes = BonCommande::orderBy('code', 'desc')->whereBetween('dateBon', [$request->debut, $request->fin])->where('statut', '!=', 'Préparation')->get();
+            $boncommandes = $query->whereBetween('dateBon', [$request->debut, $request->fin])->get();
             $req = $request->all();
             return view('boncommandes.index', compact('boncommandes', 'req', 'pre_boncommandes'));
         }
 
-        $boncommandes = BonCommande::orderBy('code', 'desc')->where('statut', '!=', 'Préparation')->get();
+        $boncommandes = $query->get();
         return view('boncommandes.index', compact('boncommandes', 'pre_boncommandes'));
     }
 

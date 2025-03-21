@@ -250,6 +250,7 @@
                                             <tr>
                                                 <th>Code</th>
                                                 <th>Bl</th>
+                                                <th>Passé le:</th>
                                                 <th>date</th>
                                                 <th>Chauf../Destin../Acteur</th>
                                                 <th>Type</th>
@@ -280,7 +281,9 @@
                                                     ---
                                                     @endif
                                                 </td>
-                                                <td>{{ date_format(date_create($item->date), 'd/m/Y') }}
+                                                <td class="text-center text-red"><span class="badge bg-dark text-white"> <i class="bi bi-calendar2-check-fill"></i> {{ \Carbon\Carbon::parse($item->created_at)->locale('fr')->isoFormat('D MMMM YYYY') }}</span> </td>
+
+                                                <td>{{\Carbon\Carbon::parse(date_create($item->date))->locale('fr')->isoFormat('D MMMM YYYY')}}
                                                 </td>
                                                 <td>
                                                     @if(count($item->vendus)>0)
@@ -496,9 +499,9 @@
             "lengthChange": false,
             "autoWidth": false,
             "buttons": ["pdf", "excel", "print"],
-            "order": [
-                [1, 'asc']
-            ],
+            // "order": [
+            //     [1, 'asc']
+            // ],
             "pageLength": 15,
             "columnDefs": [{
                     "targets": 2,
