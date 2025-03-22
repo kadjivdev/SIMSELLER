@@ -100,12 +100,14 @@
                                 <thead class="text-white text-center bg-gradient-gray-dark">
 
                                     <tr>
-
-                                        <th>#</th>
-
                                         <th>Libelle</th>
 
                                         <th>Représentant</th>
+
+                                        <!--  -->
+                                        <th>Stock</th>
+                                        <th>Détail du stock</th>
+                                        <!--  -->
 
                                         <th>Département</th>
 
@@ -121,17 +123,38 @@
 
                                     @if ($zones->count() > 0)
 
-                                    <?php $compteur = 1; ?>
-
                                     @foreach($zones as $zone)
 
+                                    <?php
+                                    $programmations = $bon_programmations->where("zone_id", $zone->id);
+                                    $qteProg = $programmations->sum("qteprogrammer");
+                                    $proVendus = $programmations->map(function ($programmation) {
+                                        return $programmation->vendus;
+                                    });
+                                    $qteVendus = $proVendus->sum("qteVendu");
+
+                                    //Calcul du stock
+                                    $stock = $qteProg - $qteVendus; ?>
+
                                     <tr>
-
-                                        <td>{{ $compteur++ }}</td>
-
                                         <td>{{ $zone->libelle }}</td>
 
                                         <td>@if($zone->representant){{ $zone->representant->civilite }} {{ $zone->representant->nom }} {{ $zone->representant->prenom }}@endif</td>
+
+                                        <td class="text-center"><span class="badge bg-danger"> {{number_format($stock,2,'.',' ')}}</span> </td>
+                                        <td class="text-left" style="width:auto;">
+                                            <div style="width:auto;height:100px!important;overflow-y: scroll">
+                                                @foreach($programmations as $programmation)
+                                                <!-- if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu")) -->
+                                                @if($programmation->zone)
+                                                <span class="badge d-block bg-dark">{{$programmation->zone->_user?->name}} (blguest/bl : {{$programmation->bl_gest}}/{{$programmation->bl}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                <span class="badge d-block bg-dark">Qte Prog: {{$programmation->qteprogrammer}} ; QteVendue : {{$programmation->vendus->sum("qteVendu")}}</span>
+                                                <hr>
+                                                @endif
+                                                <!-- endif -->
+                                                @endforeach
+                                            </div>
+                                        </td>
 
                                         <td>@if($zone->departement){{ $zone->departement->libelle }}@endif</td>
 
@@ -142,43 +165,30 @@
                                         </td>
 
                                         <td class="text-center">
-
                                             <div class="dropdown">
-
                                                 <button type="button" class="dropdown-toggle btn btn-success btn-sm" href="#" role="button" data-toggle="dropdown">
-
                                                     Actions<i class="dw dw-more"></i>
-
                                                 </button>
-
                                                 <div class="dropdown-menu dropdown-menu-md-right dropdown-menu-icon-list drop text-sm">
-
                                                     <a class="dropdown-item" href="#"><i class="fa-solid fa-list-check"></i> Programmation</a>
                                                     <a class="dropdown-item" href="#"><i class="fa-solid fa-list-check"></i> Prix </a>
-
                                                 </div>
-
                                             </div>
-
                                         </td>
                                         @endif
                                     </tr>
-
                                     @endforeach
-
                                     @endif
-
                                 </tbody>
 
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">
-
                                     <tr>
-
-                                        <th>#</th>
-
                                         <th>Libelle</th>
-
                                         <th>Représentant</th>
+                                        <!--  -->
+                                        <th>Stock</th>
+                                        <th>Détail du stock</th>
+                                        <!--  -->
 
                                         <th>Département</th>
                                         @if(!(Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists()))

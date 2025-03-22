@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Zone extends Model
 {
@@ -50,5 +51,9 @@ class Zone extends Model
     public function user($zoneId)
     {
         return User::where("zone_id", $zoneId)->first();
+    }
+
+    function _user() : HasOne {
+        return $this->hasOne(User::class,"zone_id");
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonCommande;
 use App\Models\Zone;
 use App\Models\Departement;
+use App\Models\DetailBonCommande;
 use App\Models\Programmation;
 use App\Models\Representant;
 use Illuminate\Http\Request;
@@ -15,7 +17,12 @@ class ZoneController extends Controller
     public function index()
     {
         $zones = Zone::orderBy('id','desc')->get();
-        return view('zones.index', compact('zones'));    
+
+        $bcs = BonCommande::orderBy('code', 'desc')->whereNotIn("statut", ['Préparation', 'En attente de validation', 'Envoyé'])->get();
+        $bon_details = DetailBonCommande::whereIn("bon_commande_id", $bcs->pluck("id"))->get();
+        $bon_programmations = Programmation::whereIn("detail_bon_commande_id", $bon_details->pluck("id"))->get();
+
+        return view('zones.index', compact('zones','bon_programmations'));    
     }
     
     public function create()

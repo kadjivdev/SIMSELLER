@@ -103,15 +103,14 @@
                             <table id="example1" class="table table-bordered table-striped table-sm" style="font-size: 12px">
                                 <thead class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
-                                        <th>Code</th>
-                                        <th>Reference</th>
+                                        <th>Code/Reference</th>
                                         <th>Date</th>
                                         <th>Fournisseur</th>
-                                        <th>Quantité</th>
+                                        <th>Qte com</th>
                                         <th>Qte programmée</th>
                                         <th>Qte vendus</th>
                                         <th>Stock</th>
-                                        <th>Avaliseurs</th>
+                                        <th>Agent</th>
                                         <th>Prix Unitaire</th>
                                         <th>Montant</th>
                                         <th>Type</th>
@@ -144,8 +143,13 @@
                                         return $programmation->vendus->sum("qteVendu");
                                     }) : 0;
                                     ?>
+
                                     <tr class="bg-info">
-                                        <td>1 {{ $boncommande->code }}</td>
+                                        <td>1 {{ $boncommande->code }} / @foreach($boncommande->recus as $recu)
+                                            <span class="badge bg-dark">REF_{{$recu->reference}} </span>
+                                            @endforeach
+                                        </td>
+
                                         <td class="text-center">
                                             @foreach($boncommande->recus as $recu)
                                             <span class="badge bg-dark"> {{$recu->reference}} </span>
@@ -157,13 +161,16 @@
                                         <td class="pl-2 "><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
                                         <td class="pl-2 "><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
                                         <td class="pl-2 "><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
-                                        <td class="pl-2 " style="width:auto;">
+                                        <td class="" style="width:auto;">
                                             <div style="width:auto;height:100px!important;overflow-y: scroll">
                                                 @if(isset($boncommande->detailboncommandes[0]))
                                                 @foreach($boncommande->detailboncommandes[0]->programmations as $programmation)
                                                 @if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu"))
-                                                <span class="badge bg-dark"> {{$programmation->avaliseur->nom}} {{$programmation->avaliseur->prenom}} (BL : {{$programmation->bl_gest}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                @if($programmation->zone)
+                                                <span class="badge d-block bg-dark">{{$programmation->zone->_user?->name}} (blguest/bl : {{$programmation->bl_gest}}/{{$programmation->bl}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                <span class="badge d-block bg-dark">Qte Prog: {{$programmation->qteprogrammer}} ; QteVendue : {{$programmation->vendus->sum("qteVendu")}}</span>
                                                 <hr>
+                                                @endif
                                                 @endif
                                                 @endforeach
                                                 @endif
@@ -253,26 +260,28 @@
                                         return $programmation->vendus->sum("qteVendu");
                                     }) : 0;
                                     ?>
+
                                     <tr class="">
-                                        <td>{{ $boncommande->code }}</td>
-                                        <td class="text-center">
-                                            @foreach($boncommande->recus as $recu)
-                                            <span class="badge bg-dark"> {{$recu->reference}} </span>
+                                        <td>{{ $boncommande->code }} / @foreach($boncommande->recus as $recu)
+                                            <span class="badge bg-dark">REF_{{$recu->reference}} </span>
                                             @endforeach
                                         </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($boncommande->dateBon)) }}</td>
-                                        <td class="pl-2">{{ $boncommande->fournisseur->sigle }}</td>
-                                        <td class="pl-2 qte">{{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}}</td>
-                                        <td class="pl-2 "><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
-                                        <td class="pl-2 "><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
-                                        <td class="pl-2 "><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
-                                        <td class="pl-2 " style="width:auto;">
+                                        <td class=""><span class="badge bg-light"> {{ $boncommande->fournisseur->sigle }}</span></td>
+                                        <td class="qte"><span class="badge bg-warning"> {{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}} </span></td>
+                                        <td class=""><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
+                                        <td class=""><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
+                                        <td class=""><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
+                                        <td class="" style="width:auto;">
                                             <div style="width:auto;height:100px!important;overflow-y: scroll">
                                                 @if(isset($boncommande->detailboncommandes[0]))
                                                 @foreach($boncommande->detailboncommandes[0]->programmations as $programmation)
                                                 @if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu"))
-                                                <span class="badge bg-dark"> {{$programmation->avaliseur->nom}} {{$programmation->avaliseur->prenom}} (BL : {{$programmation->bl_gest}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                @if($programmation->zone)
+                                                <span class="badge d-block bg-dark">{{$programmation->zone->_user?->name}} (blguest/bl : {{$programmation->bl_gest}}/{{$programmation->bl}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                <span class="badge d-block bg-dark">Qte Prog: {{$programmation->qteprogrammer}} ; QteVendue : {{$programmation->vendus->sum("qteVendu")}}</span>
                                                 <hr>
+                                                @endif
                                                 @endif
                                                 @endforeach
                                                 @endif
@@ -351,15 +360,14 @@
                                 </tbody>
                                 <tfoot class="text-white text-center bg-gradient-gray-dark">
                                     <tr>
-                                        <th>Code</th>
-                                        <th>Reference</th>
+                                        <th>Code/Reference</th>
                                         <th>Date</th>
                                         <th>Fournisseur</th>
-                                        <th>Quantité</th>
+                                        <th>Qte com</th>
                                         <th>Qte programmée</th>
                                         <th>Qte vendus</th>
-                                        <th>Avaliseurs</th>
-                                        <th>STock</th>
+                                        <th>Stock</th>
+                                        <th>Agent</th>
                                         <th>Prix Unitaire</th>
                                         <th>Montant</th>
                                         <th>Type</th>
@@ -399,15 +407,11 @@
         </div>
         <!-- /.container-fluid -->
     </section>
-
-    <!-- /.content -->
-
 </div>
 
 @endsection
 
 @section('script')
-
 <script>
     $(function() {
         $("#example1").DataTable({
@@ -635,18 +639,21 @@
     $("body").on('change', function() {
         var table = $('#example1').DataTable();
 
-        const newQte = new DataTable('#example1').column(4, {
+        const newQte = new DataTable('#example1').column(3, {
             page: 'all',
             search: 'applied'
         }).data().sum()
 
-        const montant = new DataTable('#example1').column(10, {
+        const montant = new DataTable('#example1').column(9, {
             page: 'all',
             search: 'applied'
         }).data().sum()
 
-        $("#qte").html(newQte + " Tonnes ")
-        $("#montant").html(montant + " FCFA ")
+        const _newQte = newQte>0?newQte:-newQte
+        const _montant = montant>0?montant:-montant
+
+        $("#qte").html(new Intl.NumberFormat().format(_newQte) + " Tonnes ")
+        $("#montant").html(new Intl.NumberFormat().format(_montant) + " FCFA ")
     })
 </script>
 
@@ -655,5 +662,4 @@
         $('#statutsForm').submit();
     }
 </script>
-
 @endsection
