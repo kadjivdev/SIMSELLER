@@ -128,30 +128,44 @@
                                     <?php
                                     $programmations = $bon_programmations->where("zone_id", $zone->id);
                                     $qteProg = $programmations->sum("qteprogrammer");
-                                    $proVendus = $programmations->map(function ($programmation) {
-                                        return $programmation->vendus;
-                                    });
-                                    $qteVendus = $proVendus->sum("qteVendu");
+                                  
+                                    $proVendus = [];
+                                    foreach ($programmations as $prog) {
+                                        array_push($proVendus, $prog->vendus->sum("qteVendu"));
+                                    }
+
+                                    $qteVendus = array_sum($proVendus);
 
                                     //Calcul du stock
-                                    $stock = $qteProg - $qteVendus; ?>
+                                    $stock = $qteProg - $qteVendus;
+
+                                    //
+                                    $_qteProg = [];
+                                    $_qteVendue = [];
+                                    $_stock = [];
+                                    ?>
 
                                     <tr>
                                         <td>{{ $zone->libelle }}</td>
 
                                         <td>@if($zone->representant){{ $zone->representant->civilite }} {{ $zone->representant->nom }} {{ $zone->representant->prenom }}@endif</td>
 
-                                        <td class="text-center"><span class="badge bg-danger"> {{number_format($stock,2,'.',' ')}}</span> </td>
+                                        <td class="text-center"><span class="badge bg-danger">{{number_format($stock,2,'.',' ')}} </span> </td>
                                         <td class="text-left" style="width:auto;">
                                             <div style="width:auto;height:100px!important;overflow-y: scroll">
                                                 @foreach($programmations as $programmation)
-                                                <!-- if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu")) -->
+                                                <?php
+                                                $reste = $programmation->qteprogrammer - $programmation->vendus->sum("qteVendu");
+                                                array_push($_stock, $reste);
+                                                array_push($_qteProg, $programmation->qteprogrammer);
+                                                array_push($_qteVendue, $programmation->vendus->sum("qteVendu"));; ?>
+                                                @if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu"))
                                                 @if($programmation->zone)
-                                                <span class="badge d-block bg-dark">{{$programmation->zone->_user?->name}} (blguest/bl : {{$programmation->bl_gest}}/{{$programmation->bl}} ; Reste : {{$programmation->qteprogrammer-$programmation->vendus->sum("qteVendu")}})</span>
+                                                <span class="badge d-block bg-dark">{{$programmation->zone->_user?->name}} (blguest/bl : {{$programmation->bl_gest}}/{{$programmation->bl}} ; Reste : {{$reste}})</span>
                                                 <span class="badge d-block bg-dark">Qte Prog: {{$programmation->qteprogrammer}} ; QteVendue : {{$programmation->vendus->sum("qteVendu")}}</span>
                                                 <hr>
                                                 @endif
-                                                <!-- endif -->
+                                                @endif
                                                 @endforeach
                                             </div>
                                         </td>
