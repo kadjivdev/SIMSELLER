@@ -510,6 +510,7 @@
                 }, 3000);
             }
         }
+
         function loadProgrammation(id){
                 $('#zone_dest option').remove()
                 $('#zone_dest').removeAttr('selected');
@@ -545,6 +546,7 @@
         function loadDetailTransfert(id){
                 $('#detailTransfert > tbody > tr').remove();
                 $('#loader1').removeAttr('hidden');
+                
                 axios.get('{{env('APP_BASE_URL')}}programmation/detail-transfert/' + id).then((response) => {
                     let details = response.data;
                     let table = document.getElementById("#detailTransfert");

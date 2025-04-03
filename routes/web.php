@@ -1109,6 +1109,7 @@ Route::middleware(['auth', 'pwd'])->group(function () {
         Route::controller(ClientController::class)->group(function () {
 
             Route::get('/clients/index', 'index')->name('clients.index');
+           
             Route::get('/clients/oldcli', 'oldSoldeClient')->name('clients.oldSoldeClient');
 
             Route::get('/clients/show', 'show')->name('clients.show');
@@ -1335,7 +1336,11 @@ Route::middleware(['auth', 'pwd'])->group(function () {
 
     //});
     Route::controller(clientsController::class)->group(function () {
+
         Route::get('newclient/index/', 'index')->name('newclient.index');
+        Route::get('/clients/index/inactif', 'inactif')->name('newclient.inactif');
+        Route::get('/clients/index/bef', 'befs')->name('newclient.befs');
+
         Route::get('newclient/indexOld/', 'oldClients')->name('newclient.oldClients');
         Route::get('newclient/indexOldNotExistInTheNewSystem/', 'oldClientsNotInTheNewSystem')->name('newclient.oldClientsNotInTheNewSystem');
 

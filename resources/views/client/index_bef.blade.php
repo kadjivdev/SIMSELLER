@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>CLIENTS</h1>
+                    <h1>CLIENTS BEFS</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -122,6 +122,7 @@
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
                                         <th>Statut</th>
+                                        <th>Dette</th>
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
@@ -144,7 +145,7 @@
                                         <td class="ml-5 pr-5">{{ $client->raisonSociale ? $client->raisonSociale : $client->nom }} ({{$client->id}})</td>
                                         <td>
                                             @if($client->Is_Bef())
-                                            <span class="badge bg-dark">CLIENT_BEF ({{$client->debit_old}})</span>
+                                            <span class="badge bg-dark">CLIENT_BEF </span>
                                             @endif <br>
 
                                             @if($client->Is_Inactif())
@@ -156,6 +157,7 @@
                                             @endif
 
                                         </td>
+                                        <td class="text-center"> <span class="badge bg-danger">{{number_format(-$client->debit_old,0," "," ") }} </span> </td>
                                         <td class="text-center"><span class="badge bg-warning">{{GetClientZone($client)}}</span></td>
                                         <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif </span></td>
 
@@ -216,6 +218,7 @@
                                         <th>#</th>
                                         <th>Nom/Raison Sociale</th>
                                         <th>Status</th>
+                                        <th>Dette</th>
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
@@ -228,6 +231,13 @@
                                     </tr>
                                 </tfoot>
                             </table>
+
+                            <!--  -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="">Dette totale: <span id="total">{{number_format(-$clients->sum("debit_old"),0," "," ")}} FCFA</span> </h5>
+                                </div>
+                            </div>
                         </div>
                         <!-- /.card-body -->
                     </div>
@@ -272,6 +282,20 @@
 
 @section('script')
 <script>
+    // calcule somme
+    $("body").on('change', function() {
+        var table = $('#example1').DataTable();
+
+        const totalDette = new DataTable('#example1').column(3, {
+            page: 'all',
+            search: 'applied'
+        }).data().sum()
+
+        const _totalDette = totalDette>0?totalDette:-totalDette
+        $("#total").html(new Intl.NumberFormat().format(_totalDette) + " FCFA ")
+    })
+
+    // 
     function affectToZone(id) {
         $("#locator_rooms").empty()
         axios.get("{{env('APP_BASE_URL')}}client/" + id + "/retrieve").then((response) => {

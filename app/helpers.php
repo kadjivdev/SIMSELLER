@@ -42,6 +42,15 @@ function IS_RODOLPHO_ACCOUNT($user)
     return false;
 }
 
+function IS_BONI_ACCOUNT($user)
+{
+    if ($user->id == 38) {
+        return true;
+    }
+
+    return false;
+}
+
 function IS_LAWANI_ACCOUNT($user)
 {
     if ($user->id == 12) {

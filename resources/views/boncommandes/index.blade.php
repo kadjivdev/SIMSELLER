@@ -137,7 +137,7 @@
                                     $MontantTotal = $MontantTotal + $boncommande->montant;
 
                                     // Qte programmée
-                                    $QteProgrammee = isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->sum("qteprogrammer") : 0;
+                                    $QteProgrammee = isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->whereIn('statut', ['Valider', 'Livrer'])->sum("qteprogrammer") : 0;
                                     // Qte vendus
                                     $QteVendue =  isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->sum(function ($programmation) {
                                         return $programmation->vendus->sum("qteVendu");
@@ -157,7 +157,7 @@
                                         </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($boncommande->dateBon)) }}</td>
                                         <td class="pl-2">{{ $boncommande->fournisseur->sigle }}</td>
-                                        <td class="pl-2 qte">{{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}}</td>
+                                        <td class="pl-2 qte">{{ number_format(isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0,2," "," ") }}</td>
                                         <td class="pl-2 "><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
                                         <td class="pl-2 "><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
                                         <td class="pl-2 "><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
@@ -254,7 +254,7 @@
                                     $MontantTotal = $MontantTotal + $boncommande->montant;
 
                                     // Qte programmée
-                                    $QteProgrammee = isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->sum("qteprogrammer") : 0;
+                                    $QteProgrammee = isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->whereIn('statut', ['Valider', 'Livrer'])->sum("qteprogrammer") : 0;
                                     // Qte vendus
                                     $QteVendue =  isset($boncommande->detailboncommandes[0]) ? $boncommande->detailboncommandes[0]->programmations->sum(function ($programmation) {
                                         return $programmation->vendus->sum("qteVendu");
@@ -268,7 +268,7 @@
                                         </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($boncommande->dateBon)) }}</td>
                                         <td class=""><span class="badge bg-light"> {{ $boncommande->fournisseur->sigle }}</span></td>
-                                        <td class="qte"><span class="badge bg-warning"> {{ isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0}} </span></td>
+                                        <td class="qte"><span class="badge bg-warning"> {{number_format(isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0,2," "," ") }} </span></td>
                                         <td class=""><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
                                         <td class=""><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
                                         <td class=""><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>

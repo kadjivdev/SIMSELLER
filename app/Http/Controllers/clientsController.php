@@ -41,8 +41,79 @@ class clientsController extends Controller
             $clients = $clients->where("zone_id", $user->zone_id);
         }
 
+        // NI INACTIF NI BEFS
+        $clients = $clients->filter(function ($client) {
+            return (!$client->Is_Bef() && !$client->Is_Inactif());
+        });
+
         $zones = Zone::all();
         return view('client.index', compact('clients', "zones"));
+    }
+
+    ###___ clients inactifs
+    public function inactif(Request $request)
+    {
+        $clients = collect();
+
+        if ($request->search) {
+            Client::with("_Zone")->where('raisonSociale', 'like', '%' . $request->search . '%')->chunk(100, function ($chunk) use (&$clients, $request) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
+        } else {
+            Client::chunk(100, function ($chunk) use (&$clients) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
+        }
+
+        // UN AGENT NE VERA QUE LES CLIENTS SE TROUVANT DANS LA ZONE DE SON REPRESENTANT
+        $user = Auth::user();
+
+        if (!(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) && Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists()) {
+            $clients = $clients->where("zone_id", $user->zone_id);
+        }
+
+        // LES INACTIFS
+        $clients = $clients->filter(function ($client) {
+            return $client->Is_Inactif();
+        });
+
+        // $clients = $clients->where('id','<',100);
+
+        $zones = Zone::all();
+        return view('client.index_inactif', compact('clients', "zones"));
+    }
+
+    ###___ clients befs
+    public function befs(Request $request)
+    {
+        $clients = collect();
+
+        if ($request->search) {
+            Client::with("_Zone")->where('raisonSociale', 'like', '%' . $request->search . '%')->chunk(100, function ($chunk) use (&$clients, $request) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
+        } else {
+            Client::chunk(100, function ($chunk) use (&$clients) {
+                $clients = $clients->merge($chunk); //merge the chunk
+            });
+        }
+
+        // UN AGENT NE VERA QUE LES CLIENTS SE TROUVANT DANS LA ZONE DE SON REPRESENTANT
+        $user = Auth::user();
+
+        if (!(Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()) && Auth::user()->roles()->where('libelle', ['VENDEUR'])->exists()) {
+            $clients = $clients->where("zone_id", $user->zone_id);
+        }
+
+        // LES BEFS
+        $clients = $clients->filter(function ($client) {
+            return $client->Is_Bef();
+        });
+
+        // $clients = $clients->where('id','<',100);
+
+        $zones = Zone::all();
+        return view('client.index_bef', compact('clients', "zones"));
     }
 
     ###_____CLIENTS ANCIENS

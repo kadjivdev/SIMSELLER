@@ -110,11 +110,16 @@ class LivraisonController extends Controller
                 $boncommandesV = BonCommande::whereIn('statut', ['Valider', 'Programmer'])->pluck('id');
                 $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
                 $programmations = Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
-                    ->where('statut', 'Valider')->where('imprimer', '1')->orWhere('statut', 'Livrer')->orderByDesc('code')->get();
+                    ->where('statut', 'Valider')
+                    ->where('imprimer', '1')
+                    ->orWhere('statut', 'Livrer')
+                    ->orderByDesc('code')->get();
             }
         }
 
         $req = $request->all();
+
+        // dd($programmations);
 
         // ON AFFICHE TOUTES LES LIVRAISONS POUR LES COMPTES *AIME & CHRISTIAN*
         if (!IS_AIME_ACCOUNT($user) && !IS_CHRISTIAN_ACCOUNT($user)) {
@@ -153,11 +158,14 @@ class LivraisonController extends Controller
         $detailboncommande = DetailBonCommande::whereIn('bon_commande_id', $boncommandesV)->pluck('id');
 
         $programmations = collect();
-        Programmation::whereIn('detail_bon_commande_id', $detailboncommande)->where('imprimer', '1')->orderByDesc('code')->chunk(100, function ($chunk) use (&$programmations) {
-            $programmations = $programmations->merge($chunk);
-        });
+        Programmation::whereIn('detail_bon_commande_id', $detailboncommande)
+            // ->where('imprimer', '1')
+            ->orderByDesc('code')
+            ->chunk(100, function ($chunk) use (&$programmations) {
+                $programmations = $programmations->merge($chunk);
+            });
 
-
+        // dd($programmations);
         if ($request->statuts) {
             if ($request->statuts == 1) {
                 if ($request->debut && $request->fin) {
@@ -219,17 +227,15 @@ class LivraisonController extends Controller
 
                 $programmations = $programmationsVal->merge($programmationsLiv);
             } else {
-                $programmationsVal = $programmations
-                    ->where('statut', 'Valider');
-                $programmationsLiv = $programmations
-                    ->where('statut', 'Livrer');
-
-                $programmations = $programmationsVal->merge($programmationsLiv);
+                $programmations = $programmations
+                    ->where('statut', 'Valider')
+                    ->where('imprimer', '1')
+                    ->orWhere('statut', 'Livrer');
             }
         }
         $req = $request->all();
 
-        dd($programmations);
+        // dd($programmations);
 
         // ON AFFICHE TOUTES LES LIVRAISONS POUR LES COMPTES *AIME & CHRISTIAN*
         if (!IS_AIME_ACCOUNT($user) && !IS_CHRISTIAN_ACCOUNT($user)) {

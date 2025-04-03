@@ -79,12 +79,12 @@
 
 
                 @if (
-                    Auth::user()->roles()->where('libelle', 'VENDEUR')->exists() 
-                    || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists() 
-                    || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists() 
-                    || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists() 
-                    || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists() 
-                    || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
+                Auth::user()->roles()->where('libelle', 'VENDEUR')->exists()
+                || Auth::user()->roles()->where('libelle', 'SUPERVISEUR')->exists()
+                || Auth::user()->roles()->where('libelle', 'GESTIONNAIRE')->exists()
+                || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists()
+                || Auth::user()->roles()->where('libelle', ['VALIDATEUR'])->exists()
+                || Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists())
                 <li class="nav-item">
                     <a href="{{ route('livraisons.index') }}" class="nav-link {{ (request()->url() == route('livraisons.index')) ? 'active' : '' }}">
                         <i class="nav-icon far fa-solid fa-truck-arrow-right"></i>
@@ -303,11 +303,31 @@
                         @endif
 
                         @if (Auth::user()->roles()->where('libelle', 'GESTION CLIENT')->exists() || Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'VENDEUR')->exists())
+                        <!-- les actifs -->
                         <li class="nav-item">
                             <a href="{{ route('newclient.index') }}" class="nav-link {{ (request()->is('newclient/index')) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
                                 <p>
-                                    Client
+                                    Client actifs
+                                </p>
+                            </a>
+                        </li>
+                        <!-- les inactifs -->
+                        <li class="nav-item">
+                            <a href="{{ route('newclient.inactif') }}" class="nav-link {{ (request()->is('newclient/index/inactif')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
+                                <p>
+                                    Client inactifs
+                                </p>
+                            </a>
+                        </li>
+
+                        <!-- les befs -->
+                        <li class="nav-item">
+                            <a href="{{ route('newclient.befs') }}" class="nav-link {{ (request()->is('newclient/index/befs')) ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-solid fa-hand-holding-hand  text-cyan"></i>
+                                <p>
+                                    Client befs
                                 </p>
                             </a>
                         </li>
@@ -384,7 +404,7 @@
                 || Auth::user()->roles()->where('libelle', ['GESTIONNAIRE'])->exists()
                 || Auth::user()->roles()->where('libelle', ['RECOUVREUR'])->exists()
                 || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
-                
+
                 <li class="nav-header">EDITION</li>
 
                 <li class="nav-item {{request()->route()->getPrefix() == '/edition' ? 'menu-open':''}}">
@@ -426,7 +446,7 @@
                         @endif
                         @endif
 
-                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists())
+                        @if (Auth::user()->roles()->where('libelle', ['SUPERVISEUR'])->exists() || Auth::user()->roles()->where('libelle', ['COMPTABLE'])->exists() || Auth::user()->roles()->where('libelle', ['CREANT'])->exists())
                         <li class="nav-item">
                             <a href="{{ route('edition.etatReglementperiode') }}" class="nav-link {{ (route('edition.etatReglementperiode') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -435,7 +455,7 @@
                                 </p>
                             </a>
                         </li>
-                        
+
                         <li class="nav-item">
                             <a href="{{ route('edition.solde') }}" class="nav-link {{ (route('edition.solde') == url()->current()) ? 'active' : '' }}">
                                 <i class="nav-icon far  fa-list text-cyan"></i>
@@ -600,7 +620,7 @@
                     @endif
                 </li>
                 @endif
-                
+
                 @if (Auth::user()->roles()->where('libelle', 'ADMINISTRATEUR')->exists() || Auth::user()->roles()->where('libelle', 'COMPTABLE')->exists() || Auth::user()->roles()->where('libelle', ['CONTROLEUR'])->exists())
                 <li class="nav-header">COMPTABILITE</li>
                 <li class="nav-item {{request()->route()->getPrefix() == '/comptabilite' ? 'menu-open':''}}">

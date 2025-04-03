@@ -52,7 +52,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div @if ($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
+                                    <div @if($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
                                         <div class="form-group">
                                             <label>Avaliseurs<span class="text-danger">*</span></label>
 
@@ -70,7 +70,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div @if ($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
+                                    <div @if($programmation==null) class="col-sm-4" @else class="col-sm-3" @endif>
                                         <div class="form-group">
                                             <label>Camions<span class="text-danger">*</span></label>
                                             <select onchange="selectDefaultDriver()" id="camion" class="select2 form-control form-control-sm @error('camion_id') is-invalid @enderror" name="camion_id" style="width: 100%;">
@@ -211,6 +211,7 @@
                                             <tbody>
                                                 @if ($programmations->count() > 0)
                                                 <?php $compteur = 1; ?>
+                                                
                                                 @foreach ($programmations as $programmation)
                                                 <tr>
                                                     <td>{{ $compteur++ }}</td>
@@ -271,9 +272,9 @@
                                                         </span>
                                                         @endif
 
-                                                        @if ($programmation->statut == 'Valider' && !$programmation->bl && !$programmation->bl_gest && !$programmation->dateSortie)
+                                                        @if($programmation->statut == 'Valider' && !$programmation->bl && !$programmation->bl_gest && !$programmation->dateSortie)
 
-                                                        @if (!$programmation->imprimer)
+                                                        @if(!$programmation->imprimer)
                                                         <a class="btn btn-warning btn-sm" href="{{ route('programmations.create', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id]) }}">
                                                             <i class="fa-solid fa-pen-to-square"></i></a>
                                                         <a class="btn btn-danger btn-sm" href="{{ route('programmations.destroy', ['detailboncommande' => $detailboncommande->id, 'programmation' => $programmation->id]) }}">
@@ -289,9 +290,7 @@
                                                     @endif
                                                 </tr>
                                                 {{-- @include('programmations.modalSortie') --}}
-
                                                 @endforeach
-
                                                 @endif
                                             </tbody>
                                         </table>
@@ -427,6 +426,7 @@
         @if(session('message') || $programmation || $errors)
         window.scrollTo(0, $("#entete_produit").offset().top);
         @endif
+
         $("#example1").DataTable({
             "responsive": true,
             "lengthChange": false,
