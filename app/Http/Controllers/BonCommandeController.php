@@ -31,8 +31,8 @@ class BonCommandeController extends Controller
 
     public function __construct(TypeCommande $typecommandes, Fournisseur $fournisseurs, Produit $produits)
     {
-        // $this->middleware('superviseur')->only(['valider', 'invalider', 'retournerCommande']);
-        // $this->middleware('gest')->only(['create', 'delete', 'envoyerCommande']);
+        $this->middleware('superviseur')->only(['valider', 'invalider', 'retournerCommande']);
+        $this->middleware('gest')->only(['create', 'delete', 'envoyerCommande']);
 
         $this->typecommandes = $typecommandes;
         $this->fournisseurs = $fournisseurs;
