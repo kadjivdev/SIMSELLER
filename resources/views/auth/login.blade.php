@@ -21,7 +21,7 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-warning">
             <div class="card-header text-center">
-                <img src="{{asset('dist/img/kadjiv.jpeg')}}" class="profile-user-img img-flat  img-circle" alt="" style="border-radius: 5px; width: 60%"><br>
+                <img src="{{asset('logo.jpeg')}}" class="profile-user-img img-flat  img-circle" alt="" style="border-radius: 5px; width: 60%"><br>
                 <b>Cim Seller</b>
             </div>
             <div class="card-body">
