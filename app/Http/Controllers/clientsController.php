@@ -47,29 +47,29 @@ class clientsController extends Controller
         });
 
 
-        $clients = $clients->transform(function ($client) {
-            $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
-                ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
-                ->where('clients.id', $client->id)
+        // $clients = $clients->transform(function ($client) {
+        //     $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+        //         ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+        //         ->where('clients.id', $client->id)
 
-                // SEULE LES VENTES VALIDE SONT RECUPERES
-                ->where('valide', true)
-                ->get();
+        //         // SEULE LES VENTES VALIDE SONT RECUPERES
+        //         ->where('valide', true)
+        //         ->get();
 
-            // $ventes = $client->commandeclients->map(function ($commande) {
-            //     return $commande->vente()->where('valide', true);
-            // });
+        //     // $ventes = $client->commandeclients->map(function ($commande) {
+        //     //     return $commande->vente()->where('valide', true);
+        //     // });
 
-            $reglements = $client->reglements->sum("montant");
-            $client->ventesSum = $ventes->sum("montant");
-            $client->rgls = $reglements;
-            $client->_ventes = $ventes;
-            $client->venteDue = $ventes->sum("montant") - $reglements;
-            return $client;
-        });
+        //     $reglements = $client->reglements->sum("montant");
+        //     $client->ventesSum = $ventes->sum("montant");
+        //     $client->rgls = $reglements;
+        //     $client->_ventes = $ventes;
+        //     $client->venteDue = $ventes->sum("montant") - $reglements;
+        //     return $client;
+        // });
 
-        $mkaClt = $clients->where("id",5);
-        dd($mkaClt);
+        // $mkaClt = $clients->where("id",5);
+        // dd($mkaClt);
 
         $zones = Zone::all();
         return view('client.index', compact('clients', "zones"));
