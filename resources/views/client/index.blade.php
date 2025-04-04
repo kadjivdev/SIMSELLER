@@ -125,6 +125,7 @@
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
+                                        <th>Vente Dues</th>
                                         <th>Appro</th>
                                         <th>Reglé</th>
                                         <th>Solde</th>
@@ -160,6 +161,7 @@
                                         <td class="text-center"><span class="badge bg-info">@if($client->_Zone) {{$client->_Zone->representant->nom}} {{$client->_Zone->representant->prenom}} ({{$client->_Zone->representant->telephone}}) / {{GetUserByZoneId($client->_Zone->id)}} @endif </span></td>
 
                                         <td class="ml-5 pr-5">{{ $client->telephone }}</td>
+                                        <td class="text-center"><span class="badge bg-light text-dark">Ventes: {{number_format($client->ventesSum, '0', '', ' ')}}</span>; <span class="badge bg-light text-dark">Rgls: {{number_format($client->rgls, '0', '', ' ')}}</span>;  <span class="badge bg-danger">Reste: {{number_format($client->venteDue, '0', '', ' ')}} FCFA</span> </td>
                                         <td class="text-center"><span class="badge bg-warning">{{number_format($credit, '0', '', ' ')}} FCFA</span> </td>
                                         <td class="text-center"><span class="badge bg-info"> {{number_format($debit, '0', '', ' ')}} FCFA</span></td>
                                         <td class="text-center"><span class="badge bg-success"> {{number_format($credit-$debit, '0', '', ' ')}} FCFA</span></td>
@@ -219,6 +221,7 @@
                                         <th>Zone</th>
                                         <th>Répresentant/Agent</th>
                                         <th>Telephone</th>
+                                        <th>Vente Due</th>
                                         <th>Appro</th>
                                         <th>Reglé</th>
                                         <th>Solde</th>

@@ -327,7 +327,6 @@ class EditionController extends Controller
 
     public function etatCompte()
     {
-        //clients
         $clients = collect();
         Client::with("_Zone")->chunk(100, function ($chunk) use (&$clients) {
             $clients = $clients->merge($chunk); //merge the chunk
@@ -358,7 +357,6 @@ class EditionController extends Controller
 
     public function postetatCompte(Request $request)
     {
-        //clients
         $clients = collect();
         Client::with("_Zone")->chunk(100, function ($chunk) use (&$clients) {
             $clients = $clients->merge($chunk); //merge the chunk
@@ -475,6 +473,7 @@ class EditionController extends Controller
             'debut' => ['required'],
             'fin' => ['required']
         ]);
+
         if ($request->user == 'tout') {
             $ventes = Vente::where('ventes.statut', 'Vendue')
                 ->join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')

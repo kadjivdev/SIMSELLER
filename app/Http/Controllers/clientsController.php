@@ -46,6 +46,26 @@ class clientsController extends Controller
             return (!$client->Is_Bef() && !$client->Is_Inactif());
         });
 
+
+
+        $clients = $clients->transform(function ($client) {
+            $ventes = Vente::join('commande_clients', 'ventes.commande_client_id', '=', 'commande_clients.id')
+                ->join('clients', 'commande_clients.client_id', '=', 'clients.id')
+                ->where('clients.id', $client->id)
+
+                // SEULE LES VENTES VALIDE SONT RECUPERES
+                ->where('valide', true)
+
+                ->orderByDesc('ventes.code')
+                ->get();
+
+            $reglements = $client->reglements->whereNotNull("vente_id")->sum("montant");
+            $client->ventesSum = $ventes->sum("montant");
+            $client->rgls = $reglements;
+            $client->venteDue = $ventes->sum("montant") - $reglements;
+            return $client;
+        });
+
         $zones = Zone::all();
         return view('client.index', compact('clients', "zones"));
     }

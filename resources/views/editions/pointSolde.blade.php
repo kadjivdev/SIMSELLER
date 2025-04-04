@@ -328,10 +328,8 @@
                                             @endforeach
                                         </tbody>
                                         <tfoot>
-
                                         </tfoot>
                                     </table>
-
 
                                     <h5 class="">Les totaux</h5>
                                     <table>
