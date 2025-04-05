@@ -101,6 +101,6 @@ class Client extends Model
 
     public function  Is_Inactif()
     {
-        return $this->commandeclients()->count() == 0 && !$this->debit_old && $this->created_at < "2024-12-31" && !in_array($this->id, [1518,1435,1669,728,890]) ;
+        return $this->commandeclients()->count() == 0 && !$this->debit_old && $this->created_at < "2024-12-31" && !in_array($this->id, [1518,1435,1669,728,890,2482]) ;
     }
 }

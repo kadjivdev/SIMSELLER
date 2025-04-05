@@ -784,7 +784,6 @@ class VenteController extends Controller
         return view('comptabilite.listesVenteAEnvoyer', compact('AEnvoyers'));
     }
 
-
     ####___TOUTES VENTES CONFONDUES (TRAITEES OU PAS)
     public function getVenteAComptabiliser()
     {
