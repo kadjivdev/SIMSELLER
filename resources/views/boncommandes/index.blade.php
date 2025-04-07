@@ -145,23 +145,17 @@
                                     ?>
 
                                     <tr class="bg-info">
-                                        <td>1 {{ $boncommande->code }} / @foreach($boncommande->recus as $recu)
+                                        <td>{{ $boncommande->code }} / @foreach($boncommande->recus as $recu)
                                             <span class="badge bg-dark">REF_{{$recu->reference}} </span>
                                             @endforeach
                                         </td>
-
-                                        <td class="text-center">
-                                            @foreach($boncommande->recus as $recu)
-                                            <span class="badge bg-dark"> {{$recu->reference}} </span>
-                                            @endforeach
-                                        </td>
                                         <td class="text-center">{{ date('d/m/Y', strtotime($boncommande->dateBon)) }}</td>
-                                        <td class="pl-2">{{ $boncommande->fournisseur->sigle }}</td>
-                                        <td class="pl-2 qte">{{ number_format(isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0,2," "," ") }}</td>
-                                        <td class="pl-2 "><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
-                                        <td class="pl-2 "><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
-                                        <td class="pl-2 "><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
-                                        <td class="" style="width:auto;">
+                                        <td class=""><span class="badge bg-light"> {{ $boncommande->fournisseur->sigle }}</span></td>
+                                        <td class="qte"><span class="badge bg-warning"> {{number_format(isset($boncommande->detailboncommandes[0]->qteCommander) ? $boncommande->detailboncommandes[0]->qteCommander:0,2," "," ") }} </span></td>
+                                        <td class=""><span class="badge bg-success"> {{ number_format($QteProgrammee,2,"."," ") }}</span> </td>
+                                        <td class=""><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
+                                        <td class=""><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
+                                        <td class="">
                                             <div style="width:auto;height:100px!important;overflow-y: scroll">
                                                 @if(isset($boncommande->detailboncommandes[0]))
                                                 @foreach($boncommande->detailboncommandes[0]->programmations as $programmation)
@@ -273,7 +267,7 @@
                                         <td class=""><span class="badge bg-success"> {{number_format($QteVendue,2,'.',' ')}}</span> </td>
                                         <td class=""><span class="badge bg-danger"> {{number_format($QteProgrammee-$QteVendue,2,'.',' ')}}</span> </td>
                                         <td class="" style="width:auto;">
-                                            <div style="width:auto;height:100px!important;overflow-y: scroll">
+                                            <div style="height:100px!important;overflow-y: scroll">
                                                 @if(isset($boncommande->detailboncommandes[0]))
                                                 @foreach($boncommande->detailboncommandes[0]->programmations as $programmation)
                                                 @if($programmation->qteprogrammer>$programmation->vendus->sum("qteVendu"))
@@ -649,8 +643,8 @@
             search: 'applied'
         }).data().sum()
 
-        const _newQte = newQte>0?newQte:-newQte
-        const _montant = montant>0?montant:-montant
+        const _newQte = newQte > 0 ? newQte : -newQte
+        const _montant = montant > 0 ? montant : -montant
 
         $("#qte").html(new Intl.NumberFormat().format(_newQte) + " Tonnes ")
         $("#montant").html(new Intl.NumberFormat().format(_montant) + " FCFA ")
